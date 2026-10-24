@@ -301,8 +301,9 @@ pytest -v
 ## 🗺️ Estado del Plan de Implementación
 
 - [x] **Fase 0 — Preparación del entorno**: Entorno virtual, dependencias, `.gitignore`, `.env.example`, estructura de directorios, `Procfile`, `render.yaml`, test `/health`.
-- [ ] **Fase 1 — Base de datos y autenticación**: Modelos SQLAlchemy, Alembic, registro, login, logout, control de sesión.
+- [x] **Fase 1 — Base de datos y autenticación**: Modelos SQLAlchemy, Alembic, registro, login, logout, control de sesión.
 - [ ] **Fase 2 — API de tareas**: Lógica de tareas comunes/del día, ocurrencias lazy, reordenación, pruebas unitarias.
+
 - [ ] **Fase 3 — UI base y estilos**: Plantillas Jinja2, diseño responsive blanco/negro/marrón.
 - [ ] **Fase 4 — Calendario**: Integración con FullCalendar (mes y semana), cambio de días por arrastre.
 - [ ] **Fase 5 — Tablero de Día**: Post-its con SortableJS, rotación, cambio rápido de estado y reordenación persistente.
