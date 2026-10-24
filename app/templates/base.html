@@ -3,12 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Owngarnization — Gestión de Tareas y Calendario{% endblock %}</title>
+  <meta name="description" content="Owngarnization — Aplicación minimalista de gestión de tareas y calendario con tablero de post-its.">
+  <title>{% block title %}Owngarnization — Tareas y Calendario{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos propios -->
   <link rel="stylesheet" href="/static/css/styles.css">
+
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+  <!-- Contenedor global de Toasts/Notificaciones -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
   {% block content %}{% endblock %}
+
+  <!-- Scripts base -->
+  <script src="/static/js/api.js"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

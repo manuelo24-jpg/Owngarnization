@@ -1,35 +1,335 @@
 {% extends "base.html" %}
 
-{% block title %}Owngarnization — Mis Tareas{% endblock %}
+{% block title %}Owngarnization — Mis Tareas y Calendario{% endblock %}
+
+{% block extra_head %}
+<!-- FullCalendar CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js"></script>
+
+<!-- SortableJS CDN (para Drag & Drop en vista día) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="app-layout">
+  <!-- Cabecera Principal -->
   <header class="app-header">
-    <div class="header-left">
-      <h1 class="app-title">Owngarnization</h1>
+    <div class="header-brand">
+      <a href="/" class="brand-link">
+        <h1 class="app-title">Owngarnization</h1>
+      </a>
     </div>
-    <div class="header-right">
-      <span class="user-greeting">Hola, <strong>{{ user.username }}</strong></span>
-      <button id="logout-btn" class="btn btn-secondary">Cerrar sesión</button>
+
+    <!-- Buscador Global -->
+    <div class="header-search">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="search" 
+          id="search-input" 
+          placeholder="Buscar tareas (título o descripción)..." 
+          autocomplete="off"
+          aria-label="Buscar tareas"
+        >
+      </div>
+    </div>
+
+    <!-- Acciones y Menú de Usuario -->
+    <div class="header-actions">
+      <button id="btn-new-task" class="btn btn-accent">
+        <span class="btn-icon">＋</span> Nueva tarea
+      </button>
+
+      <div class="user-profile">
+        <span class="user-name" title="{{ user.email }}">{{ user.username }}</span>
+        <button id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</button>
+      </div>
     </div>
   </header>
 
-  <main class="app-main">
-    <div class="dashboard-placeholder">
-      <p>Bienvenido a tu espacio personal de organización.</p>
+  <!-- Barra de Control: Navegación de Fecha y Selector de Vistas -->
+  <div class="control-bar">
+    <div class="control-nav">
+      <div class="btn-group">
+        <button id="btn-prev" class="btn btn-secondary-sm" aria-label="Período anterior">‹</button>
+        <button id="btn-today" class="btn btn-secondary-sm">Hoy</button>
+        <button id="btn-next" class="btn btn-secondary-sm" aria-label="Período siguiente">›</button>
+      </div>
+      <h2 id="current-period-label" class="current-period-label">—</h2>
     </div>
-  </main>
+
+    <div class="view-switcher" role="tablist" aria-label="Vistas del calendario">
+      <button class="view-btn active" data-view="day" role="tab" aria-selected="true">Día</button>
+      <button class="view-btn" data-view="week" role="tab" aria-selected="false">Semana</button>
+      <button class="view-btn" data-view="month" role="tab" aria-selected="false">Mes</button>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal: Barra Lateral + Vistas -->
+  <div class="main-container">
+    <!-- Barra lateral de Filtros -->
+    <aside class="sidebar-filters" aria-label="Filtros">
+      <div class="filters-header">
+        <span class="filters-title">Filtros</span>
+        <button id="btn-reset-filters" class="btn-text" style="display: none;">Limpiar</button>
+      </div>
+
+      <!-- Filtro por Tipo -->
+      <div class="filter-section">
+        <label class="filter-label">Tipo de tarea</label>
+        <div class="filter-chips" data-filter="kind">
+          <button class="chip active" data-value="">Todas</button>
+          <button class="chip" data-value="common">Comunes</button>
+          <button class="chip" data-value="daily">Del día</button>
+        </div>
+      </div>
+
+      <!-- Filtro por Estado -->
+      <div class="filter-section">
+        <label class="filter-label">Estado</label>
+        <div class="filter-chips" data-filter="status">
+          <button class="chip active" data-value="">Todos</button>
+          <button class="chip" data-value="not_started"><span class="status-icon">○</span> Sin empezar</button>
+          <button class="chip" data-value="in_progress"><span class="status-icon">◐</span> En proceso</button>
+          <button class="chip" data-value="done"><span class="status-icon">✓</span> Finalizada</button>
+        </div>
+      </div>
+
+      <!-- Filtro por Importancia -->
+      <div class="filter-section">
+        <label class="filter-label">Importancia</label>
+        <div class="filter-chips" data-filter="importance">
+          <button class="chip active" data-value="">Todas</button>
+          <button class="chip chip-importance pi-low" data-value="low">Baja</button>
+          <button class="chip chip-importance pi-medium" data-value="medium">Media</button>
+          <button class="chip chip-importance pi-high" data-value="high">Alta</button>
+          <button class="chip chip-importance pi-urgent" data-value="urgent">Urgente</button>
+        </div>
+      </div>
+
+      <!-- Atajos de teclado en la barra lateral -->
+      <div class="keyboard-shortcuts">
+        <span class="shortcuts-title">Atajos rápidos:</span>
+        <ul>
+          <li><kbd>N</kbd> Nueva tarea</li>
+          <li><kbd>Esc</kbd> Cerrar modal</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Área de Vistas -->
+    <main class="view-workspace">
+      <!-- 1. VISTA DÍA (Tablero de Post-its) -->
+      <section id="view-day" class="view-section active" aria-label="Vista del día">
+        <div class="day-board">
+          <!-- Columna: Tareas Comunes (Rutinas diarias) -->
+          <div class="board-column" id="column-common">
+            <div class="column-header">
+              <h3 class="column-title">
+                <span class="column-icon">🔁</span> Tareas comunes
+                <span class="column-badge" id="badge-common">0</span>
+              </h3>
+              <span class="column-subtitle">Rutinas que se repiten cada día</span>
+            </div>
+            <div class="postit-list" id="list-common" data-kind="common">
+              <!-- Se rellena dinámicamente -->
+            </div>
+            <div class="empty-state" id="empty-common" style="display: none;">
+              <p>No hay tareas comunes activas</p>
+            </div>
+          </div>
+
+          <!-- Columna: Tareas del Día (Puntuales) -->
+          <div class="board-column" id="column-daily">
+            <div class="column-header">
+              <h3 class="column-title">
+                <span class="column-icon">📌</span> Tareas del día
+                <span class="column-badge" id="badge-daily">0</span>
+              </h3>
+              <span class="column-subtitle">Tareas asignadas a esta fecha</span>
+            </div>
+            <div class="postit-list" id="list-daily" data-kind="daily">
+              <!-- Se rellena dinámicamente -->
+            </div>
+            <div class="empty-state" id="empty-daily" style="display: none;">
+              <p>No tienes tareas programadas para hoy</p>
+              <button class="btn btn-outline-sm btn-quick-add">＋ Añadir tarea</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. VISTA SEMANA -->
+      <section id="view-week" class="view-section" style="display: none;" aria-label="Vista semanal">
+        <div id="calendar-week" class="calendar-container"></div>
+      </section>
+
+      <!-- 3. VISTA MES -->
+      <section id="view-month" class="view-section" style="display: none;" aria-label="Vista mensual">
+        <div id="calendar-month" class="calendar-container"></div>
+      </section>
+    </main>
+  </div>
 </div>
+
+<!-- ==============================================
+     MODAL DE CREACIÓN / EDICIÓN DE TAREAS
+=================================================== -->
+<div id="task-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h3 id="modal-title" class="modal-title">Nueva tarea</h3>
+      <button id="modal-close-btn" class="modal-close" aria-label="Cerrar modal">✕</button>
+    </div>
+
+    <form id="task-form" class="task-form">
+      <input type="hidden" id="task-form-id" name="id">
+
+      <!-- Título -->
+      <div class="form-group">
+        <label for="task-title">Nombre de la tarea <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="task-title" 
+          name="title" 
+          required 
+          maxlength="255" 
+          placeholder="Ej. Revisar balance de gastos"
+        >
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="task-description">Descripción <span class="optional">(opcional)</span></label>
+        <textarea 
+          id="task-description" 
+          name="description" 
+          rows="3" 
+          placeholder="Detalles, enlaces o notas adicionales..."
+        ></textarea>
+      </div>
+
+      <!-- Tipo de Tarea: Común o Del Día -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-kind">Tipo</label>
+          <select id="task-kind" name="kind">
+            <option value="daily">Del día (puntual)</option>
+            <option value="common">Común (todos los días)</option>
+          </select>
+        </div>
+
+        <!-- Fecha (visible solo para daily) -->
+        <div class="form-group flex-1" id="date-group">
+          <label for="task-date">Fecha</label>
+          <input type="date" id="task-date" name="date">
+        </div>
+      </div>
+
+      <!-- Importancia y Estado Inicial -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-importance">Importancia</label>
+          <select id="task-importance" name="importance">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+            <option value="urgent">Urgente</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="task-status">Estado</label>
+          <select id="task-status" name="initial_status">
+            <option value="not_started">○ Sin empezar</option>
+            <option value="in_progress">◐ En proceso</option>
+            <option value="done">✓ Finalizada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Horario Opcional (Inicio y Fin) -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-start-time">Hora inicio <span class="optional">(opcional)</span></label>
+          <input type="time" id="task-start-time" name="start_time">
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="task-end-time">Hora fin <span class="optional">(opcional)</span></label>
+          <input type="time" id="task-end-time" name="end_time">
+        </div>
+      </div>
+
+      <div id="modal-error-box" class="alert-box" style="display: none;"></div>
+
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel-btn" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" id="modal-submit-btn" class="btn btn-primary">Guardar tarea</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==============================================
+     PANEL DESLIZANTE DE DETALLE DE TAREA
+=================================================== -->
+<aside id="detail-drawer" class="detail-drawer" aria-hidden="true" style="display: none;">
+  <div class="drawer-header">
+    <div class="drawer-header-meta">
+      <span id="drawer-kind-badge" class="badge">Tipo</span>
+      <span id="drawer-importance-badge" class="badge">Importancia</span>
+    </div>
+    <button id="drawer-close-btn" class="drawer-close" aria-label="Cerrar detalle">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <h3 id="drawer-title" class="drawer-title">—</h3>
+    
+    <div class="drawer-status-toggle">
+      <label class="drawer-section-label">Estado:</label>
+      <div class="status-button-group">
+        <button class="status-opt" data-status="not_started">○ Sin empezar</button>
+        <button class="status-opt" data-status="in_progress">◐ En proceso</button>
+        <button class="status-opt" data-status="done">✓ Finalizada</button>
+      </div>
+    </div>
+
+    <div class="drawer-info-block" id="drawer-schedule-block" style="display: none;">
+      <span class="info-icon">⏱️</span>
+      <span id="drawer-time-label">—</span>
+    </div>
+
+    <div class="drawer-info-block" id="drawer-date-block">
+      <span class="info-icon">📅</span>
+      <span id="drawer-date-label">—</span>
+    </div>
+
+    <div class="drawer-section">
+      <label class="drawer-section-label">Descripción</label>
+      <p id="drawer-description" class="drawer-description">Sin descripción adicional.</p>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button id="drawer-edit-btn" class="btn btn-secondary flex-1">✏️ Editar</button>
+    <button id="drawer-delete-btn" class="btn btn-danger-outline">🗑️ Eliminar</button>
+  </div>
+</aside>
 {% endblock %}
 
 {% block scripts %}
 <script>
+  // Script de Logout
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
     try {
-      await fetch("/auth/logout", { method: "POST" });
+      await api.post("/auth/logout");
       window.location.href = "/login";
     } catch (e) {
       console.error(e);
+      window.location.href = "/login";
     }
   });
 </script>
