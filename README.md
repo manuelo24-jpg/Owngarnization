@@ -1,0 +1,312 @@
+# Owngarnization 📋🗓️
+
+> Aplicación web minimalista y elegante de gestión de tareas y rutinas con calendario interactivo (mes, semana y día), tablero de post-its reordenables y aislamiento de datos por usuario. Diseñada para desplegarse fácilmente en plataformas gratuitas (como Render + Neon o PythonAnywhere).
+
+---
+
+## 📑 Tabla de Contenidos
+
+1. [Descripción General](#-descripción-general)
+2. [Características Principales](#-características-principales)
+3. [Stack Tecnológico](#-stack-tecnológico)
+4. [Estructura del Proyecto](#-estructura-del-proyecto)
+5. [Modelo de Datos](#-modelo-de-datos)
+6. [API REST (Endpoints)](#-api-rest-endpoints)
+7. [Diseño Visual y Sistema de Estilos](#-diseño-visual-y-sistema-de-estilos)
+8. [Requisitos Previos e Instalación Local](#-requisitos-previos-e-instalación-local)
+9. [Variables de Entorno](#-variables-de-entorno)
+10. [Ejecución y Pruebas](#-ejecución-y-pruebas)
+11. [Guía de Despliegue Gratuito](#-guía-de-despliegue-gratuito)
+12. [Estado del Plan de Implementación](#-estado-del-plan-de-implementación)
+
+---
+
+## 🌟 Descripción General
+
+**Owngarnization** combina la flexibilidad de un calendario con la agilidad visual de un tablero de post-its físicos. Permite a los usuarios organizar su día a día sin fricciones, distinguiendo entre **tareas comunes** (rutinas diarias automáticas como "beber agua" o "revisar correo") y **tareas del día** (puntuales para una fecha específica).
+
+Cada día mantiene un **estado independiente** para cada tarea (pudiendo completar una rutina hoy sin que afecte a la de mañana) y permite ordenar los post-its manualmente con **drag & drop** persistente.
+
+---
+
+## ✨ Características Principales
+
+- 🔐 **Autenticación y Privacidad Total**: Registro, inicio y cierre de sesión con cookies HTTP-only firmadas y contraseñas cifradas con `bcrypt`. Cada usuario sólo tiene acceso a sus propios datos.
+- 🔁 **Tareas Comunes vs. Tareas del Día**:
+  - **Comunes**: Se configuran una sola vez y se replican automáticamente cada día (`get_or_create` bajo demanda).
+  - **Del Día**: Tareas puntuales asignadas a una fecha concreta en el calendario.
+- 📅 **Calendario Multivista**:
+  - **Mes**: Vista global con resumen de tareas y acceso directo por día.
+  - **Semana**: Vista por columnas semanales con soporte para arrastrar tareas entre días.
+  - **Día (Tablero de Post-its)**: Vista detallada con post-its estilo notas adhesivas con color por nivel de importancia y orden manual arrastrable (SortableJS).
+- 🏷️ **Niveles de Importancia y Estados**:
+  - **Importancia**: Baja (`pi-low`), Media (`pi-medium`), Alta (`pi-high`), Urgente (`pi-urgent`).
+  - **Estados**: Sin empezar (`○`), En proceso (`◐`), Finalizada (`✓`).
+- ⏱️ **Horarios Opcionales**: Las tareas pueden o no tener hora de inicio y fin, con validación de coherencia horaria (`fin > inicio`).
+- 🔍 **Búsqueda y Filtros en Tiempo Real**: Filtrado por texto (título/descripción), estado, importancia y tipo de tarea.
+- 🪟 **Panel Deslizante / Modal**: Creación, edición rápida y eliminación de tareas sin perder el contexto visual ni recargar la página.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+| Capa | Tecnología | Justificación |
+|---|---|---|
+| **Lenguaje** | Python 3.12+ (compatible con 3.14) | Robusto, limpio y tipado |
+| **Backend** | FastAPI + Uvicorn | Rendimiento asíncrono excepcional, OpenAPI automático y validación tipada |
+| **Plantillas** | Jinja2 | Renderizado del lado del servidor sin sobrecarga de frameworks JS |
+| **Base de Datos & ORM** | SQLAlchemy 2.x + Alembic | SQLite en local y PostgreSQL en producción sin modificar código |
+| **Seguridad** | Cookies firmadas (`SessionMiddleware` / `itsdangerous`) + `bcrypt` | Sesión segura sin tokens expuestos en `localStorage` |
+| **Frontend** | HTML5 semántico + Vanilla CSS + Vanilla JS | Ultraligero, rápido y sin paso de transpilación/build |
+| **Librerías UI CDN** | FullCalendar (vistas mes/semana) + SortableJS (drag & drop) | Estándares de la industria cargados vía CDN |
+| **Testing** | Pytest + HTTPX | Pruebas unitarias y de integración de endpoints |
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+Owngarnization/
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # Instancia FastAPI, configuración de middlewares y rutas
+│   ├── config.py            # Gestión tipada de variables de entorno (Pydantic Settings)
+│   ├── database.py          # Engine de BD, SessionLocal y Base declarativa
+│   ├── models.py            # Modelos ORM (User, Task, TaskOccurrence)
+│   ├── schemas.py           # Esquemas Pydantic para validación y serialización
+│   ├── security.py          # Hashing de contraseñas y utilidades criptográficas
+│   ├── deps.py              # Inyección de dependencias (get_db, get_current_user)
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── auth.py          # Endpoints de autenticación (registro, login, logout)
+│   │   ├── pages.py         # Controladores de vistas HTML (Jinja2)
+│   │   └── tasks.py         # API REST JSON de tareas y ocurrencias
+│   ├── templates/
+│   │   ├── base.html        # Layout común, cabecera y assets
+│   │   ├── login.html       # Vista de inicio de sesión
+│   │   ├── register.html    # Vista de registro de usuario
+│   │   └── app.html         # Pantalla principal (calendario + panel post-its)
+│   └── static/
+│       ├── css/
+│       │   └── styles.css   # Variables de diseño y estilos de la aplicación
+│       └── js/
+│           ├── api.js       # Cliente HTTP centralizado para la API
+│           ├── board.js     # Lógica del tablero de post-its y SortableJS
+│           ├── calendar.js  # Integración y eventos de FullCalendar
+│           └── modal.js     # Gestión de modales y panel deslizante
+├── migrations/              # Control de versiones de la BD con Alembic
+│   ├── env.py
+│   └── versions/
+├── tests/                   # Pruebas automatizadas con Pytest
+│   ├── __init__.py
+│   ├── test_health.py
+│   ├── test_auth.py
+│   └── test_tasks.py
+├── .env.example             # Plantilla de variables de entorno
+├── .gitignore               # Exclusiones de Git
+├── alembic.ini              # Configuración de migraciones
+├── Procfile                 # Instrucción de arranque para PaaS
+├── render.yaml              # Manifiesto de despliegue en Render
+├── requirements.txt         # Dependencias Python fijadas
+└── README.md                # Este documento
+```
+
+---
+
+## 🗄️ Modelo de Datos
+
+```mermaid
+erDiagram
+    USER ||--o{ TASK : "crea"
+    TASK ||--o{ TASK_OCCURRENCE : "genera"
+
+    USER {
+        int id PK
+        string email UK
+        string username
+        string password_hash
+        datetime created_at
+    }
+
+    TASK {
+        int id PK
+        int user_id FK
+        string title
+        string description
+        string kind "common | daily"
+        string importance "low | medium | high | urgent"
+        date date "NULL si es common"
+        time start_time "opcional"
+        time end_time "opcional"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    TASK_OCCURRENCE {
+        int id PK
+        int task_id FK
+        date date
+        string status "not_started | in_progress | done"
+        int position "orden manual"
+        time start_time "override opcional"
+        time end_time "override opcional"
+    }
+```
+
+### Reglas de Negocio Clave
+1. **Generación Perezosa (Lazy)**: Al solicitar la información de una fecha determinada, el sistema verifica y genera (`get_or_create`) la `TaskOccurrence` para cada tarea común activa y para las tareas del día de esa fecha.
+2. **Restricción de unicidad**: Cada par `(task_id, date)` es único en `TaskOccurrence`.
+3. **Persistencia de orden**: El campo `position` almacena la secuencia elegida por el usuario al arrastrar los post-its en el día.
+
+---
+
+## 🔌 API REST (Endpoints)
+
+Todas las rutas privadas validan la sesión activa del usuario.
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `POST` | `/auth/register` | Registro de nuevo usuario (email, username, password) |
+| `POST` | `/auth/login` | Autenticación y creación de cookie de sesión |
+| `POST` | `/auth/logout` | Invalidación y eliminación de cookie de sesión |
+| `GET` | `/api/occurrences` | Obtiene ocurrencias en rango (`start`, `end`, filtros `q`, `status`, `importance`) |
+| `POST` | `/api/tasks` | Creación de tarea (común o puntual) y generación de ocurrencia inicial |
+| `GET` | `/api/tasks/{id}` | Detalle completo de una tarea |
+| `PATCH` | `/api/tasks/{id}` | Modificación de datos generales de la tarea |
+| `DELETE` | `/api/tasks/{id}` | Eliminación física o desactivación lógica de la tarea |
+| `PATCH` | `/api/occurrences/{id}` | Actualización de estado (`not_started`, `in_progress`, `done`), fecha u horas del día |
+| `POST` | `/api/occurrences/reorder` | Persiste el nuevo orden manual tras drag & drop (`{date, ordered_ids: []}`) |
+
+---
+
+## 🎨 Diseño Visual y Sistema de Estilos
+
+La interfaz sigue una estética **minimalista y cálida**, basada en tonos tierra, negros suaves y beiges:
+
+```css
+:root {
+  --bg: #FFFFFF;
+  --surface: #FAF8F5;        /* Blanco cálido para fondos secundarios */
+  --ink: #111111;            /* Negro tipográfico de alto contraste */
+  --ink-soft: #555555;       /* Texto atenuado y metadatos */
+  --line: #E7E2DA;           /* Separadores y bordes sutiles */
+  --accent: #C9B49A;         /* Marrón claro elegante */
+  --accent-strong: #A8906F;
+
+  /* Post-its por nivel de importancia */
+  --pi-low: #EFE9E0;         /* Beige suave */
+  --pi-medium: #E3CFB4;      /* Marrón claro */
+  --pi-high: #C9A57C;        /* Marrón caramelo medio */
+  --pi-urgent: #111111;      /* Negro con texto blanco contrastado */
+}
+```
+
+- **Post-its con personalidad**: Rotación ligera aleatoria ($\pm 1^\circ$), esquinas suavemente redondeadas (`8px`) y sombras difusas.
+- **Iconografía semántica**:
+  - Sin empezar: `○`
+  - En proceso: `◐`
+  - Finalizada: `✓` (con opacidad atenuada y texto tachado)
+- **Accesibilidad**: Contraste adecuado (WCAG AA), navegación asistida por teclado (`Esc` para cerrar paneles, `N` para nueva tarea) y foco visualmente marcado.
+
+---
+
+## 💻 Requisitos Previos e Instalación Local
+
+### 1. Requisitos
+- **Python**: 3.12 o superior (3.12, 3.13, 3.14).
+- **Git** instalado.
+
+### 2. Clonar el repositorio
+```bash
+git clone https://github.com/tu-usuario/owngarnization.git
+cd owngarnization
+```
+
+### 3. Crear y activar el entorno virtual
+En Windows (PowerShell):
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+En Linux / macOS:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 4. Instalar dependencias
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 5. Configurar variables de entorno
+Copia la plantilla `.env.example`:
+```bash
+cp .env.example .env
+```
+
+---
+
+## ⚙️ Variables de Entorno
+
+| Variable | Tipo | Por defecto | Descripción |
+|---|---|---|---|
+| `SECRET_KEY` | `str` | `dev-secret-key-...` | Clave secreta para firmar cookies de sesión |
+| `ENV` | `str` | `development` | Entorno de ejecución (`development` o `production`) |
+| `DATABASE_URL` | `str` | `sqlite:///./owngarnization.db` | Cadena de conexión para SQLite o PostgreSQL |
+| `PORT` | `int` | `8000` | Puerto en el que escucha el servidor web |
+
+---
+
+## 🚀 Ejecución y Pruebas
+
+### Modo Desarrollo
+Inicia el servidor Uvicorn con recarga en caliente:
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+La aplicación estará disponible en [http://localhost:8000](http://localhost:8000) y la documentación interactiva en [http://localhost:8000/docs](http://localhost:8000/docs).
+
+### Ejecutar Pruebas Automatizadas
+```bash
+pytest -v
+```
+
+---
+
+## ☁️ Guía de Despliegue Gratuito
+
+### Opción A: Render (Web Service) + Neon (PostgreSQL Serverless) *(Recomendada)*
+1. **Base de Datos**:
+   - Crea un proyecto gratuito en [Neon.tech](https://neon.tech).
+   - Copia la cadena de conexión `DATABASE_URL` generada.
+2. **Servicio Web en Render**:
+   - Conecta tu repositorio de GitHub en [Render.com](https://render.com).
+   - Configura:
+     - **Build Command**: `pip install -r requirements.txt && alembic upgrade head`
+     - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+     - **Environment Variables**:
+       - `SECRET_KEY`: Una cadena segura generada aleatoriamente.
+       - `ENV`: `production`
+       - `DATABASE_URL`: Tu URL de Neon (con `sslmode=require`).
+
+### Opción B: PythonAnywhere (Plan gratuito con SQLite)
+- Permite ejecutar la aplicación con SQLite y almacenamiento persistente en disco.
+
+---
+
+## 🗺️ Estado del Plan de Implementación
+
+- [x] **Fase 0 — Preparación del entorno**: Entorno virtual, dependencias, `.gitignore`, `.env.example`, estructura de directorios, `Procfile`, `render.yaml`, test `/health`.
+- [ ] **Fase 1 — Base de datos y autenticación**: Modelos SQLAlchemy, Alembic, registro, login, logout, control de sesión.
+- [ ] **Fase 2 — API de tareas**: Lógica de tareas comunes/del día, ocurrencias lazy, reordenación, pruebas unitarias.
+- [ ] **Fase 3 — UI base y estilos**: Plantillas Jinja2, diseño responsive blanco/negro/marrón.
+- [ ] **Fase 4 — Calendario**: Integración con FullCalendar (mes y semana), cambio de días por arrastre.
+- [ ] **Fase 5 — Tablero de Día**: Post-its con SortableJS, rotación, cambio rápido de estado y reordenación persistente.
+- [ ] **Fase 6 — Modal de Detalle y Edición**: Panel deslizante sin recarga, selector de horas opcionales.
+- [ ] **Fase 7 — Búsqueda y Filtros**: Filtrado en tiempo real en las 3 vistas.
+- [ ] **Fase 8 — Pulido y Accesibilidad**: Atajos de teclado, mensajes de estado (toasts), navegación móvil.
+- [ ] **Fase 9 — Despliegue**: Verificación en producción en servidor gratuito.

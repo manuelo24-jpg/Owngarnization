@@ -1,0 +1,28 @@
+:root {
+  --bg: #FFFFFF;
+  --surface: #FAF8F5;        /* blanco cálido */
+  --ink: #111111;            /* negro principal */
+  --ink-soft: #555555;
+  --line: #E7E2DA;
+  --accent: #C9B49A;         /* marrón clarito */
+  --accent-strong: #A8906F;
+
+  /* Post-its por importancia */
+  --pi-low: #EFE9E0;         /* beige muy claro */
+  --pi-medium: #E3CFB4;      /* marrón claro */
+  --pi-high: #C9A57C;        /* marrón medio */
+  --pi-urgent: #111111;      /* negro, texto blanco */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
