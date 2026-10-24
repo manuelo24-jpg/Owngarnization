@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Cuenta — Owngarnization{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="logo">Owngarnization</h1>
+      <p class="subtitle">Crea tu cuenta personal en segundos</p>
+    </div>
+
+    <div id="alert-box" class="alert-box" style="display: none;"></div>
+
+    <form id="register-form" class="auth-form">
+      <div class="form-group">
+        <label for="username">Nombre de usuario</label>
+        <input type="text" id="username" name="username" required autocomplete="username" placeholder="ej. Sofia">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" required autocomplete="email" placeholder="tu@correo.com">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="password" name="password" minlength="6" required autocomplete="new-password" placeholder="••••••••">
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-primary">Crear cuenta</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById("register-form");
+  const alertBox = document.getElementById("alert-box");
+  const submitBtn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    alertBox.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Creando cuenta...";
+
+    const payload = {
+      username: form.username.value.trim(),
+      email: form.email.value.trim(),
+      password: form.password.value
+    };
+
+    try {
+      const res = await fetch("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || "Error al crear la cuenta");
+      }
+      window.location.href = "/";
+    } catch (err) {
+      alertBox.textContent = err.message;
+      alertBox.style.display = "block";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Crear cuenta";
+    }
+  });
+</script>
+{% endblock %}

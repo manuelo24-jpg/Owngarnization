@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Owngarnization — Mis Tareas{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">Owngarnization</h1>
+    </div>
+    <div class="header-right">
+      <span class="user-greeting">Hola, <strong>{{ user.username }}</strong></span>
+      <button id="logout-btn" class="btn btn-secondary">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="dashboard-placeholder">
+      <p>Bienvenido a tu espacio personal de organización.</p>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    try {
+      await fetch("/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (e) {
+      console.error(e);
+    }
+  });
+</script>
+{% endblock %}

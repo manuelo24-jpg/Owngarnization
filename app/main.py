@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from pathlib import Path
 
 from app.config import settings
+from app.routers import auth, pages
 
 app = FastAPI(
     title="Owngarnization",
@@ -20,6 +21,12 @@ app.add_middleware(
     same_site="lax",
     https_only=settings.is_production,
 )
+
+# Incluir routers
+app.include_router(auth.router)
+app.include_router(pages.router)
+
+
 
 BASE_DIR = Path(__file__).resolve().parent
 
