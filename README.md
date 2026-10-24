@@ -373,9 +373,10 @@ Todos los tests pasarán en verde con sus aserciones.
 
 - [x] **Fase 3 — UI base y estilos**: Plantillas Jinja2, diseño responsive blanco/negro/marrón.
 
-- [ ] **Fase 4 — Calendario**: Integración con FullCalendar (mes y semana), cambio de días por arrastre.
-- [ ] **Fase 5 — Tablero de Día**: Post-its con SortableJS, rotación, cambio rápido de estado y reordenación persistente.
-- [ ] **Fase 6 — Modal de Detalle y Edición**: Panel deslizante sin recarga, selector de horas opcionales.
-- [ ] **Fase 7 — Búsqueda y Filtros**: Filtrado en tiempo real en las 3 vistas.
-- [ ] **Fase 8 — Pulido y Accesibilidad**: Atajos de teclado, mensajes de estado (toasts), navegación móvil.
+- [x] **Fase 4 — Calendario**: Integración con FullCalendar (mes y semana), cambio de días por arrastre.
+- [x] **Fase 5 — Tablero de Día**: Post-its con SortableJS, rotación, cambio rápido de estado y reordenación persistente.
+- [x] **Fase 6 — Modal de Detalle y Edición**: Panel deslizante sin recarga, selector de horas opcionales.
+- [x] **Fase 7 — Búsqueda y Filtros**: Filtrado en tiempo real en las 3 vistas.
+- [x] **Fase 8 — Pulido y Accesibilidad**: Atajos de teclado, mensajes de estado (toasts), navegación móvil.
 - [ ] **Fase 9 — Despliegue**: Verificación en producción en servidor gratuito.
+

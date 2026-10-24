@@ -321,6 +321,12 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Módulos de la Aplicación -->
+<script src="/static/js/modal.js"></script>
+<script src="/static/js/board.js"></script>
+<script src="/static/js/calendar.js"></script>
+<script src="/static/js/app.js"></script>
+
 <script>
   // Script de Logout
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
@@ -334,3 +340,4 @@
   });
 </script>
 {% endblock %}
+
