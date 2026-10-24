@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from pathlib import Path
 
 from app.config import settings
-from app.routers import auth, pages
+from app.routers import auth, pages, tasks
 
 app = FastAPI(
     title="Owngarnization",
@@ -24,7 +24,9 @@ app.add_middleware(
 
 # Incluir routers
 app.include_router(auth.router)
+app.include_router(tasks.router)
 app.include_router(pages.router)
+
 
 
 
