@@ -343,24 +343,67 @@ Todos los tests pasarán en verde con sus aserciones.
 
 ---
 
-## ☁️ Guía de Despliegue Gratuito
+## ☁️ Guía de Despliegue en Servidor Gratuito
 
-### Opción A: Render (Web Service) + Neon (PostgreSQL Serverless) *(Recomendada)*
-1. **Base de Datos**:
-   - Crea un proyecto gratuito en [Neon.tech](https://neon.tech).
-   - Copia la cadena de conexión `DATABASE_URL` generada.
-2. **Servicio Web en Render**:
-   - Conecta tu repositorio de GitHub en [Render.com](https://render.com).
-   - Configura:
-     - **Build Command**: `pip install -r requirements.txt && alembic upgrade head`
-     - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-     - **Environment Variables**:
-       - `SECRET_KEY`: Una cadena segura generada aleatoriamente.
-       - `ENV`: `production`
-       - `DATABASE_URL`: Tu URL de Neon (con `sslmode=require`).
+La aplicación incluye todos los manifiestos de infraestructura necesarios ([render.yaml](file:///c:/Users/ichig/Documents/Owngarnization/render.yaml) y [Procfile](file:///c:/Users/ichig/Documents/Owngarnization/Procfile)) para desplegarse gratis en **Render** con base de datos **Neon (PostgreSQL Serverless)**.
 
-### Opción B: PythonAnywhere (Plan gratuito con SQLite)
-- Permite ejecutar la aplicación con SQLite y almacenamiento persistente en disco.
+### Paso 1: Subir los últimos cambios a GitHub
+Asegúrate de que tu repositorio local esté sincronizado con tu GitHub:
+```powershell
+git push origin master
+```
+
+---
+
+### Paso 2: Crear Base de Datos PostgreSQL Gratuita en Neon
+1. Entra en [Neon.tech](https://neon.tech) y regístrate con tu cuenta de GitHub (gratis, sin tarjeta).
+2. Haz clic en **"Create Project"** (nombre: `owngarnization-db`).
+3. En el panel de control de Neon, copia la cadena de conexión **Connection string** (asegúrate de que termine en `?sslmode=require`).
+   - Ejemplo: `postgresql://neondb_owner:xyz123@ep-cool-fog-123456.us-east-2.aws.neon.tech/neondb?sslmode=require`
+
+---
+
+### Paso 3: Desplegar en Render
+Tienes dos opciones sencillas en [Render.com](https://render.com):
+
+#### Método Rápido A: Vía Blueprint Automático (Recomendado)
+1. Inicia sesión en [Render.com](https://render.com).
+2. Haz clic en **"New +"** $\to$ **"Blueprint"**.
+3. Selecciona tu repositorio `Owngarnization`. Render detectará automáticamente el archivo [render.yaml](file:///c:/Users/ichig/Documents/Owngarnization/render.yaml).
+4. Cuando te solicite la variable `DATABASE_URL`, pega la URL que copiaste de Neon.
+5. Haz clic en **"Apply"**. Render instalará dependencias, ejecutará las migraciones de Alembic (`alembic upgrade head`) y levantará el servicio.
+
+#### Método Manual B: Web Service Estándar
+1. En Render, selecciona **"New +"** $\to$ **"Web Service"** y conecta el repositorio `Owngarnization`.
+2. Configura los siguientes campos:
+   - **Name**: `owngarnization`
+   - **Runtime**: `Python 3`
+   - **Branch**: `master`
+   - **Build Command**:
+     ```bash
+     pip install -r requirements.txt && alembic upgrade head
+     ```
+   - **Start Command**:
+     ```bash
+     uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+     ```
+   - **Plan**: `Free`
+3. En la sección **"Environment Variables"**, añade:
+   - `DATABASE_URL`: *(Tu cadena de conexión de Neon con `sslmode=require`)*
+   - `SECRET_KEY`: *(Cadena larga y aleatoria para firmar cookies)*
+   - `ENV`: `production`
+   - `PYTHON_VERSION`: `3.12.0`
+4. Haz clic en **"Create Web Service"**.
+
+---
+
+### Paso 4: Verificación en Producción
+Una vez finalizado el despliegue (suele tardar 2-3 minutos la primera vez):
+1. Render te asignará una URL pública segura con HTTPS (ej. `https://owngarnization.onrender.com`).
+2. Entra a `https://owngarnization.onrender.com/health` para comprobar que responde `{"status": "ok"}`.
+3. Entra a `https://owngarnization.onrender.com/` para crear tu primera cuenta de producción y comenzar a organizar tus tareas y rutinas.
+
+> **Nota sobre el plan gratuito de Render**: Tras 15 minutos sin peticiones, el servicio entra en reposo (*sleep*). Cuando alguien accede de nuevo, puede tardar entre 30 y 45 segundos en reactivarse. Gracias a la base de datos persistente en Neon, todos tus datos y estados diarios estarán siempre seguros.
 
 ---
 
@@ -369,14 +412,12 @@ Todos los tests pasarán en verde con sus aserciones.
 - [x] **Fase 0 — Preparación del entorno**: Entorno virtual, dependencias, `.gitignore`, `.env.example`, estructura de directorios, `Procfile`, `render.yaml`, test `/health`.
 - [x] **Fase 1 — Base de datos y autenticación**: Modelos SQLAlchemy, Alembic, registro, login, logout, control de sesión.
 - [x] **Fase 2 — API de tareas**: Lógica de tareas comunes/del día, ocurrencias lazy, reordenación, pruebas unitarias.
-
-
 - [x] **Fase 3 — UI base y estilos**: Plantillas Jinja2, diseño responsive blanco/negro/marrón.
-
 - [x] **Fase 4 — Calendario**: Integración con FullCalendar (mes y semana), cambio de días por arrastre.
 - [x] **Fase 5 — Tablero de Día**: Post-its con SortableJS, rotación, cambio rápido de estado y reordenación persistente.
 - [x] **Fase 6 — Modal de Detalle y Edición**: Panel deslizante sin recarga, selector de horas opcionales.
 - [x] **Fase 7 — Búsqueda y Filtros**: Filtrado en tiempo real en las 3 vistas.
 - [x] **Fase 8 — Pulido y Accesibilidad**: Atajos de teclado, mensajes de estado (toasts), navegación móvil.
-- [ ] **Fase 9 — Despliegue**: Verificación en producción en servidor gratuito.
+- [x] **Fase 9 — Despliegue**: Configuración de `render.yaml`, `Procfile`, PostgreSQL serverless en Neon y guía paso a paso.
+
 
