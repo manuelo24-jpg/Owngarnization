@@ -261,19 +261,85 @@ cp .env.example .env
 
 ---
 
-## 🚀 Ejecución y Pruebas
+## 🚀 Guía Rápida para Arrancar y Testear la Aplicación
 
-### Modo Desarrollo
-Inicia el servidor Uvicorn con recarga en caliente:
-```bash
+Sigue estos sencillos pasos para levantar el servidor y comprobar el estado actual de la aplicación en tu navegador:
+
+### 1. Activar el entorno virtual
+
+Abre tu terminal en la carpeta raíz del proyecto (`Owngarnization`):
+
+- **En Windows (PowerShell)**:
+  ```powershell
+  .\.venv\Scripts\Activate.ps1
+  ```
+  *(O si usas CMD clásico: `.\.venv\Scripts\activate.bat`)*
+
+- **En Linux o macOS**:
+  ```bash
+  source .venv/bin/activate
+  ```
+
+---
+
+### 2. Arrancar el servidor de desarrollo
+
+Ejecuta el siguiente comando:
+
+```powershell
 uvicorn app.main:app --reload --port 8000
 ```
-La aplicación estará disponible en [http://localhost:8000](http://localhost:8000) y la documentación interactiva en [http://localhost:8000/docs](http://localhost:8000/docs).
+> *(También puedes arrancarlo con: `python -m uvicorn app.main:app --reload --port 8000`)*
 
-### Ejecutar Pruebas Automatizadas
-```bash
+Verás una salida similar a esta indicando que el servidor está listo:
+```text
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [...]
+INFO:     Application startup complete.
+```
+
+---
+
+### 3. ¿Qué puedes testear ahora mismo?
+
+Con las **Fases 0 y 1** completadas, ya puedes probar todo el flujo de autenticación y protección de rutas:
+
+1. **Protección de rutas privadas**:
+   - Abre tu navegador en [http://localhost:8000](http://localhost:8000).
+   - Como aún no has iniciado sesión, el sistema te redirigirá automáticamente a [http://localhost:8000/login](http://localhost:8000/login).
+
+2. **Registro de un nuevo usuario**:
+   - Haz clic en **"Regístrate gratis"** o entra directamente a [http://localhost:8000/register](http://localhost:8000/register).
+   - Introduce tu nombre de usuario, correo y una contraseña (mínimo 6 caracteres).
+   - Al enviar el formulario, el usuario se guardará en la base de datos SQLite con contraseña hasheada en `bcrypt` y se creará la sesión cifrada.
+
+3. **Acceso a la pantalla principal**:
+   - Tras registrarte o iniciar sesión, serás llevado automáticamente a [http://localhost:8000/](http://localhost:8000/).
+   - Verás la cabecera con el saludo a tu usuario (ej. *"Hola, **tu_usuario**"*) y el botón de cerrar sesión.
+
+4. **Cierre de sesión y protección**:
+   - Haz clic en **"Cerrar sesión"**. La cookie de sesión se destruirá y volverás a la pantalla de login.
+   - Si intentas volver atrás a `/`, se denegará el acceso y serás devuelto al login.
+
+5. **Documentación interactiva de la API**:
+   - Entra en [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI) para probar directamente los endpoints:
+     - `GET /health` (Estado y versión del servicio)
+     - `POST /auth/register`
+     - `POST /auth/login`
+     - `POST /auth/logout`
+     - `GET /auth/me` (Devuelve tus datos si la sesión está activa, o error 401 si no lo está)
+
+---
+
+### 4. Ejecutar pruebas automatizadas
+
+Para validar que todo el código cumple los criterios de calidad y seguridad:
+
+```powershell
 pytest -v
 ```
+Todos los tests pasarán en verde con sus aserciones.
+
 
 ---
 
