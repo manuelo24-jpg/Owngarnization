@@ -1,0 +1,50 @@
+<!-- Barra lateral de Filtros y Atajos -->
+<aside class="sidebar-filters" aria-label="Filtros">
+  <div class="filters-header">
+    <span class="filters-title">Filtros</span>
+    <button id="btn-reset-filters" class="btn-text" style="display: none;">Limpiar</button>
+  </div>
+
+  <!-- Filtro por Tipo -->
+  <div class="filter-section">
+    <label class="filter-label">Tipo de tarea</label>
+    <div class="filter-chips" data-filter="kind">
+      <button class="chip active" data-value="">Todas</button>
+      <button class="chip" data-value="common">Comunes</button>
+      <button class="chip" data-value="daily">Del día</button>
+    </div>
+  </div>
+
+  <!-- Filtro por Estado -->
+  <div class="filter-section">
+    <label class="filter-label">Estado</label>
+    <div class="filter-chips" data-filter="status">
+      <button class="chip active" data-value="">Todos</button>
+      <button class="chip" data-value="not_started"><span class="status-icon">○</span> Sin empezar</button>
+      <button class="chip" data-value="in_progress"><span class="status-icon">◐</span> En proceso</button>
+      <button class="chip" data-value="done"><span class="status-icon">✓</span> Finalizada</button>
+    </div>
+  </div>
+
+  <!-- Filtro por Importancia -->
+  <div class="filter-section">
+    <label class="filter-label">Importancia</label>
+    <div class="filter-chips" data-filter="importance">
+      <button class="chip active" data-value="">Todas</button>
+      <button class="chip chip-importance pi-low" data-value="low">Baja</button>
+      <button class="chip chip-importance pi-medium" data-value="medium">Media</button>
+      <button class="chip chip-importance pi-high" data-value="high">Alta</button>
+      <button class="chip chip-importance pi-urgent" data-value="urgent">Urgente</button>
+    </div>
+  </div>
+
+  <!-- Atajos de teclado en la barra lateral -->
+  <div class="keyboard-shortcuts">
+    <span class="shortcuts-title">Atajos rápidos:</span>
+    <ul>
+      <li><kbd>N</kbd> Nueva tarea</li>
+      <li><kbd>?</kbd> Manual de ayuda</li>
+      <li><kbd>Esc</kbd> Cerrar modal</li>
+    </ul>
+  </div>
+</aside>

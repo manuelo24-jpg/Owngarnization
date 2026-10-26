@@ -1,0 +1,39 @@
+<!-- 1. VISTA DÍA (Tablero de Post-its) -->
+<section id="view-day" class="view-section active" aria-label="Vista del día">
+  <div class="day-board">
+    <!-- Columna: Tareas Comunes (Rutinas diarias) -->
+    <div class="board-column" id="column-common">
+      <div class="column-header">
+        <h3 class="column-title">
+          <span class="column-icon">🔁</span> Tareas comunes
+          <span class="column-badge" id="badge-common">0</span>
+        </h3>
+        <span class="column-subtitle">Rutinas que se repiten cada día</span>
+      </div>
+      <div class="postit-list" id="list-common" data-kind="common">
+        <!-- Se rellena dinámicamente -->
+      </div>
+      <div class="empty-state" id="empty-common" style="display: none;">
+        <p>No hay tareas comunes activas</p>
+      </div>
+    </div>
+
+    <!-- Columna: Tareas del Día (Puntuales) -->
+    <div class="board-column" id="column-daily">
+      <div class="column-header">
+        <h3 class="column-title">
+          <span class="column-icon">📌</span> Tareas del día
+          <span class="column-badge" id="badge-daily">0</span>
+        </h3>
+        <span class="column-subtitle">Tareas asignadas a esta fecha</span>
+      </div>
+      <div class="postit-list" id="list-daily" data-kind="daily">
+        <!-- Se rellena dinámicamente -->
+      </div>
+      <div class="empty-state" id="empty-daily" style="display: none;">
+        <p>No tienes tareas programadas para hoy</p>
+        <button class="btn btn-outline-sm btn-quick-add">＋ Añadir tarea</button>
+      </div>
+    </div>
+  </div>
+</section>

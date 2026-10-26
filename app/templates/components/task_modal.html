@@ -1,0 +1,119 @@
+<!-- ==============================================
+     MODAL DE CREACIÓN / EDICIÓN DE TAREAS
+=================================================== -->
+<div id="task-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h3 id="modal-title" class="modal-title">Nueva tarea</h3>
+      <button id="modal-close-btn" class="modal-close" aria-label="Cerrar modal">✕</button>
+    </div>
+
+    <form id="task-form" class="task-form">
+      <input type="hidden" id="task-form-id" name="id">
+
+      <!-- Título -->
+      <div class="form-group">
+        <label for="task-title">Nombre de la tarea <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="task-title" 
+          name="title" 
+          required 
+          maxlength="255" 
+          placeholder="Ej. Revisar balance de gastos"
+        >
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="task-description">Descripción <span class="optional">(opcional)</span></label>
+        <textarea 
+          id="task-description" 
+          name="description" 
+          rows="3" 
+          placeholder="Detalles, enlaces o notas adicionales..."
+        ></textarea>
+      </div>
+
+      <!-- Tipo de Tarea: Común o Del Día -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-kind">Tipo</label>
+          <select id="task-kind" name="kind">
+            <option value="daily">Del día (puntual)</option>
+            <option value="common">Común (rutina periódica)</option>
+          </select>
+        </div>
+
+        <!-- Fecha (visible solo para daily) -->
+        <div class="form-group flex-1" id="date-group">
+          <label for="task-date">Fecha</label>
+          <input type="date" id="task-date" name="date">
+        </div>
+      </div>
+
+      <!-- Selector de días de la semana (visible solo para common) -->
+      <div class="form-group" id="days-of-week-group" style="display: none;">
+        <div class="days-header">
+          <label>Días que aparece:</label>
+          <div class="quick-days-btns">
+            <button type="button" class="btn-text-sm" data-days="all">Todos</button>
+            <button type="button" class="btn-text-sm" data-days="weekdays">L - V</button>
+            <button type="button" class="btn-text-sm" data-days="weekend">Fin de semana</button>
+          </div>
+        </div>
+        <div class="day-selector-chips" id="day-selector-chips">
+          <button type="button" class="day-chip active" data-day="1" title="Lunes">L</button>
+          <button type="button" class="day-chip active" data-day="2" title="Martes">M</button>
+          <button type="button" class="day-chip active" data-day="3" title="Miércoles">X</button>
+          <button type="button" class="day-chip active" data-day="4" title="Jueves">J</button>
+          <button type="button" class="day-chip active" data-day="5" title="Viernes">V</button>
+          <button type="button" class="day-chip active" data-day="6" title="Sábado">S</button>
+          <button type="button" class="day-chip active" data-day="7" title="Domingo">D</button>
+        </div>
+      </div>
+
+      <!-- Importancia y Estado Inicial -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-importance">Importancia</label>
+          <select id="task-importance" name="importance">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+            <option value="urgent">Urgente</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="task-status">Estado</label>
+          <select id="task-status" name="initial_status">
+            <option value="not_started">○ Sin empezar</option>
+            <option value="in_progress">◐ En proceso</option>
+            <option value="done">✓ Finalizada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Horario Opcional (Inicio y Fin) -->
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="task-start-time">Hora inicio <span class="optional">(opcional)</span></label>
+          <input type="time" id="task-start-time" name="start_time">
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="task-end-time">Hora fin <span class="optional">(opcional)</span></label>
+          <input type="time" id="task-end-time" name="end_time">
+        </div>
+      </div>
+
+      <div id="modal-error-box" class="alert-box" style="display: none;"></div>
+
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel-btn" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" id="modal-submit-btn" class="btn btn-primary">Guardar tarea</button>
+      </div>
+    </form>
+  </div>
+</div>

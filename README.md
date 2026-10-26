@@ -76,24 +76,39 @@ Owngarnization/
 │   ├── schemas.py           # Esquemas Pydantic para validación y serialización
 │   ├── security.py          # Hashing de contraseñas y utilidades criptográficas
 │   ├── deps.py              # Inyección de dependencias (get_db, get_current_user)
-│   ├── routers/
-│   │   ├── __init__.py
+│   ├── routers/             # Controladores delgados (Thin Controllers)
 │   │   ├── auth.py          # Endpoints de autenticación (registro, login, logout)
 │   │   ├── pages.py         # Controladores de vistas HTML (Jinja2)
-│   │   └── tasks.py         # API REST JSON de tareas y ocurrencias
+│   │   └── tasks.py         # API REST delgada delegada en servicios
+│   ├── services/            # Capa de Lógica de Negocio (Service Layer)
+│   │   ├── task_service.py  # Operaciones CRUD y reglas de tareas
+│   │   └── occurrence_service.py # Generación lazy, rollover y reordenación
 │   ├── templates/
-│   │   ├── base.html        # Layout común, cabecera y assets
+│   │   ├── base.html        # Shell HTML común, fuentes y assets
 │   │   ├── login.html       # Vista de inicio de sesión
 │   │   ├── register.html    # Vista de registro de usuario
-│   │   └── app.html         # Pantalla principal (calendario + panel post-its)
+│   │   ├── app.html         # Ensamblador principal de la app (< 70 líneas)
+│   │   └── components/      # Componentes parciales reutilizables (Jinja2)
+│   │       ├── header.html
+│   │       ├── control_bar.html
+│   │       ├── sidebar.html
+│   │       ├── board_day.html
+│   │       ├── task_modal.html
+│   │       ├── detail_drawer.html
+│   │       └── guide_modal.html
 │   └── static/
-│       ├── css/
-│       │   └── styles.css   # Variables de diseño y estilos de la aplicación
-│       └── js/
-│           ├── api.js       # Cliente HTTP centralizado para la API
-│           ├── board.js     # Lógica del tablero de post-its y SortableJS
+│       ├── css/             # Arquitectura modular de estilos
+│       │   ├── styles.css   # Manifiesto maestro de imports
+│       │   ├── variables.css, base.css, auth.css, layout.css
+│       │   ├── board.css, calendar.css, modals.css, guide.css, responsive.css
+│       └── js/              # Módulos JavaScript con responsabilidad única
+│           ├── api.js       # Cliente HTTP centralizado
 │           ├── calendar.js  # Integración y eventos de FullCalendar
-│           └── modal.js     # Gestión de modales y panel deslizante
+│           ├── board.js     # Tablero post-its y drag & drop (SortableJS)
+│           ├── task_modal.js # Formulario modal de tareas
+│           ├── drawer.js    # Panel deslizante de detalle
+│           ├── guide.js     # Lógica del manual interactivo
+│           └── app.js       # Coordinador de estado global y vistas
 ├── migrations/              # Control de versiones de la BD con Alembic
 │   ├── env.py
 │   └── versions/
@@ -419,5 +434,7 @@ Una vez finalizado el despliegue (suele tardar 2-3 minutos la primera vez):
 - [x] **Fase 7 — Búsqueda y Filtros**: Filtrado en tiempo real en las 3 vistas.
 - [x] **Fase 8 — Pulido y Accesibilidad**: Atajos de teclado, mensajes de estado (toasts), navegación móvil.
 - [x] **Fase 9 — Despliegue**: Configuración de `render.yaml`, `Procfile`, PostgreSQL serverless en Neon y guía paso a paso.
+- [x] **Fase 10 — Manual de Usuario Integrado (In-App)**: Icono de ayuda con símbolo de pregunta (`?`) en la cabecera que despliega una ventana emergente interactiva y estructurada con guías visuales y sencillas sobre todas las funcionalidades de Owngarnization.
+- [x] **Fase 11 — Refactorización para Escalabilidad y Modularidad (Senior Architecture)**: Desacoplamiento en capa de servicios (Service Layer), componentes Jinja2 modulares, arquitectura CSS escalable y separación de módulos frontend.
 
 

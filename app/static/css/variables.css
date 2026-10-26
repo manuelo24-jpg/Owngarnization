@@ -1,0 +1,45 @@
+/* =========================================================
+   Owngarnization — Design System & Stylesheet
+   Paleta: Blanco cálido, negro, marrón clarito y beige post-it
+   ========================================================= */
+
+:root {
+  --bg: #FFFFFF;
+  --surface: #FAF8F5;        /* blanco cálido */
+  --surface-card: #FFFFFF;
+  --ink: #111111;            /* negro principal */
+  --ink-soft: #555555;
+  --ink-muted: #8E8A83;
+  --line: #E7E2DA;
+  --line-strong: #D5CEBE;
+  --accent: #C9B49A;         /* marrón clarito */
+  --accent-strong: #A8906F;
+  --accent-hover: #967F60;
+  --danger: #b33939;
+  --danger-bg: #fde8e8;
+
+  /* Post-its por importancia */
+  --pi-low: #EFE9E0;         /* beige muy claro */
+  --pi-medium: #E3CFB4;      /* marrón claro */
+  --pi-high: #C9A57C;        /* marrón medio */
+  --pi-urgent: #111111;      /* negro, texto blanco */
+
+  /* Sombras y elevaciones sutiles */
+  --shadow-xs: 0 1px 2px rgba(17, 17, 17, 0.04);
+  --shadow-sm: 0 2px 4px rgba(17, 17, 17, 0.06);
+  --shadow-md: 0 4px 12px rgba(17, 17, 17, 0.08);
+  --shadow-lg: 0 12px 28px rgba(17, 17, 17, 0.12);
+  --shadow-postit: 0 3px 6px rgba(17, 17, 17, 0.08), 0 1px 2px rgba(17, 17, 17, 0.04);
+
+  /* Radios de borde */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transiciones */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+

@@ -1,0 +1,17 @@
+<!-- Barra de Control: Navegación de Fecha y Selector de Vistas -->
+<div class="control-bar">
+  <div class="control-nav">
+    <div class="btn-group">
+      <button id="btn-prev" class="btn btn-secondary-sm" aria-label="Período anterior">‹</button>
+      <button id="btn-today" class="btn btn-secondary-sm">Hoy</button>
+      <button id="btn-next" class="btn btn-secondary-sm" aria-label="Período siguiente">›</button>
+    </div>
+    <h2 id="current-period-label" class="current-period-label">—</h2>
+  </div>
+
+  <div class="view-switcher" role="tablist" aria-label="Vistas del calendario">
+    <button class="view-btn active" data-view="day" role="tab" aria-selected="true">Día</button>
+    <button class="view-btn" data-view="week" role="tab" aria-selected="false">Semana</button>
+    <button class="view-btn" data-view="month" role="tab" aria-selected="false">Mes</button>
+  </div>
+</div>

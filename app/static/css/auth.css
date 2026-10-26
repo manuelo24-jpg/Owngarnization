@@ -1,0 +1,130 @@
+/* =========================================================
+   Páginas de Autenticación (Login / Registro)
+   ========================================================= */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.auth-card {
+  background: var(--surface-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 32px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-logo-link {
+  display: inline-block;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.auth-logo {
+  height: 72px;
+  width: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: block;
+  margin: 0 auto;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.auth-logo:hover {
+  transform: scale(1.04);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-header .logo {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.auth-header .subtitle {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.form-group label .required {
+  color: var(--danger);
+}
+
+.form-group label .optional {
+  font-weight: 400;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 13px;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px rgba(168, 144, 111, 0.15);
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.alert-box {
+  padding: 10px 14px;
+  background-color: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid #f8b4b4;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+

@@ -1,0 +1,45 @@
+<!-- ==============================================
+     PANEL DESLIZANTE DE DETALLE DE TAREA
+=================================================== -->
+<aside id="detail-drawer" class="detail-drawer" aria-hidden="true" style="display: none;">
+  <div class="drawer-header">
+    <div class="drawer-header-meta">
+      <span id="drawer-kind-badge" class="badge">Tipo</span>
+      <span id="drawer-importance-badge" class="badge">Importancia</span>
+    </div>
+    <button id="drawer-close-btn" class="drawer-close" aria-label="Cerrar detalle">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <h3 id="drawer-title" class="drawer-title">—</h3>
+    
+    <div class="drawer-status-toggle">
+      <label class="drawer-section-label">Estado:</label>
+      <div class="status-button-group">
+        <button class="status-opt" data-status="not_started">○ Sin empezar</button>
+        <button class="status-opt" data-status="in_progress">◐ En proceso</button>
+        <button class="status-opt" data-status="done">✓ Finalizada</button>
+      </div>
+    </div>
+
+    <div class="drawer-info-block" id="drawer-schedule-block" style="display: none;">
+      <span class="info-icon">⏱️</span>
+      <span id="drawer-time-label">—</span>
+    </div>
+
+    <div class="drawer-info-block" id="drawer-date-block">
+      <span class="info-icon">📅</span>
+      <span id="drawer-date-label">—</span>
+    </div>
+
+    <div class="drawer-section">
+      <label class="drawer-section-label">Descripción</label>
+      <p id="drawer-description" class="drawer-description">Sin descripción adicional.</p>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button id="drawer-edit-btn" class="btn btn-secondary flex-1">✏️ Editar</button>
+    <button id="drawer-delete-btn" class="btn btn-danger-outline">🗑️ Eliminar</button>
+  </div>
+</aside>
