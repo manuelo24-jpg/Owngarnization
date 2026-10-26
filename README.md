@@ -32,9 +32,8 @@ Cada día mantiene un **estado independiente** para cada tarea (pudiendo complet
 ## ✨ Características Principales
 
 - 🔐 **Autenticación y Privacidad Total**: Registro, inicio y cierre de sesión con cookies HTTP-only firmadas y contraseñas cifradas con `bcrypt`. Cada usuario sólo tiene acceso a sus propios datos.
-- 🔁 **Tareas Comunes vs. Tareas del Día**:
-  - **Comunes**: Se configuran una sola vez y se replican automáticamente cada día (`get_or_create` bajo demanda).
-  - **Del Día**: Tareas puntuales asignadas a una fecha concreta en el calendario.
+- 🔁 **Tareas Comunes (con selección de días)**: Rutinas que se repiten en días específicos de la semana (ej. de Lunes a Viernes, fines de semana o días concretos como L, X, V) o todos los días, manteniendo un estado independiente por cada fecha.
+- ⏩ **Traspaso Automático (*Rollover*) de Tareas del Día Pendientes**: Si una tarea puntual no se completa en su fecha (`status != 'done'`), se traslada automáticamente al día de hoy para que nunca se quede olvidada en el pasado. Las tareas completadas se conservan en su fecha original.
 - 📅 **Calendario Multivista**:
   - **Mes**: Vista global con resumen de tareas y acceso directo por día.
   - **Semana**: Vista por columnas semanales con soporte para arrastrar tareas entre días.
@@ -45,6 +44,7 @@ Cada día mantiene un **estado independiente** para cada tarea (pudiendo complet
 - ⏱️ **Horarios Opcionales**: Las tareas pueden o no tener hora de inicio y fin, con validación de coherencia horaria (`fin > inicio`).
 - 🔍 **Búsqueda y Filtros en Tiempo Real**: Filtrado por texto (título/descripción), estado, importancia y tipo de tarea.
 - 🪟 **Panel Deslizante / Modal**: Creación, edición rápida y eliminación de tareas sin perder el contexto visual ni recargar la página.
+
 
 ---
 
