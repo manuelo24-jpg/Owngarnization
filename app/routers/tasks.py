@@ -21,10 +21,60 @@ from app.schemas import (
 router = APIRouter(prefix="/api", tags=["Tareas"])
 
 
+def _rollover_uncompleted_daily_tasks(db: Session, user_id: int) -> None:
+    """
+    Traspasa automáticamente al día de hoy las tareas del día puntuales
+    que quedaron sin completar (status != 'done') en fechas pasadas.
+    """
+    today = dt.date.today()
+    past_daily_tasks = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id,
+            Task.kind == "daily",
+            Task.is_active == True,
+            Task.date < today,
+        )
+        .all()
+    )
+
+    if not past_daily_tasks:
+        return
+
+    for task in past_daily_tasks:
+        # Buscar la ocurrencia original
+        past_occ = (
+            db.query(TaskOccurrence)
+            .filter(
+                TaskOccurrence.task_id == task.id,
+                TaskOccurrence.date == task.date
+            )
+            .first()
+        )
+
+        # Si no está completada (not_started o in_progress), mover a hoy
+        if past_occ and past_occ.status != "done":
+            existing_today = (
+                db.query(TaskOccurrence)
+                .filter(
+                    TaskOccurrence.task_id == task.id,
+                    TaskOccurrence.date == today
+                )
+                .first()
+            )
+            if not existing_today:
+                past_occ.date = today
+                task.date = today
+            else:
+                task.date = today
+
+    db.commit()
+
+
 def _ensure_occurrences(db: Session, user_id: int, start_date: dt.date, end_date: dt.date) -> None:
     """
     Generación perezosa (lazy) de TaskOccurrence:
-    - Asegura que cada tarea 'common' activa tenga una ocurrencia para cada día en [start_date, end_date].
+    - Asegura que cada tarea 'common' activa tenga una ocurrencia para cada día permitido en [start_date, end_date].
     - Asegura que cada tarea 'daily' activa en dicho rango tenga su ocurrencia.
     """
     # 1. Tareas comunes activas del usuario
@@ -51,7 +101,17 @@ def _ensure_occurrences(db: Session, user_id: int, start_date: dt.date, end_date
         # Crear las que falten
         curr = start_date
         while curr <= end_date:
+            day_iso = curr.isoweekday()  # 1=Lunes, 2=Martes ... 7=Domingo
             for task in common_tasks:
+                # Si la tarea especifica días de la semana, comprobar si hoy aplica
+                if task.days_of_week:
+                    try:
+                        allowed_days = [int(x.strip()) for x in task.days_of_week.split(",") if x.strip()]
+                        if day_iso not in allowed_days:
+                            continue
+                    except ValueError:
+                        pass
+
                 if (task.id, curr) not in existing_set:
                     new_occ = TaskOccurrence(
                         task_id=task.id,
@@ -122,7 +182,8 @@ def get_occurrences(
 ):
     """
     Obtiene las ocurrencias de tareas en un rango de fechas con búsqueda y filtros.
-    Genera automáticamente las ocurrencias para tareas comunes y tareas del día.
+    Traspasa al día de hoy tareas del día incompletas de fechas pasadas.
+    Genera automáticamente las ocurrencias para tareas comunes (según días permitidos) y del día.
     """
     if end < start:
         raise HTTPException(
@@ -137,8 +198,12 @@ def get_occurrences(
             detail="El rango de fechas no puede superar un año"
         )
 
-    # Generación lazy
+    # 1. Traspasar tareas pendientes del pasado a hoy
+    _rollover_uncompleted_daily_tasks(db, current_user.id)
+
+    # 2. Generación lazy
     _ensure_occurrences(db, current_user.id, start, end)
+
 
     # Consulta con JOIN y filtros
     query = (
@@ -205,6 +270,7 @@ def create_task(
         date=task_in.date,
         start_time=task_in.start_time,
         end_time=task_in.end_time,
+        days_of_week=task_in.days_of_week if task_in.kind == "common" else None,
         is_active=True,
     )
     db.add(task)
@@ -212,24 +278,35 @@ def create_task(
 
     # Determinar fecha para la primera ocurrencia
     target_date = task_in.date if task_in.kind == "daily" else dt.date.today()
+    should_create_occ = True
 
-    # Calcular siguiente posición para el día
-    max_position = (
-        db.query(func.max(TaskOccurrence.position))
-        .join(Task)
-        .filter(Task.user_id == current_user.id, TaskOccurrence.date == target_date)
-        .scalar()
-    ) or 0
+    # Para tareas comunes, comprobar si hoy es un día permitido
+    if task.kind == "common" and task.days_of_week:
+        try:
+            allowed_days = [int(x.strip()) for x in task.days_of_week.split(",") if x.strip()]
+            if target_date.isoweekday() not in allowed_days:
+                should_create_occ = False
+        except ValueError:
+            pass
 
-    initial_occ = TaskOccurrence(
-        task_id=task.id,
-        date=target_date,
-        status=task_in.initial_status,
-        position=max_position + 1,
-        start_time=task.start_time,
-        end_time=task.end_time,
-    )
-    db.add(initial_occ)
+    if should_create_occ:
+        max_position = (
+            db.query(func.max(TaskOccurrence.position))
+            .join(Task)
+            .filter(Task.user_id == current_user.id, TaskOccurrence.date == target_date)
+            .scalar()
+        ) or 0
+
+        initial_occ = TaskOccurrence(
+            task_id=task.id,
+            date=target_date,
+            status=task_in.initial_status,
+            position=max_position + 1,
+            start_time=task.start_time,
+            end_time=task.end_time,
+        )
+        db.add(initial_occ)
+
     db.commit()
     db.refresh(task)
 
@@ -282,10 +359,31 @@ def update_task(
     # Si se cambió a común, la fecha de definición pasa a ser None
     if task.kind == "common":
         task.date = None
+    elif task.kind == "daily":
+        task.days_of_week = None
+
+    # Si cambiaron los días permitidos de una común, limpiar ocurrencias no iniciadas en días no permitidos
+    if "days_of_week" in update_data and task.kind == "common" and task.days_of_week:
+        try:
+            allowed = [int(x.strip()) for x in task.days_of_week.split(",") if x.strip()]
+            existing_unstarted = (
+                db.query(TaskOccurrence)
+                .filter(
+                    TaskOccurrence.task_id == task.id,
+                    TaskOccurrence.status == "not_started"
+                )
+                .all()
+            )
+            for occ in existing_unstarted:
+                if occ.date.isoweekday() not in allowed:
+                    db.delete(occ)
+        except ValueError:
+            pass
 
     db.commit()
     db.refresh(task)
     return task
+
 
 
 @router.delete("/tasks/{task_id}")

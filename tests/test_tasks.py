@@ -233,3 +233,72 @@ def test_move_occurrence_date():
     day3_occs = client.get("/api/occurrences?start=2026-11-03&end=2026-11-03").json()
     assert len(day3_occs) == 1
     assert day3_occs[0]["date"] == "2026-11-03"
+
+
+def test_daily_task_rollover_when_uncompleted():
+    import datetime as dt
+    client = create_authenticated_client("rollover@example.com", "rollover")
+
+    today = dt.date.today()
+    past_date = today - dt.timedelta(days=2)
+    past_date_str = past_date.isoformat()
+    today_str = today.isoformat()
+
+    # 1. Tarea del pasado que NO se completó (not_started)
+    t_pending = client.post("/api/tasks", json={
+        "title": "Comprar pan ayer",
+        "kind": "daily",
+        "date": past_date_str
+    }).json()
+
+    # 2. Tarea del pasado que SÍ se completó (done)
+    t_done = client.post("/api/tasks", json={
+        "title": "Pagar factura",
+        "kind": "daily",
+        "date": past_date_str,
+        "initial_status": "done"
+    }).json()
+
+    # 3. Consultar hoy
+    today_occs = client.get(f"/api/occurrences?start={today_str}&end={today_str}").json()
+
+
+    # La tarea pendiente debe haber hecho rollover a HOY
+    today_titles = [o["task"]["title"] for o in today_occs]
+    assert "Comprar pan ayer" in today_titles
+
+    # La tarea completada debe permanecer en su fecha pasada
+    assert "Pagar factura" not in today_titles
+
+    # Comprobar que en la fecha pasada la completada sigue allí
+    recheck_past = client.get(f"/api/occurrences?start={past_date_str}&end={past_date_str}").json()
+    past_titles = [o["task"]["title"] for o in recheck_past]
+    assert "Pagar factura" in past_titles
+
+
+def test_common_task_with_specific_days_of_week():
+    client = create_authenticated_client("daysuser@example.com", "daysuser")
+
+    # Tarea común solo para Lunes (1), Miércoles (3) y Viernes (5)
+    resp = client.post("/api/tasks", json={
+        "title": "Ir al gimnasio",
+        "kind": "common",
+        "days_of_week": "1,3,5"
+    })
+    assert resp.status_code == 201
+
+    # Rango de una semana completa: Lunes 2026-11-02 a Domingo 2026-11-08
+    # 2026-11-02 es Lunes (1)
+    # 2026-11-03 es Martes (2)
+    # 2026-11-04 es Miércoles (3)
+    # 2026-11-05 es Jueves (4)
+    # 2026-11-06 es Viernes (5)
+    # 2026-11-07 es Sábado (6)
+    # 2026-11-08 es Domingo (7)
+    occs = client.get("/api/occurrences?start=2026-11-02&end=2026-11-08").json()
+
+    # Solo debe aparecer 3 veces (Lunes, Miércoles, Viernes)
+    assert len(occs) == 3
+    fechas = [o["date"] for o in occs]
+    assert fechas == ["2026-11-02", "2026-11-04", "2026-11-06"]
+

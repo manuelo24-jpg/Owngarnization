@@ -42,9 +42,11 @@ class Task(Base):
     date = Column(Date, nullable=True, index=True)  # Solo para "daily", NULL para "common"
     start_time = Column(Time, nullable=True)
     end_time = Column(Time, nullable=True)
+    days_of_week = Column(String(50), nullable=True)  # Ej: "1,2,3,4,5" (1=Lunes .. 7=Domingo), NULL para todos los días
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), server_default=func.now(), nullable=False)
+
 
     user = relationship("User", back_populates="tasks")
     occurrences = relationship("TaskOccurrence", back_populates="task", cascade="all, delete-orphan")

@@ -24,13 +24,44 @@ const modal = {
     // Envío del formulario de tarea
     document.getElementById("task-form")?.addEventListener("submit", (e) => this.handleTaskSubmit(e));
 
-    // Cambio dinámico en el selector de Tipo (mostrar/ocultar fecha)
+    // Cambio dinámico en el selector de Tipo (mostrar/ocultar fecha o selector de días)
     const kindSelect = document.getElementById("task-kind");
     kindSelect?.addEventListener("change", (e) => {
       const dateGroup = document.getElementById("date-group");
-      if (dateGroup) {
-        dateGroup.style.display = e.target.value === "common" ? "none" : "flex";
-      }
+      const daysGroup = document.getElementById("days-of-week-group");
+      const isCommon = e.target.value === "common";
+      if (dateGroup) dateGroup.style.display = isCommon ? "none" : "flex";
+      if (daysGroup) daysGroup.style.display = isCommon ? "flex" : "none";
+    });
+
+    // Clic en chips de días de la semana
+    document.querySelectorAll("#day-selector-chips .day-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        chip.classList.toggle("active");
+        // Asegurar que al menos uno quede activo
+        const activeCount = document.querySelectorAll("#day-selector-chips .day-chip.active").length;
+        if (activeCount === 0) {
+          chip.classList.add("active");
+        }
+      });
+    });
+
+    // Botones rápidos de selección de días
+    document.querySelectorAll(".quick-days-btns button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const type = btn.dataset.days;
+        const chips = document.querySelectorAll("#day-selector-chips .day-chip");
+        chips.forEach(chip => {
+          const day = parseInt(chip.dataset.day, 10);
+          if (type === "all") {
+            chip.classList.add("active");
+          } else if (type === "weekdays") {
+            chip.classList.toggle("active", day >= 1 && day <= 5);
+          } else if (type === "weekend") {
+            chip.classList.toggle("active", day === 6 || day === 7);
+          }
+        });
+      });
     });
 
     // Cerrar panel lateral (Drawer)
@@ -84,6 +115,7 @@ const modal = {
     const titleEl = document.getElementById("modal-title");
     const errorBox = document.getElementById("modal-error-box");
     const dateGroup = document.getElementById("date-group");
+    const daysGroup = document.getElementById("days-of-week-group");
 
     if (!taskModal || !form) return;
 
@@ -94,6 +126,9 @@ const modal = {
     // Obtener la fecha seleccionada en el tablero (o hoy)
     const selectedDate = window.appState ? window.appState.getCurrentDateFormatted() : new Date().toISOString().split("T")[0];
 
+    // Resetear chips de días a todos activos por defecto
+    document.querySelectorAll("#day-selector-chips .day-chip").forEach(c => c.classList.add("active"));
+
     if (mode === "create") {
       titleEl.textContent = "Nueva tarea";
       document.getElementById("task-form-id").value = "";
@@ -102,6 +137,7 @@ const modal = {
       document.getElementById("task-importance").value = "medium";
       document.getElementById("task-status").value = "not_started";
       if (dateGroup) dateGroup.style.display = "flex";
+      if (daysGroup) daysGroup.style.display = "none";
     } else if (mode === "edit" && occ) {
       titleEl.textContent = "Editar tarea";
       const task = occ.task;
@@ -115,8 +151,19 @@ const modal = {
       document.getElementById("task-start-time").value = occ.start_time || task.start_time || "";
       document.getElementById("task-end-time").value = occ.end_time || task.end_time || "";
 
-      if (dateGroup) {
-        dateGroup.style.display = task.kind === "common" ? "none" : "flex";
+      const isCommon = task.kind === "common";
+      if (dateGroup) dateGroup.style.display = isCommon ? "none" : "flex";
+      if (daysGroup) {
+        daysGroup.style.display = isCommon ? "flex" : "none";
+        // Marcar los chips de días correspondientes
+        if (task.days_of_week) {
+          const allowed = task.days_of_week.split(",").map(s => s.trim());
+          document.querySelectorAll("#day-selector-chips .day-chip").forEach(chip => {
+            chip.classList.toggle("active", allowed.includes(chip.dataset.day));
+          });
+        } else {
+          document.querySelectorAll("#day-selector-chips .day-chip").forEach(chip => chip.classList.add("active"));
+        }
       }
     }
 
@@ -124,6 +171,7 @@ const modal = {
     taskModal.setAttribute("aria-hidden", "false");
     document.getElementById("task-title")?.focus();
   },
+
 
   closeTaskModal() {
     const taskModal = document.getElementById("task-modal");
@@ -154,7 +202,23 @@ const modal = {
       date: kind === "daily" ? (form.date.value || null) : null,
       start_time: form.start_time.value || null,
       end_time: form.end_time.value || null,
+      days_of_week: null,
     };
+
+    if (kind === "common") {
+      const activeChips = Array.from(document.querySelectorAll("#day-selector-chips .day-chip.active"));
+      if (activeChips.length === 0) {
+        errorBox.textContent = "Debes seleccionar al menos un día para la tarea común";
+        errorBox.style.display = "block";
+        submitBtn.disabled = false;
+        return;
+      }
+      if (activeChips.length === 7) {
+        payload.days_of_week = null; // Todos los días
+      } else {
+        payload.days_of_week = activeChips.map(c => c.dataset.day).sort((a, b) => Number(a) - Number(b)).join(",");
+      }
+    }
 
     if (!isEdit) {
       payload.initial_status = form.initial_status.value;
@@ -211,7 +275,18 @@ const modal = {
     document.getElementById("drawer-title").textContent = task.title;
 
     const kindBadge = document.getElementById("drawer-kind-badge");
-    kindBadge.textContent = task.kind === "common" ? "🔁 Común (diaria)" : "📌 Del día";
+    const dayNames = { "1": "L", "2": "M", "3": "X", "4": "J", "5": "V", "6": "S", "7": "D" };
+    if (task.kind === "common") {
+      let daysText = "Todos los días";
+      if (task.days_of_week) {
+        const daysArr = task.days_of_week.split(",").map(d => dayNames[d.trim()] || d);
+        daysText = daysArr.join(", ");
+      }
+      kindBadge.textContent = `🔁 Común (${daysText})`;
+    } else {
+      kindBadge.textContent = "📌 Del día";
+    }
+
 
     const impBadge = document.getElementById("drawer-importance-badge");
     const impLabels = { low: "Baja", medium: "Media", high: "Alta", urgent: "Urgente" };

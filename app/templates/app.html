@@ -217,7 +217,7 @@
           <label for="task-kind">Tipo</label>
           <select id="task-kind" name="kind">
             <option value="daily">Del día (puntual)</option>
-            <option value="common">Común (todos los días)</option>
+            <option value="common">Común (rutina periódica)</option>
           </select>
         </div>
 
@@ -227,6 +227,28 @@
           <input type="date" id="task-date" name="date">
         </div>
       </div>
+
+      <!-- Selector de días de la semana (visible solo para common) -->
+      <div class="form-group" id="days-of-week-group" style="display: none;">
+        <div class="days-header">
+          <label>Días que aparece:</label>
+          <div class="quick-days-btns">
+            <button type="button" class="btn-text-sm" data-days="all">Todos</button>
+            <button type="button" class="btn-text-sm" data-days="weekdays">L - V</button>
+            <button type="button" class="btn-text-sm" data-days="weekend">Fin de semana</button>
+          </div>
+        </div>
+        <div class="day-selector-chips" id="day-selector-chips">
+          <button type="button" class="day-chip active" data-day="1" title="Lunes">L</button>
+          <button type="button" class="day-chip active" data-day="2" title="Martes">M</button>
+          <button type="button" class="day-chip active" data-day="3" title="Miércoles">X</button>
+          <button type="button" class="day-chip active" data-day="4" title="Jueves">J</button>
+          <button type="button" class="day-chip active" data-day="5" title="Viernes">V</button>
+          <button type="button" class="day-chip active" data-day="6" title="Sábado">S</button>
+          <button type="button" class="day-chip active" data-day="7" title="Domingo">D</button>
+        </div>
+      </div>
+
 
       <!-- Importancia y Estado Inicial -->
       <div class="form-row">

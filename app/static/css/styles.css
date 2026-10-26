@@ -915,6 +915,71 @@ kbd {
   gap: 16px;
 }
 
+/* Selector de días para tareas comunes */
+.days-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.days-header label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.quick-days-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-text-sm {
+  background: none;
+  border: none;
+  color: var(--accent-strong);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: var(--radius-xs);
+  transition: all var(--transition-fast);
+}
+.btn-text-sm:hover {
+  background-color: rgba(168, 144, 111, 0.1);
+  text-decoration: underline;
+}
+
+.day-selector-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.day-chip {
+  flex: 1;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  padding: 8px 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.day-chip:hover {
+  border-color: var(--accent-strong);
+  color: var(--ink);
+}
+
+.day-chip.active {
+  background-color: var(--ink);
+  color: #FFFFFF;
+  border-color: var(--ink);
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -923,6 +988,7 @@ kbd {
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
+
 
 /* =========================================================
    Panel Lateral Deslizante (Detail Drawer)

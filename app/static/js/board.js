@@ -139,12 +139,23 @@ const board = {
       descHtml = `<p class="postit-desc-preview">${this.escapeHtml(task.description)}</p>`;
     }
 
+    let kindBadgeText = "📌 Día";
+    if (task.kind === "common") {
+      if (task.days_of_week) {
+        const dayNames = { "1": "L", "2": "M", "3": "X", "4": "J", "5": "V", "6": "S", "7": "D" };
+        const dArr = task.days_of_week.split(",").map(d => dayNames[d.trim()] || d);
+        kindBadgeText = `🔁 ${dArr.join(",")}`;
+      } else {
+        kindBadgeText = "🔁 Todos los días";
+      }
+    }
+
     card.innerHTML = `
       <div class="postit-header">
         <button class="postit-status-btn" title="${statusTitles[occ.status] || ''}" aria-label="Cambiar estado">
           ${statusIcons[occ.status] || "○"}
         </button>
-        <span class="postit-kind-badge">${task.kind === "common" ? "🔁 Común" : "📌 Día"}</span>
+        <span class="postit-kind-badge">${kindBadgeText}</span>
       </div>
       <h4 class="postit-title">${this.escapeHtml(task.title)}</h4>
       ${descHtml}
@@ -153,6 +164,7 @@ const board = {
         <span class="postit-importance-tag">${task.importance}</span>
       </div>
     `;
+
 
     // Clic en la tarjeta abre el detalle
     card.addEventListener("click", (e) => {

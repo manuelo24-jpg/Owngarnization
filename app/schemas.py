@@ -41,12 +41,17 @@ class TaskBase(BaseModel):
     date: Optional[dt.date] = None
     start_time: Optional[dt.time] = None
     end_time: Optional[dt.time] = None
+    days_of_week: Optional[str] = None  # Coma-separado: ej. "1,2,3,4,5" (1=Lunes .. 7=Domingo)
 
     @model_validator(mode="after")
     def validate_task_coherence(self):
         # Si es common, date debe ser None
         if self.kind == "common" and self.date is not None:
             self.date = None
+
+        # Si es daily, days_of_week debe ser None
+        if self.kind == "daily" and self.days_of_week is not None:
+            self.days_of_week = None
 
         # Validación horaria: end_time > start_time
         if self.start_time and self.end_time and self.end_time <= self.start_time:
@@ -67,6 +72,7 @@ class TaskUpdate(BaseModel):
     date: Optional[dt.date] = None
     start_time: Optional[dt.time] = None
     end_time: Optional[dt.time] = None
+    days_of_week: Optional[str] = None
     is_active: Optional[bool] = None
 
     @model_validator(mode="after")
@@ -74,6 +80,7 @@ class TaskUpdate(BaseModel):
         if self.start_time and self.end_time and self.end_time <= self.start_time:
             raise ValueError("La hora de fin debe ser posterior a la hora de inicio")
         return self
+
 
 
 class TaskResponse(TaskBase):
