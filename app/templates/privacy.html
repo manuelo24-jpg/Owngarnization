@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Política de Privacidad y Protección de Datos — Owngarnization{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card privacy-card">
+    <div class="auth-header">
+      <a href="/" class="auth-logo-link" title="Owngarnization" aria-label="Owngarnization">
+        <img src="/static/img/logo.png" alt="Owngarnization" class="auth-logo">
+      </a>
+      <h2>Política de Privacidad y Protección de Datos</h2>
+      <p class="subtitle">Última actualización: Octubre 2026</p>
+    </div>
+
+    <div class="privacy-content">
+      <section class="privacy-section">
+        <h3>1. Compromiso de Privacidad</h3>
+        <p>En <strong>Owngarnization</strong> nos tomamos la privacidad muy en serio. Esta aplicación ha sido diseñada con la premisa de recopilar únicamente los datos imprescindibles para el funcionamiento del organizador personal.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h3>2. Datos que Recopilamos</h3>
+        <ul>
+          <li><strong>Información de cuenta:</strong> Tu nombre de usuario y dirección de correo electrónico para identificar tu sesión.</li>
+          <li><strong>Contraseñas seguras:</strong> Las contraseñas se almacenan cifradas mediante algoritmos de hash irreversible (bcrypt con sal única). Nunca conocemos ni almacenamos tu contraseña en texto plano.</li>
+          <li><strong>Tus tareas y actividades:</strong> Títulos, descripciones, fechas, horarios y estados de las tareas que decides crear para organizar tu día a día.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section">
+        <h3>3. Uso y Tratamiento de la Información</h3>
+        <p>La información recopilada se utiliza de forma exclusiva para brindarte la experiencia de planificación, persistir tus tareas diarias y comunes, y permitirte el acceso seguro mediante cookies de sesión cifradas.</p>
+        <p><strong>Bajo ningún concepto vendemos, comercializamos ni cedemos tus datos personales ni tus tareas a terceros.</strong></p>
+      </section>
+
+      <section class="privacy-section">
+        <h3>4. Seguridad y Retención</h3>
+        <p>Aplicamos medidas técnicas para proteger tus datos frente a accesos no autorizados. Tienes derecho en cualquier momento a eliminar tus tareas o solicitar la baja de tu cuenta eliminando todos los registros asociados.</p>
+      </section>
+
+      <section class="privacy-section">
+        <h3>5. Contacto y Consultas</h3>
+        <p>Si tienes preguntas o inquietudes respecto a tus datos personales o esta política, puedes contactarnos a través de tu administrador de Owngarnization.</p>
+      </section>
+    </div>
+
+    <div class="auth-footer privacy-footer">
+      <a href="/register" class="btn btn-primary">Volver al registro</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

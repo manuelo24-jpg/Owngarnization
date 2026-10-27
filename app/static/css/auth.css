@@ -128,3 +128,107 @@
   color: var(--ink-soft);
 }
 
+/* Indicador de coincidencia de contraseñas */
+.password-match-hint {
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.password-match-hint.match {
+  color: #15803d; /* verde suave */
+}
+
+.password-match-hint.no-match {
+  color: var(--danger);
+}
+
+.password-match-hint.empty {
+  visibility: hidden;
+}
+
+/* Checkbox de términos y privacidad */
+.form-checkbox-group {
+  margin-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  line-height: 1.45;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--accent-strong);
+  flex-shrink: 0;
+}
+
+.checkbox-label a {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.checkbox-label a:hover {
+  color: var(--ink);
+}
+
+/* Página de Privacidad */
+.privacy-card {
+  max-width: 640px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.privacy-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.privacy-section h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.privacy-section p {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.privacy-section ul {
+  padding-left: 20px;
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.privacy-section li {
+  margin-bottom: 4px;
+}
+
+.privacy-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+

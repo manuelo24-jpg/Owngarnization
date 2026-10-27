@@ -141,18 +141,33 @@ const drawer = {
   },
 
   async deleteTask(taskId) {
-    if (!confirm("¿Seguro que deseas eliminar esta tarea?")) return;
+    const taskTitle = this.activeOccurrence?.task?.title || "";
 
-    try {
-      await api.delete(`/api/tasks/${taskId}`);
-      showToast("Tarea eliminada", "info");
-      this.close();
+    const performDelete = async () => {
+      try {
+        await api.delete(`/api/tasks/${taskId}`);
+        showToast("Tarea eliminada", "info");
+        this.close();
 
-      if (window.appState) {
-        window.appState.reloadCurrentView();
+        if (window.appState) {
+          window.appState.reloadCurrentView();
+        }
+      } catch (err) {
+        showToast(err.message || "Error al eliminar tarea", "error");
       }
-    } catch (err) {
-      showToast(err.message || "Error al eliminar tarea", "error");
+    };
+
+    if (window.modal && typeof window.modal.showConfirm === "function") {
+      window.modal.showConfirm({
+        title: "Eliminar tarea",
+        message: "¿Seguro que deseas eliminar esta tarea? Esta acción no se puede deshacer.",
+        taskTitle: taskTitle,
+        confirmText: "Eliminar tarea",
+        onConfirm: performDelete
+      });
+    } else {
+      if (!confirm("¿Seguro que deseas eliminar esta tarea?")) return;
+      await performDelete();
     }
   }
 };

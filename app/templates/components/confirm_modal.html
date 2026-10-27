@@ -1,0 +1,31 @@
+<!-- ==============================================
+     MODAL DE CONFIRMACIÓN (ELIMINAR TAREA / ACCIONES)
+=================================================== -->
+<div id="confirm-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card confirm-modal-card" role="dialog" aria-labelledby="confirm-modal-title">
+    <div class="modal-header">
+      <div class="confirm-modal-header-content">
+        <div class="confirm-icon-circle">
+          <span>🗑️</span>
+        </div>
+        <h3 id="confirm-modal-title" class="modal-title">Eliminar tarea</h3>
+      </div>
+      <button id="confirm-modal-close-btn" class="modal-close" aria-label="Cerrar modal">✕</button>
+    </div>
+
+    <div class="confirm-modal-body">
+      <p id="confirm-modal-message" class="confirm-message">
+        ¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.
+      </p>
+      <div id="confirm-modal-task-preview" class="confirm-task-preview" style="display: none;">
+        <span class="preview-bullet">•</span>
+        <strong id="confirm-modal-task-title" class="preview-title"></strong>
+      </div>
+    </div>
+
+    <div class="modal-footer confirm-modal-footer">
+      <button type="button" id="confirm-modal-cancel-btn" class="btn btn-secondary">Cancelar</button>
+      <button type="button" id="confirm-modal-accept-btn" class="btn btn-danger">Eliminar tarea</button>
+    </div>
+  </div>
+</div>

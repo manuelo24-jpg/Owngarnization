@@ -45,3 +45,13 @@ def register_page(request: Request, current_user: User | None = Depends(get_opti
         name="register.html"
     )
 
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    """Página de Política de Privacidad y Protección de Datos."""
+    return templates.TemplateResponse(
+        request=request,
+        name="privacy.html"
+    )
+
+

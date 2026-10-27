@@ -286,3 +286,74 @@
   background-color: var(--surface);
 }
 
+/* =========================================================
+   Modal de Confirmación
+   ========================================================= */
+.confirm-modal-card {
+  max-width: 440px;
+}
+
+.confirm-modal-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.confirm-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(220, 38, 38, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.confirm-modal-body {
+  padding: 22px 24px 12px 24px;
+}
+
+.confirm-message {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.confirm-task-preview {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.confirm-task-preview .preview-bullet {
+  color: var(--danger);
+  font-size: 16px;
+}
+
+.confirm-modal-footer {
+  padding: 16px 24px 20px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: #FFFFFF;
+  border: 1px solid var(--danger);
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: #B91C1C;
+  border-color: #B91C1C;
+}
+
+

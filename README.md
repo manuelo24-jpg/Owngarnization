@@ -299,12 +299,11 @@ Abre tu terminal en la carpeta raíz del proyecto (`Owngarnization`):
 
 ### 2. Arrancar el servidor de desarrollo
 
-Ejecuta el siguiente comando:
-
 ```powershell
 uvicorn app.main:app --reload --port 8000
+# o también
+python -m uvicorn app.main:app --reload --port 8000
 ```
-> *(También puedes arrancarlo con: `python -m uvicorn app.main:app --reload --port 8000`)*
 
 Verás una salida similar a esta indicando que el servidor está listo:
 ```text
