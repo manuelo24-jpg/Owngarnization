@@ -2,10 +2,16 @@
    Vista Día — Tablero de Post-its
    ========================================================= */
 .day-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 28px;
-  align-items: start;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.day-board .board-column {
+  flex: 1 1 380px;
+  max-width: 580px;
 }
 
 .board-column {
@@ -17,6 +23,27 @@
   display: flex;
   flex-direction: column;
   min-height: 480px;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Diferenciación visual entre paneles */
+#column-common {
+  background-color: #FAF9F6;
+  border-top: 4px solid var(--accent-strong);
+}
+
+#column-common .column-header {
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+#column-daily {
+  background-color: var(--bg);
+  border-top: 4px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+#column-daily .column-header {
+  border-bottom: 1px solid var(--line);
 }
 
 .column-header {
@@ -81,18 +108,13 @@
   cursor: grabbing;
 }
 
-/* Ligera rotación física */
-.postit-card:nth-child(odd) {
-  transform: rotate(-0.5deg);
-}
-.postit-card:nth-child(even) {
-  transform: rotate(0.6deg);
-}
-.postit-card:nth-child(3n) {
-  transform: rotate(-0.8deg);
+/* Tarjetas rectas sin inclinación */
+.postit-card {
+  transform: none;
+  margin: 0;
 }
 .postit-card:hover {
-  transform: rotate(0deg) translateY(-2px);
+  transform: translateY(-2px);
 }
 
 /* Colores de Post-it por Importancia */

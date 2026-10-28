@@ -1,6 +1,6 @@
 import datetime as dt
 from typing import List, Optional, Tuple
-from sqlalchemy import or_
+from sqlalchemy import or_, case
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import Task, TaskOccurrence
@@ -201,6 +201,15 @@ def get_occurrences_in_range(
         .order_by(
             TaskOccurrence.date.asc(),
             TaskOccurrence.position.asc(),
+            TaskOccurrence.start_time.is_(None),  # False (0) para tareas con hora, True (1) para NULL
+            TaskOccurrence.start_time.asc(),
+            case(
+                (Task.importance == 'urgent', 1),
+                (Task.importance == 'high', 2),
+                (Task.importance == 'medium', 3),
+                (Task.importance == 'low', 4),
+                else_=5
+            ).asc(),
             TaskOccurrence.id.asc()
         )
         .all()

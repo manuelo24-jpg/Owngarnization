@@ -66,8 +66,19 @@ const board = {
     const badgeDaily = document.getElementById("badge-daily");
     const emptyCommon = document.getElementById("empty-common");
     const emptyDaily = document.getElementById("empty-daily");
+    const colCommon = document.getElementById("column-common");
+    const colDaily = document.getElementById("column-daily");
 
     if (!listCommon || !listDaily) return;
+
+    // Manejar visibilidad según filtro de tipo (kind)
+    const currentKindFilter = window.appState ? window.appState.filters.kind : "";
+    if (colCommon) {
+      colCommon.style.display = (currentKindFilter === "daily") ? "none" : "";
+    }
+    if (colDaily) {
+      colDaily.style.display = (currentKindFilter === "common") ? "none" : "";
+    }
 
     listCommon.innerHTML = "";
     listDaily.innerHTML = "";

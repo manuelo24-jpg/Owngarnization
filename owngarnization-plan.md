@@ -32,6 +32,9 @@ Prioridades: código limpio, sencillo de mantener, mínimo de dependencias, inte
 | Calendario | **FullCalendar** (vistas mes/semana/día) por CDN | Resuelve mes y semana |
 | Drag & drop post-its | **SortableJS** por CDN | Orden manual en vista día |
 | Tests | pytest + httpx | Pruebas de API |
+| App móvil | **PWA** (Web App Manifest + Service Worker) | Instalable gratis desde la web en iOS y Android, sin tiendas ni segundo código |
+| Notificaciones | **Web Push** (estándar VAPID) + `pywebpush` | Funciona en Android (Chrome/Edge/Firefox) e iOS ≥ 16.4 (PWA instalada) |
+| Disparador de avisos | Cron externo gratuito (cron-job.org) → endpoint protegido | El plan gratis de Render duerme: no se puede depender de un scheduler en proceso |
 
 > Si prefieres menos JS: se puede usar HTMX para modales y listas, pero el drag & drop sigue necesitando SortableJS.
 
@@ -101,6 +104,22 @@ owngarnization/
 │       ├── js/projects/                 # projects_list.js, project_board.js, project_drawer.js,
 │       │                                # project_members.js, projects_guide.js
 │       └── img/guide/projects/          # Capturas del manual de Proyectos
+│
+│   # --- App móvil PWA y notificaciones (Fases 15-18) ---
+│   ├── routers/pwa.py                   # Sirve /manifest.webmanifest y /sw.js desde la raíz (scope global)
+│   ├── routers/push.py                  # Thin Controller: suscripciones, preferencias y endpoint de cron
+│   ├── services/push_service.py         # Alta/baja de suscripciones y envío con pywebpush (limpia 404/410)
+│   ├── services/reminder_service.py     # Cálculo de avisos pendientes por zona horaria y deduplicación
+│   ├── templates/components/
+│   │   ├── mobile_nav.html              # Barra inferior (Día · Semana · Mes) + botón flotante ＋
+│   │   ├── install_banner.html          # Invitación a instalar (Android nativo / instrucciones iOS)
+│   │   └── notification_settings.html   # Activar avisos, antelación y prueba de notificación
+│   └── static/
+│       ├── sw.js                        # Service Worker: caché del shell, push y notificationclick
+│       ├── css/mobile.css               # Ajustes mobile-first (bottom sheets, safe areas, táctil)
+│       ├── js/pwa.js                    # Registro del SW, detección standalone e instalación
+│       ├── js/push.js                   # Permiso, suscripción y sincronización con el backend
+│       └── img/icons/                   # icon-192, icon-512, maskable-512, apple-touch-icon-180, badge-72
 ├── migrations/              # Control de versiones de la BD con Alembic
 ├── tests/                   # Pruebas con Pytest (incl. test_projects.py y test_project_permissions.py)
 ├── requirements.txt
@@ -162,6 +181,25 @@ owngarnization/
 - Permisos por rol comprobados en la capa de servicios, no en el router.
 - Mover una tarea a una columna `is_done` registra la finalización; índices en `(project_id, column_id, position)`.
 
+### 5.2 Modelo de datos de notificaciones (PWA)
+
+**User** (campos nuevos)
+- `timezone` (IANA, p. ej. `"Europe/Madrid"`; se detecta con `Intl.DateTimeFormat().resolvedOptions().timeZone` y se guarda al iniciar sesión).
+- `reminders_enabled` (bool, por defecto `true`) y `reminder_offset_min` (entero: `0`, `5`, `10`, `15`, `30`, `60`; por defecto `10`).
+
+**PushSubscription** (un usuario puede tener varios dispositivos)
+- `id`, `user_id` (FK), `endpoint` (único, texto), `p256dh`, `auth`, `user_agent`, `created_at`, `last_success_at`.
+- Se elimina automáticamente si el servicio push responde `404` o `410` (suscripción caducada).
+
+**TaskOccurrence** (campo nuevo)
+- `reminder_sent_at` (datetime UTC, nullable). Evita avisos duplicados; se **resetea a `NULL`** si cambian `start_time` o `date`.
+
+**Reglas clave**
+- Solo generan aviso las ocurrencias con `start_time`, `status != "done"` y tarea activa.
+- La "fecha de hoy" se calcula **en la zona horaria del usuario**, no del servidor (Render corre en UTC). Aplicar también al traspaso automático de pendientes.
+- Antes de buscar avisos, el dispatcher llama a la generación lazy (`ensure_occurrences`) para el día actual de cada usuario con suscripciones, porque las tareas comunes solo se materializan al consultarse.
+- Ventana de envío: `inicio − antelación ≤ ahora ≤ inicio + 15 min`. Si el servidor estuvo dormido más tiempo, el aviso se descarta en lugar de llegar tarde.
+
 ## 6. Autenticación y seguridad
 
 - Registro (email + usuario + contraseña con validación mínima) y login.
@@ -184,6 +222,12 @@ owngarnization/
 | DELETE | `/api/tasks/{id}` | Eliminar / desactivar |
 | PATCH | `/api/occurrences/{id}` | Cambiar estado, horario o fecha (mover en calendario) |
 | POST | `/api/occurrences/reorder` | Guardar orden manual `{date, ordered_ids: []}` |
+| GET | `/manifest.webmanifest` · `/sw.js` | Manifest y Service Worker servidos desde la raíz (públicos) |
+| GET | `/api/push/public-key` | Clave pública VAPID para suscribirse |
+| POST / DELETE | `/api/push/subscriptions` | Registrar / eliminar la suscripción del dispositivo actual |
+| GET / PATCH | `/api/me/preferences` | `timezone`, `reminders_enabled`, `reminder_offset_min` |
+| POST | `/api/push/test` | Enviar una notificación de prueba a mis dispositivos |
+| POST | `/internal/reminders/dispatch` | Llamado por el cron cada minuto. **Sin sesión**: exige cabecera `X-Cron-Secret` (comparación en tiempo constante) |
 
 Validar todo con Pydantic y devolver errores claros (422/404/403).
 
@@ -229,10 +273,11 @@ Pantalla centrada, logo/nombre **Owngarnization**, formularios simples, mensajes
 - **Mes**: cada día muestra mini-tarjetas (máx. 3 + "+N más"). Clic en un día → vista Día.
 - **Semana**: 7 columnas con post-its compactos. Se pueden **arrastrar entre días** para cambiar la fecha.
 - **Día (tablero de post-its)**:
-  - Las tareas se muestran como **post-its** (ligera rotación ±1°, sombra suave) coloreados por importancia.
+  - Las tareas se muestran como **post-its** rectos (sin rotación), con sombra suave y **separación uniforme** entre tarjetas, coloreados por importancia.
   - Cada post-it muestra: **nombre**, importancia (color), estado (icono), horario si existe y marca de "común".
-  - **Reordenable manualmente** con drag & drop (SortableJS) y orden persistido en BD.
-  - Sección separada: **Tareas comunes** y **Tareas del día**.
+  - **Orden por defecto**: primero las tareas con hora (cronológico), después las que no tienen hora, ordenadas por prioridad (urgente → alta → media → baja).
+  - **Reordenable manualmente** con drag & drop (SortableJS); si el usuario reordena, su orden manda y se persiste en BD.
+  - Sección separada: **Tareas comunes** y **Tareas del día**, diferenciadas visualmente (borde superior y fondo distintos). Al filtrar por tipo, el otro panel desaparece y el visible se centra manteniendo su ancho.
   - Cambio rápido de estado desde el propio post-it (clic en icono o menú).
 
 ### 9.4 Panel emergente de detalle (sin salir de la pantalla)
@@ -298,6 +343,78 @@ Páginas HTML: `GET /projects` y `GET /projects/{id}` (redirigen a `/login` si n
   4. **Gestión de tareas**: Creación con horas opcionales, edición rápida en panel lateral y eliminación.
   5. **Atajos de teclado**: `N` (nueva tarea), `?` (abrir manual), `Esc` (cerrar cualquier modal).
 - Accesibilidad: Cierre con botón ✕, tecla `Esc` o clic fuera del modal sin perder el estado de la pantalla.
+
+### 9.8 App móvil (PWA instalable, gratis, iOS y Android)
+
+**Decisión de arquitectura**: PWA sobre la misma web publicada, en lugar de app nativa.
+
+| Opción | Coste | Código | Push en iOS | Veredicto |
+|---|---|---|---|---|
+| **PWA** | 0 € | El mismo | Sí (iOS ≥ 16.4, instalada) | ✅ Elegida |
+| Capacitor / tiendas | 99 €/año Apple + 25 € Google | Wrapper + publicación | Sí | Futuro, si se quiere estar en tiendas |
+| Nativa (Swift/Kotlin) | Idem | 2 códigos nuevos | Sí | Descartada |
+
+**Requisitos de instalación**
+- `manifest.webmanifest`: `name`, `short_name: "Owngarnization"`, `start_url: "/app?source=pwa"`, `scope: "/"`, `display: "standalone"`, `background_color: #FAF8F5`, `theme_color: #111111`, `lang: "es"`, iconos 192/512 + **maskable** 512.
+- `base.html`: `<link rel="manifest">`, `<meta name="theme-color">`, `apple-touch-icon` 180×180, `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, y `viewport` con `viewport-fit=cover`.
+- **Service Worker en `/sw.js` (raíz)**, no en `/static/`, para que su `scope` cubra toda la app.
+- HTTPS obligatorio (Render ya lo da).
+
+**Experiencia de instalación**
+- **Android**: capturar `beforeinstallprompt` y mostrar un botón propio "Instalar app" (no el banner automático).
+- **iOS**: no existe prompt programático; si es Safari y no está en modo `standalone`, mostrar mini-guía: *Compartir ⬆️ → "Añadir a pantalla de inicio"*. Descartable y recordado en `localStorage`.
+- Aviso para iOS: la PWA instalada tiene **almacenamiento separado de Safari**, así que el usuario inicia sesión una vez dentro de la app. Ampliar la caducidad de la cookie de sesión (p. ej. 30 días) para no pedirlo a menudo.
+
+**Offline (alcance mínimo y honesto)**
+- Cache-first para el *app shell* (CSS, JS, iconos, fuentes) con versión de caché (`owng-v{N}`) y limpieza en `activate`.
+- Network-first para `/api/*`; sin conexión se muestran los últimos datos cacheados de **solo lectura** y un aviso "Sin conexión".
+- Fuera de alcance: crear/editar sin conexión con sincronización posterior.
+
+### 9.9 Notificaciones de tareas con hora
+
+**Flujo**
+1. El usuario pulsa "Activar avisos" (el permiso **solo** se pide tras un gesto explícito; iOS lo exige y Chrome penaliza pedirlo al cargar).
+2. `push.js` obtiene la clave VAPID, se suscribe con `pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })` y envía la suscripción a `/api/push/subscriptions`.
+3. **cron-job.org** llama cada minuto a `POST /internal/reminders/dispatch` con `X-Cron-Secret`.
+4. `reminder_service` busca ocurrencias dentro de la ventana de envío (ver 5.2), envía con `pywebpush` a todos los dispositivos del usuario y marca `reminder_sent_at` **en la misma transacción**.
+5. `sw.js` muestra la notificación; al pulsarla, enfoca la ventana abierta o abre `/app?date=YYYY-MM-DD&occ={id}` con el detalle de la tarea.
+
+**Contenido de la notificación**
+- Título: `⏱️ 09:30 · Reunión con cliente`. Cuerpo: "Empieza en 10 min · Prioridad alta".
+- `tag: "occ-{id}"` (si se reenvía, reemplaza la anterior en lugar de duplicarla), `icon`, `badge` monocromo.
+- Acción "✓ Marcar como hecha" en Android (iOS no soporta acciones: allí solo se abre la app).
+
+**Preferencias** (`notification_settings.html`, accesible desde el menú de usuario)
+- Interruptor general, antelación (0/5/10/15/30/60 min), botón "Enviar notificación de prueba" y estado del permiso del navegador (concedido / bloqueado, con instrucciones para desbloquearlo).
+
+**Compatibilidad y limitaciones (a documentar en el README y en el manual)**
+- Android: Chrome, Edge, Firefox y Samsung Internet, con o sin instalar.
+- iOS/iPadOS ≥ 16.4: **solo si la PWA está añadida a la pantalla de inicio**. En Safari sin instalar no hay push; la UI debe indicarlo en lugar de mostrar un botón que no funciona.
+- Precisión: ±1 min (frecuencia del cron) más el arranque en frío de Render (~30-60 s) si estaba dormido. El cron cada minuto mantiene la instancia despierta; una sola instancia 24/7 consume ~744 h y cabe en las 750 h/mes gratis.
+- Modo "No molestar" o ahorro de batería del sistema pueden retrasar o silenciar avisos: no es controlable desde la web.
+
+### 9.10 Experiencia móvil (mobile-first)
+
+**Navegación y layout** (breakpoint principal `≤ 768px`)
+- La barra lateral de filtros pasa a **bottom sheet** que se abre con un botón "Filtros" (con contador de filtros activos).
+- **Barra inferior fija** con Día · Semana · Mes y **botón flotante ＋** para nueva tarea; la cabecera se reduce a logo, búsqueda (icono que se expande) y menú.
+- Vista Día: un solo panel visible a la vez con **pestañas segmentadas "Del día / Comunes"** (reutiliza la lógica del filtro de tipo), en lugar de apilar dos columnas largas.
+- Modal de tarea y panel de detalle a **pantalla completa / bottom sheet** con cierre por botón y gesto de deslizar hacia abajo.
+- Usar `100dvh` en vez de `100vh` y respetar `env(safe-area-inset-*)` (notch y barra de gestos de iPhone).
+
+**Táctil**
+- Áreas táctiles de **mínimo 44×44 px** (botón de estado del post-it incluido).
+- SortableJS con `delay: 200` y `delayOnTouchOnly: true` (mantener pulsado para arrastrar) para que no choque con el scroll; feedback visual al "levantar" la tarjeta.
+- Efectos `:hover` solo bajo `@media (hover: hover)` para evitar estados pegados en táctil.
+- Inputs con `font-size ≥ 16px` (evita el zoom automático de iOS), teclados adecuados (`type="time"`, `type="date"`, `inputmode`, `enterkeyhint`).
+- Ocultar la sección de atajos de teclado en dispositivos táctiles.
+
+**Calendario en móvil**
+- Mes: `dayMaxEvents: 2` con "+N", tocar un día abre la vista Día.
+- Semana: cambiar a `listWeek` (lista agrupada por día) o vista de 3 días, porque 7 columnas no son legibles en 375 px.
+
+**Rendimiento** (objetivo Lighthouse móvil ≥ 90 en Performance, Accessibility, Best Practices)
+- `defer` en scripts, cargar FullCalendar solo al entrar en Semana/Mes, iconos y capturas del manual en WebP con `loading="lazy"`.
 
 ## 10. Plan de implementación por fases
 
@@ -373,6 +490,34 @@ Ver sección 11.
 - Se mantiene el manual existente para tareas/calendario como documento aparte (un manual por sección de la app).
 - **Criterio de hecho**: cada pantalla tiene su manual contextual, abierto con `?` y cerrado con `Esc`.
 
+### Fase 15 — Experiencia móvil (mobile-first)
+- Auditoría en 360, 375, 390 y 430 px (DevTools) de login, registro, app, proyectos y manuales; lista de defectos priorizada.
+- `mobile.css` + `mobile_nav.html`: barra inferior, botón flotante ＋, filtros en bottom sheet, modal/drawer a pantalla completa, safe areas, `100dvh`.
+- Vista Día con pestañas "Del día / Comunes"; calendario semana en `listWeek`; SortableJS con retardo táctil.
+- **Criterio de hecho**: sin scroll horizontal en ninguna pantalla a 360 px, todas las acciones alcanzables con el pulgar, áreas táctiles ≥ 44 px y Lighthouse móvil ≥ 90 en Accessibility.
+
+### Fase 16 — PWA instalable
+- Iconos (incluido maskable y `apple-touch-icon`), `manifest.webmanifest`, metaetiquetas iOS en `base.html`.
+- `routers/pwa.py` sirviendo `/manifest.webmanifest` y `/sw.js` (con `Cache-Control: no-cache` para el SW).
+- `sw.js` con caché versionada del shell y network-first para la API; `pwa.js` con registro, botón de instalación (Android) y guía de instalación (iOS).
+- **Criterio de hecho**: Lighthouse marca la app como instalable; se instala desde Chrome Android y desde Safari iOS, abre en modo standalone sin barra del navegador y muestra la pantalla "Sin conexión" en modo avión.
+
+### Fase 17 — Notificaciones: backend
+- Migración Alembic: campos nuevos en `User` y `TaskOccurrence`, tabla `PushSubscription` (sección 5.2).
+- Generar claves VAPID una vez (`vapid --gen` o script en `scripts/`) y cargarlas por variables de entorno.
+- `push_service.py`, `reminder_service.py`, `routers/push.py` y endpoint `/internal/reminders/dispatch` protegido por secreto.
+- Calcular "hoy" con la zona horaria del usuario (incluido el traspaso de pendientes) y resetear `reminder_sent_at` al cambiar hora o fecha.
+- Tests (con `pywebpush` simulado): ventana de envío correcta, no duplica avisos, ignora tareas `done` y sin hora, respeta `reminders_enabled` y antelación, distintas zonas horarias, borra suscripciones 410, rechaza el cron sin secreto (401) y aislamiento entre usuarios.
+- **Criterio de hecho**: todos los tests (nuevos y existentes) en verde.
+
+### Fase 18 — Notificaciones: frontend y QA en dispositivos reales
+- `push.js` + `notification_settings.html`: activar/desactivar, antelación, prueba, estados del permiso y mensaje específico para iOS sin instalar.
+- `sw.js`: eventos `push`, `notificationclick` (enfocar/abrir la tarea) y `pushsubscriptionchange` (re-suscribir).
+- Configurar cron-job.org (cada minuto) y documentarlo.
+- Nueva pestaña en el manual de usuario: "App móvil y avisos" (instalación por plataforma y cómo activar notificaciones).
+- Matriz de pruebas manuales: iPhone (Safari + PWA instalada, iOS ≥ 16.4), Android (Chrome, PWA instalada y sin instalar), escritorio (Chrome/Edge). Casos: app cerrada, pantalla bloqueada, varios dispositivos, permiso denegado, cambio de hora de la tarea tras el aviso.
+- **Criterio de hecho**: con la app cerrada, una tarea programada a +12 min con antelación de 10 min genera **una sola** notificación en iOS y Android en ±1 min, y al pulsarla se abre el detalle de esa tarea.
+
 ## 11. Despliegue en servidor gratuito
 
 **Opción recomendada A: Render (web service gratis) + Neon (PostgreSQL gratis)**
@@ -388,6 +533,12 @@ Ver sección 11.
 - Soporta SQLite con disco persistente. Requiere configurar WSGI (usar `a2wsgi` para adaptar FastAPI) o usar Flask.
 
 Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `README.md`.
+
+**Añadidos para PWA y notificaciones**
+- Variables nuevas: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:tu@email.com`), `CRON_SECRET` (cadena larga aleatoria). Nunca en el repo.
+- Añadir `pywebpush` a `requirements.txt`.
+- **cron-job.org** (gratis): tarea cada minuto → `POST https://<tu-app>.onrender.com/internal/reminders/dispatch` con cabecera `X-Cron-Secret`. Activar avisos de fallo por email.
+- Alternativa a evaluar si se migra de Render: un host sin suspensión permitiría un scheduler en proceso (APScheduler), pero el endpoint + cron externo sigue siendo válido y más fácil de probar.
 
 > Los planes gratuitos cambian con el tiempo: verifica las condiciones actuales antes de elegir.
 
@@ -410,6 +561,10 @@ Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `
 - [ ] Los proyectos y sus tareas son privados por usuario (y compartidos solo con los miembros invitados), con tests de aislamiento y permisos.
 - [ ] El módulo de proyectos respeta la arquitectura modular (router delgado + servicios + componentes + CSS/JS propios, ningún archivo > ~250 líneas).
 - [ ] Manual de usuario independiente para Proyectos, accesible desde un icono `?` en la propia pantalla de proyectos.
+- [ ] **Móvil**: todas las pantallas se ven y se usan bien desde 360 px (sin scroll horizontal, navegación inferior, bottom sheets, áreas táctiles ≥ 44 px, drag & drop táctil).
+- [ ] **PWA**: la app se instala gratis desde la web publicada en iOS (Safari) y Android (Chrome), abre a pantalla completa y tiene icono propio.
+- [ ] **Notificaciones**: las tareas con hora avisan con la antelación elegida, una sola vez, en la zona horaria del usuario, también con la app cerrada; al pulsar se abre la tarea.
+- [ ] Las limitaciones de iOS (push solo con la PWA instalada, iOS ≥ 16.4) se explican en la UI, el manual y el README.
 
 ## 13. Reglas de trabajo para el agente
 
