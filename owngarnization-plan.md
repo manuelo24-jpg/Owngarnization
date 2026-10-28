@@ -490,33 +490,133 @@ Ver sección 11.
 - Se mantiene el manual existente para tareas/calendario como documento aparte (un manual por sección de la app).
 - **Criterio de hecho**: cada pantalla tiene su manual contextual, abierto con `?` y cerrado con `Esc`.
 
-### Fase 15 — Experiencia móvil (mobile-first)
-- Auditoría en 360, 375, 390 y 430 px (DevTools) de login, registro, app, proyectos y manuales; lista de defectos priorizada.
-- `mobile.css` + `mobile_nav.html`: barra inferior, botón flotante ＋, filtros en bottom sheet, modal/drawer a pantalla completa, safe areas, `100dvh`.
-- Vista Día con pestañas "Del día / Comunes"; calendario semana en `listWeek`; SortableJS con retardo táctil.
-- **Criterio de hecho**: sin scroll horizontal en ninguna pantalla a 360 px, todas las acciones alcanzables con el pulgar, áreas táctiles ≥ 44 px y Lighthouse móvil ≥ 90 en Accessibility.
+### Bloque móvil (Fases 15-18) — planificado con Review Driven Development (RDD)
 
-### Fase 16 — PWA instalable
-- Iconos (incluido maskable y `apple-touch-icon`), `manifest.webmanifest`, metaetiquetas iOS en `base.html`.
-- `routers/pwa.py` sirviendo `/manifest.webmanifest` y `/sw.js` (con `Cache-Control: no-cache` para el SW).
-- `sw.js` con caché versionada del shell y network-first para la API; `pwa.js` con registro, botón de instalación (Android) y guía de instalación (iOS).
-- **Criterio de hecho**: Lighthouse marca la app como instalable; se instala desde Chrome Android y desde Safari iOS, abre en modo standalone sin barra del navegador y muestra la pantalla "Sin conexión" en modo avión.
+**Cómo se trabaja este bloque**
+- El trabajo se divide en **PRs pequeños** (objetivo: ≤ ~400 líneas de diff, una sola responsabilidad). Cada PR se diseña **pensando en cómo se va a revisar**: qué se debe mirar, qué evidencias lo prueban y qué lo bloquea.
+- Cada PR define **antes de escribir código**: objetivo, alcance y fuera de alcance, riesgos, **checklist de revisión** y **evidencias obligatorias**. Si un PR no se puede revisar en ~20 min, se parte.
+- **Gate**: un PR no se mergea sin checklist completo, evidencias adjuntas y tests en verde. La fase siguiente no empieza hasta cerrar la revisión de fase (*phase review*).
+- Severidad de comentarios de revisión: **🔴 Bloqueante** (bug, seguridad, pérdida de datos, rompe criterio) · **🟡 Debe arreglarse** antes de cerrar la fase · **🔵 Sugerencia** (se apunta como deuda en el README si no se hace).
+- Revisión transversal en **todos** los PRs (además del checklist propio): aislamiento por `user_id`, CSRF en peticiones que modifican, secretos solo en entorno, sin `innerHTML` con datos de usuario sin escapar, textos en español, ningún archivo > ~250 líneas, sin regresiones en escritorio.
 
-### Fase 17 — Notificaciones: backend
-- Migración Alembic: campos nuevos en `User` y `TaskOccurrence`, tabla `PushSubscription` (sección 5.2).
-- Generar claves VAPID una vez (`vapid --gen` o script en `scripts/`) y cargarlas por variables de entorno.
-- `push_service.py`, `reminder_service.py`, `routers/push.py` y endpoint `/internal/reminders/dispatch` protegido por secreto.
-- Calcular "hoy" con la zona horaria del usuario (incluido el traspaso de pendientes) y resetear `reminder_sent_at` al cambiar hora o fecha.
-- Tests (con `pywebpush` simulado): ventana de envío correcta, no duplica avisos, ignora tareas `done` y sin hora, respeta `reminders_enabled` y antelación, distintas zonas horarias, borra suscripciones 410, rechaza el cron sin secreto (401) y aislamiento entre usuarios.
-- **Criterio de hecho**: todos los tests (nuevos y existentes) en verde.
+#### Revisión 0 — Revisión del plan (antes de cualquier código)
+Decisiones que el responsable del producto debe **aprobar o cambiar**:
+1. PWA en lugar de app de tiendas (coste 0 €, mismo código).
+2. Avisos por Web Push + cron externo cada minuto (cron-job.org).
+3. Antelación por defecto: 10 min. Ventana de gracia: 15 min (después se descarta el aviso).
+4. Offline solo lectura (sin edición offline en esta versión).
+5. Vista Día en móvil con pestañas "Del día / Comunes" en lugar de dos columnas apiladas.
+- **Evidencia**: decisiones anotadas en el README (sección "Decisiones"). **Gate**: aprobación explícita.
 
-### Fase 18 — Notificaciones: frontend y QA en dispositivos reales
-- `push.js` + `notification_settings.html`: activar/desactivar, antelación, prueba, estados del permiso y mensaje específico para iOS sin instalar.
-- `sw.js`: eventos `push`, `notificationclick` (enfocar/abrir la tarea) y `pushsubscriptionchange` (re-suscribir).
-- Configurar cron-job.org (cada minuto) y documentarlo.
-- Nueva pestaña en el manual de usuario: "App móvil y avisos" (instalación por plataforma y cómo activar notificaciones).
-- Matriz de pruebas manuales: iPhone (Safari + PWA instalada, iOS ≥ 16.4), Android (Chrome, PWA instalada y sin instalar), escritorio (Chrome/Edge). Casos: app cerrada, pantalla bloqueada, varios dispositivos, permiso denegado, cambio de hora de la tarea tras el aviso.
-- **Criterio de hecho**: con la app cerrada, una tarea programada a +12 min con antelación de 10 min genera **una sola** notificación en iOS y Android en ±1 min, y al pulsarla se abre el detalle de esa tarea.
+#### Fase 15 — Experiencia móvil (mobile-first)
+
+**PR 15.0 — Corrección del orden por defecto de la vista Día** *(defecto detectado en revisión)*
+- Problema: `position` se rellena siempre al crear ocurrencias, así que el orden por hora/prioridad casi nunca se aplica.
+- Solución: marcar si el usuario reordenó ese día (p. ej. `manual_order` en la ocurrencia, puesto a `true` por `/reorder`). Sin orden manual → hora ↑, sin hora al final por prioridad; con orden manual → `position`.
+- Checklist: migración reversible · el orden manual sobrevive a recargar · una tarea nueva en un día ya reordenado aparece al final · tests de ambos casos.
+- Evidencias: salida de pytest + captura antes/después.
+
+**PR 15.1 — Auditoría móvil (solo documento, sin código)**
+- Recorrer login, registro, app (día/semana/mes), drawer, modal, proyectos y manuales a 360/375/390/430 px.
+- Entregable: tabla de defectos con captura, severidad y PR que lo resolverá.
+- Checklist: cubre todas las pantallas · cada defecto tiene dueño (PR) · nada queda "sin asignar".
+
+**PR 15.2 — Cimientos móviles**
+- `mobile.css`, viewport con `viewport-fit=cover`, `100dvh`, safe areas, `:hover` solo bajo `@media (hover: hover)`, inputs ≥ 16 px.
+- Checklist: sin scroll horizontal a 360 px · iOS no hace zoom al enfocar inputs · escritorio idéntico al actual.
+- Evidencias: capturas 360 px y 1440 px de cada pantalla.
+
+**PR 15.3 — Navegación móvil**
+- `mobile_nav.html` (Día · Semana · Mes + ＋ flotante), cabecera compacta, filtros en bottom sheet con contador.
+- Checklist: navegación con una mano (zona del pulgar) · bottom sheet se cierra con ✕, fondo y `Esc` · foco atrapado y devuelto · contador refleja filtros activos.
+- Evidencias: vídeo corto o GIF del flujo + captura de Lighthouse Accessibility.
+
+**PR 15.4 — Vista Día, modal y drawer táctiles**
+- Pestañas "Del día / Comunes", modal y drawer a pantalla completa, botón de estado ≥ 44 px, SortableJS con `delay: 200` y `delayOnTouchOnly`.
+- Checklist: arrastrar no bloquea el scroll · el cambio de estado no abre el drawer por error · el teclado virtual no tapa el botón Guardar.
+- Evidencias: GIF arrastrando en móvil real o emulado.
+
+**PR 15.5 — Calendario en móvil**
+- Mes con `dayMaxEvents: 2`; semana en `listWeek` por debajo de 768 px; FullCalendar cargado solo al entrar en Semana/Mes.
+- Checklist: cambiar de tamaño de ventana no deja el calendario roto · tocar un día abre la vista Día.
+
+**Revisión de fase 15** — Gate: sin scroll horizontal a 360 px, áreas táctiles ≥ 44 px, Lighthouse móvil ≥ 90 en Accessibility, todos los defectos 🔴/🟡 de la auditoría cerrados.
+
+#### Fase 16 — PWA instalable
+
+**PR 16.1 — Manifest e iconos**
+- Iconos 192/512/maskable/apple-touch-icon/badge, `routers/pwa.py` sirviendo `/manifest.webmanifest`, metaetiquetas iOS en `base.html`.
+- Checklist: el icono maskable no se recorta (maskable.app) · `start_url` y `scope` correctos · `theme_color` coherente con la paleta.
+- Evidencias: panel *Application → Manifest* de DevTools sin avisos.
+
+**PR 16.2 — Service Worker y offline**
+- `/sw.js` en la raíz con `Cache-Control: no-cache`, caché versionada del shell, network-first en `/api/*`, pantalla "Sin conexión".
+- Riesgos a revisar con lupa: **servir HTML o datos de otro usuario desde caché** (no cachear respuestas autenticadas compartidas; limpiar caché al cerrar sesión) · usuarios atrapados en versiones viejas (versionado + `skipWaiting` controlado).
+- Checklist: logout borra cachés de API · un despliegue nuevo se activa sin pedir borrar datos · modo avión muestra la pantalla offline.
+- Evidencias: captura de *Application → Service Workers* y de modo avión.
+
+**PR 16.3 — Experiencia de instalación**
+- `pwa.js` + `install_banner.html`: botón con `beforeinstallprompt` (Android) y guía "Compartir → Añadir a inicio" (iOS), descartable y recordado.
+- Checklist: no aparece si ya está instalada (`display-mode: standalone`) · no aparece en escritorio si no aplica · no molesta tras descartarlo.
+
+**Revisión de fase 16** — Gate: Lighthouse marca "instalable", instalación probada en Android (Chrome) e iOS (Safari) reales, abre en standalone.
+
+#### Fase 17 — Notificaciones: backend
+
+**PR 17.1 — Modelo de datos y zona horaria**
+- Migración: `User.timezone`, `reminders_enabled`, `reminder_offset_min`; `PushSubscription`; `TaskOccurrence.reminder_sent_at`. Guardar zona horaria al iniciar sesión. Calcular "hoy" con la zona del usuario (incluido el traspaso de pendientes).
+- Checklist: migración `upgrade` y `downgrade` probadas · zona horaria inválida se rechaza · usuarios existentes reciben valores por defecto.
+- Tests: traspaso de pendientes con usuario en `Europe/Madrid` y servidor en UTC alrededor de medianoche.
+
+**PR 17.2 — Suscripciones y preferencias (API)**
+- `/api/push/public-key`, `/api/push/subscriptions` (POST/DELETE), `/api/me/preferences`, `push_service.py`.
+- Checklist: `endpoint` único (re-suscribirse no duplica) · un usuario no puede borrar la suscripción de otro · validación Pydantic de las claves.
+
+**PR 17.3 — Dispatcher de recordatorios**
+- `reminder_service.py` + `/internal/reminders/dispatch` con `X-Cron-Secret` (comparación en tiempo constante, `hmac.compare_digest`).
+- Riesgos a revisar con lupa: **avisos duplicados** (marcar `reminder_sent_at` en la misma transacción; tolerar dos crons solapados) · **consultas N+1** con muchos usuarios · suscripciones caducadas (404/410 → borrar) · el endpoint no debe filtrar datos en la respuesta (solo contadores).
+- Tests (pywebpush simulado): ventana correcta · sin duplicados · ignora `done` y sin hora · respeta interruptor y antelación · varias zonas horarias · reset al cambiar hora/fecha · 401 sin secreto · aislamiento entre usuarios.
+
+**Revisión de fase 17** — Gate: todos los tests (nuevos y existentes) en verde, revisión de seguridad del endpoint interno y de los secretos VAPID completada.
+
+#### Fase 18 — Notificaciones: frontend y QA en dispositivos reales
+
+**PR 18.1 — Activación y preferencias**
+- `push.js` + `notification_settings.html`: permiso solo tras gesto del usuario, antelación, botón de prueba, estado del permiso, mensaje específico para iOS sin instalar.
+- Checklist: nunca se pide permiso al cargar · permiso denegado muestra cómo desbloquearlo · desactivar borra la suscripción del dispositivo.
+
+**PR 18.2 — Service Worker: push y clic**
+- Eventos `push`, `notificationclick` (enfocar o abrir `/app?date=…&occ=…`) y `pushsubscriptionchange`; acción "✓ Marcar como hecha" en Android.
+- Checklist: `tag: occ-{id}` evita duplicados visuales · el clic abre la tarea correcta aunque la app esté cerrada · la acción respeta CSRF y sesión.
+
+**PR 18.3 — Operación y documentación**
+- Configurar cron-job.org cada minuto con alertas de fallo; README (variables VAPID, `CRON_SECRET`, limitaciones iOS); pestaña "App móvil y avisos" en el manual.
+
+**Revisión de fase 18 (QA final)** — Matriz de pruebas con evidencia (captura o vídeo) por celda:
+
+| Caso | iPhone PWA (iOS ≥ 16.4) | Android Chrome (PWA) | Android Chrome (sin instalar) | Escritorio |
+|---|---|---|---|---|
+| Aviso con app cerrada | | | | |
+| Aviso con pantalla bloqueada | | | | |
+| Dos dispositivos del mismo usuario | | | | |
+| Permiso denegado | | | | |
+| Cambio de hora tras el aviso → nuevo aviso | | | | |
+| Clic abre la tarea correcta | | | | |
+
+Gate: una tarea a +12 min con antelación de 10 min genera **una sola** notificación en ±1 min en iOS y Android, y al pulsarla se abre su detalle.
+
+**Plantilla de descripción de PR** (copiar en cada PR del bloque)
+```markdown
+## Objetivo
+## Alcance / Fuera de alcance
+## Cómo revisarlo (orden de lectura de archivos y qué mirar)
+## Riesgos
+## Checklist de revisión
+- [ ] Propio del PR (copiado del plan)
+- [ ] Transversal (aislamiento, CSRF, secretos, escape HTML, español, tamaño de archivos, escritorio sin regresiones)
+## Evidencias (tests, capturas 360/1440 px, Lighthouse, vídeo)
+## Deuda anotada (sugerencias 🔵 no aplicadas)
+```
 
 ## 11. Despliegue en servidor gratuito
 
@@ -574,3 +674,4 @@ Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `
 4. Commits pequeños con mensaje claro por fase.
 5. Si algo del plan es ambiguo, aplica los **supuestos de la sección 2** y deja la decisión anotada en el README.
 6. Todo el texto visible de la interfaz en **español**.
+7. **Review Driven Development** en el bloque móvil y en todo trabajo nuevo: diseña cada PR para ser revisado (objetivo, riesgos, checklist y evidencias definidos antes del código), usa la plantilla de PR de la Fase 18 y no mergees sin pasar el gate.
