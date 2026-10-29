@@ -5,6 +5,11 @@
 const board = {
   sortableCommon: null,
   sortableDaily: null,
+  mobileActiveTab: "daily",
+
+  isMobileMode() {
+    return Boolean(document.querySelector('[data-app-mode="mobile"]'));
+  },
 
   init() {
     this.initSortable();
@@ -16,6 +21,40 @@ const board = {
     document.querySelector(".btn-quick-add")?.addEventListener("click", () => {
       if (window.modal) window.modal.openTaskModal("create");
     });
+
+    // Pestañas segmentadas en la versión móvil (/m)
+    document.querySelectorAll(".mobile-day-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        this.mobileActiveTab = tab.dataset.dayTab;
+        document.querySelectorAll(".mobile-day-tab").forEach(t => {
+          const active = t.dataset.dayTab === this.mobileActiveTab;
+          t.classList.toggle("active", active);
+          t.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        this.updateColumnVisibility();
+      });
+    });
+  },
+
+  updateColumnVisibility() {
+    const colCommon = document.getElementById("column-common");
+    const colDaily = document.getElementById("column-daily");
+    if (!colCommon || !colDaily) return;
+
+    const currentKindFilter = window.appState ? window.appState.filters.kind : "";
+    if (currentKindFilter === "daily") {
+      colCommon.style.display = "none";
+      colDaily.style.display = "";
+    } else if (currentKindFilter === "common") {
+      colCommon.style.display = "";
+      colDaily.style.display = "none";
+    } else if (this.isMobileMode()) {
+      colCommon.style.display = this.mobileActiveTab === "common" ? "" : "none";
+      colDaily.style.display = this.mobileActiveTab === "daily" ? "" : "none";
+    } else {
+      colCommon.style.display = "";
+      colDaily.style.display = "";
+    }
   },
 
   initSortable() {
@@ -25,6 +64,8 @@ const board = {
     if (listCommon && !this.sortableCommon && window.Sortable) {
       this.sortableCommon = new Sortable(listCommon, {
         animation: 180,
+        delay: 200,
+        delayOnTouchOnly: true,
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
@@ -35,6 +76,8 @@ const board = {
     if (listDaily && !this.sortableDaily && window.Sortable) {
       this.sortableDaily = new Sortable(listDaily, {
         animation: 180,
+        delay: 200,
+        delayOnTouchOnly: true,
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
@@ -64,21 +107,14 @@ const board = {
     const listDaily = document.getElementById("list-daily");
     const badgeCommon = document.getElementById("badge-common");
     const badgeDaily = document.getElementById("badge-daily");
+    const mobileCountCommon = document.getElementById("mobile-count-common");
+    const mobileCountDaily = document.getElementById("mobile-count-daily");
     const emptyCommon = document.getElementById("empty-common");
     const emptyDaily = document.getElementById("empty-daily");
-    const colCommon = document.getElementById("column-common");
-    const colDaily = document.getElementById("column-daily");
 
     if (!listCommon || !listDaily) return;
 
-    // Manejar visibilidad según filtro de tipo (kind)
-    const currentKindFilter = window.appState ? window.appState.filters.kind : "";
-    if (colCommon) {
-      colCommon.style.display = (currentKindFilter === "daily") ? "none" : "";
-    }
-    if (colDaily) {
-      colDaily.style.display = (currentKindFilter === "common") ? "none" : "";
-    }
+    this.updateColumnVisibility();
 
     listCommon.innerHTML = "";
     listDaily.innerHTML = "";
@@ -89,6 +125,8 @@ const board = {
     // Actualizar badges numéricos
     if (badgeCommon) badgeCommon.textContent = commons.length;
     if (badgeDaily) badgeDaily.textContent = dailies.length;
+    if (mobileCountCommon) mobileCountCommon.textContent = commons.length;
+    if (mobileCountDaily) mobileCountDaily.textContent = dailies.length;
 
     // Renderizar comunes
     if (commons.length === 0) {
@@ -194,11 +232,11 @@ const board = {
         done: "not_started"
       };
       const nextStatus = cycle[occ.status] || "not_started";
-      
+
       try {
         const updated = await api.patch(`/api/occurrences/${occ.id}`, { status: nextStatus });
         occ.status = updated.status;
-        
+
         // Actualizar visualmente la tarjeta de inmediato
         card.className = `postit-card importance-${task.importance} status-${occ.status}`;
         statusBtn.textContent = statusIcons[occ.status];

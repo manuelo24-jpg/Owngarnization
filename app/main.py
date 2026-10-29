@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from pathlib import Path
 
 from app.config import settings
-from app.routers import auth, pages, tasks
+from app.routers import auth, pages, tasks, pwa, push
 
 app = FastAPI(
     title="Owngarnization",
@@ -12,12 +12,12 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Sesión firmada
+# Sesión firmada (30 días para experiencia fluida en PWA standalone iOS/Android)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     session_cookie="owngarnization_session",
-    max_age=14 * 24 * 3600,  # 14 días
+    max_age=30 * 24 * 3600,  # 30 días
     same_site="lax",
     https_only=settings.is_production,
 )
@@ -25,6 +25,8 @@ app.add_middleware(
 # Incluir routers
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(pwa.router)
+app.include_router(push.router)
 app.include_router(pages.router)
 
 

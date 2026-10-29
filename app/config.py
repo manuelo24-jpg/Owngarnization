@@ -7,6 +7,10 @@ class Settings(BaseSettings):
     ENV: str = "development"
     DATABASE_URL: str = "sqlite:///./owngarnization.db"
     PORT: int = 8000
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_SUBJECT: str = "mailto:admin@owngarnization.example.com"
+    CRON_SECRET: str = "dev-cron-secret-owngarnization"
 
     model_config = SettingsConfigDict(
         env_file=".env",

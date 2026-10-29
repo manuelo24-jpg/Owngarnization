@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Owngarnization Móvil — Mis Tareas y Calendario{% endblock %}
+
+{% block extra_head %}
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Owngarnization">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png">
+
+<!-- Estilos exclusivos de la Versión Móvil -->
+<link rel="stylesheet" href="/static/css/mobile.css">
+
+<!-- FullCalendar CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/es.global.min.js"></script>
+
+<!-- SortableJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-layout mobile-version-layout" data-app-mode="mobile">
+  <!-- Cabecera Compacta Móvil -->
+  <header class="app-header">
+    <div class="header-brand">
+      <a href="/m" class="brand-link" title="Owngarnization Móvil" aria-label="Owngarnization Móvil">
+        <img src="/static/img/logo.png" alt="Owngarnization" class="app-logo">
+      </a>
+    </div>
+
+    <div class="header-search">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="search-input" placeholder="Buscar tareas..." autocomplete="off" aria-label="Buscar tareas">
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-notifications" class="btn-guide-icon" title="Ajustes de avisos" aria-label="Abrir ajustes de notificaciones">
+        <span class="guide-qmark">🔔</span>
+      </button>
+      <button id="btn-guide" class="btn-guide-icon" title="Manual de ayuda" aria-label="Abrir manual de usuario">
+        <span class="guide-qmark">?</span>
+      </button>
+      <div class="user-profile">
+        <button id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  {% include "components/install_banner.html" %}
+  {% include "components/control_bar.html" %}
+
+  <div class="main-container">
+    {% include "components/sidebar.html" %}
+
+    <main class="view-workspace">
+      <!-- Selector segmentado móvil (Del día / Comunes) -->
+      <div class="mobile-day-tabs" id="mobile-day-tabs" role="tablist" aria-label="Sección del día">
+        <button class="mobile-day-tab active" data-day-tab="daily" role="tab" aria-selected="true">
+          📌 Del día <span class="tab-count" id="mobile-count-daily">0</span>
+        </button>
+        <button class="mobile-day-tab" data-day-tab="common" role="tab" aria-selected="false">
+          🔁 Comunes <span class="tab-count" id="mobile-count-common">0</span>
+        </button>
+      </div>
+
+      {% include "components/board_day.html" %}
+
+      <section id="view-week" class="view-section" style="display: none;" aria-label="Vista semanal">
+        <div id="calendar-week" class="calendar-container"></div>
+      </section>
+
+      <section id="view-month" class="view-section" style="display: none;" aria-label="Vista mensual">
+        <div id="calendar-month" class="calendar-container"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+{% include "components/mobile_nav.html" %}
+{% include "components/task_modal.html" %}
+{% include "components/notification_settings.html" %}
+{% include "components/guide_modal.html" %}
+{% include "components/confirm_modal.html" %}
+{% include "components/detail_drawer.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pwa.js"></script>
+<script src="/static/js/push.js"></script>
+<script src="/static/js/task_modal.js"></script>
+<script src="/static/js/drawer.js"></script>
+<script src="/static/js/guide.js"></script>
+<script src="/static/js/modal.js"></script>
+<script src="/static/js/board.js"></script>
+<script src="/static/js/calendar.js"></script>
+<script src="/static/js/app.js"></script>
+
+<script>
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    try {
+      if (window.pwaManager) window.pwaManager.clearApiCache();
+      await api.post("/auth/logout");
+      window.location.href = "/login";
+    } catch (e) {
+      window.location.href = "/login";
+    }
+  });
+</script>
+{% endblock %}
+

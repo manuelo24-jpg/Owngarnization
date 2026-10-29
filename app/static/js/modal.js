@@ -106,6 +106,8 @@ const modal = {
     this.closeTaskModal();
     this.closeDetailDrawer();
     this.closeGuideModal();
+    if (window.pushManagerClient) window.pushManagerClient.closeModal();
+    if (window.appState) window.appState.closeMobileFilters();
   },
 
   // Proxies para compatibilidad con código existente

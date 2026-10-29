@@ -1,18 +1,33 @@
 import datetime as dt
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from typing import List, Optional, Tuple
 from sqlalchemy import or_, case
 from sqlalchemy.orm import Session, joinedload
 
-from app.models import Task, TaskOccurrence
+from app.models import User, Task, TaskOccurrence
 from app.schemas import OccurrenceUpdate, OccurrenceReorder, TaskStatus, TaskImportance, TaskKind
 
 
-def rollover_uncompleted_daily_tasks(db: Session, user_id: int) -> None:
+def get_user_today(db: Session, user_id: int, now_utc: Optional[dt.datetime] = None) -> dt.date:
+    """Calcula la fecha de 'hoy' en la zona horaria IANA del usuario."""
+    user = db.query(User).filter(User.id == user_id).first()
+    tz_name = (user.timezone if user and user.timezone else "Europe/Madrid")
+    try:
+        tz = ZoneInfo(tz_name)
+    except (ZoneInfoNotFoundError, KeyError, ValueError):
+        tz = ZoneInfo("Europe/Madrid")
+    ref_utc = now_utc or dt.datetime.now(dt.timezone.utc)
+    if ref_utc.tzinfo is None:
+        ref_utc = ref_utc.replace(tzinfo=dt.timezone.utc)
+    return ref_utc.astimezone(tz).date()
+
+
+def rollover_uncompleted_daily_tasks(db: Session, user_id: int, now_utc: Optional[dt.datetime] = None) -> None:
     """
-    Traspasa automáticamente al día de hoy las tareas del día puntuales
-    que quedaron sin completar (status != 'done') en fechas pasadas.
+    Traspasa automáticamente al día de hoy (en la zona horaria del usuario)
+    las tareas del día puntuales que quedaron sin completar en fechas pasadas.
     """
-    today = dt.date.today()
+    today = get_user_today(db, user_id, now_utc)
     past_daily_tasks = (
         db.query(Task)
         .filter(
@@ -200,7 +215,8 @@ def get_occurrences_in_range(
         query
         .order_by(
             TaskOccurrence.date.asc(),
-            TaskOccurrence.position.asc(),
+            case((TaskOccurrence.manual_order == True, 0), else_=1).asc(),
+            case((TaskOccurrence.manual_order == True, TaskOccurrence.position), else_=0).asc(),
             TaskOccurrence.start_time.is_(None),  # False (0) para tareas con hora, True (1) para NULL
             TaskOccurrence.start_time.asc(),
             case(
@@ -242,6 +258,8 @@ def update_occurrence(
         occ.status = occ_in.status
 
     if "start_time" in fields_set:
+        if occ_in.start_time != occ.start_time:
+            occ.reminder_sent_at = None
         occ.start_time = occ_in.start_time
 
     if "end_time" in fields_set:
@@ -262,6 +280,7 @@ def update_occurrence(
             return None, "Ya existe una ocurrencia para esta tarea en la fecha indicada"
 
         occ.date = new_date
+        occ.reminder_sent_at = None
         if occ.task.kind == "daily":
             occ.task.date = new_date
 
@@ -285,5 +304,6 @@ def reorder_occurrences(db: Session, user_id: int, reorder_in: OccurrenceReorder
         )
         if occ:
             occ.position = position
+            occ.manual_order = True
 
     db.commit()

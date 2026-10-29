@@ -134,10 +134,12 @@
   border-radius: 0;
   margin-right: -1px;
 }
+
 .btn-group .btn-secondary-sm:first-child {
   border-top-left-radius: var(--radius-sm);
   border-bottom-left-radius: var(--radius-sm);
 }
+
 .btn-group .btn-secondary-sm:last-child {
   border-top-right-radius: var(--radius-sm);
   border-bottom-right-radius: var(--radius-sm);
@@ -259,10 +261,21 @@
 }
 
 /* Colores de chips por importancia */
-.chip.chip-importance.pi-low { border-color: #D8CFBE; }
-.chip.chip-importance.pi-medium { border-color: #C8AC88; }
-.chip.chip-importance.pi-high { border-color: #AC8553; }
-.chip.chip-importance.pi-urgent { border-color: #111111; }
+.chip.chip-importance.pi-low {
+  border-color: #D8CFBE;
+}
+
+.chip.chip-importance.pi-medium {
+  border-color: #C8AC88;
+}
+
+.chip.chip-importance.pi-high {
+  border-color: #AC8553;
+}
+
+.chip.chip-importance.pi-urgent {
+  border-color: #111111;
+}
 
 .status-icon {
   font-size: 11px;
@@ -298,7 +311,7 @@ kbd {
   padding: 1px 5px;
   font-size: 11px;
   font-family: inherit;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
 }
 
 /* Área de Espacio de Trabajo */
@@ -312,3 +325,20 @@ kbd {
   width: 100%;
 }
 
+
+/* Acciones extra de filtros y notificaciones */
+.filters-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-close-mobile-filters {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px 8px;
+}

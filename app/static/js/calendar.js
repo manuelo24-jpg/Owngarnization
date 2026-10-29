@@ -107,12 +107,15 @@ const calendarManager = {
     const el = document.getElementById("calendar-week");
     if (!el || !window.FullCalendar) return;
 
+    const isMobileVersion = Boolean(document.querySelector('[data-app-mode="mobile"]'));
+
     this.calendarWeek = new FullCalendar.Calendar(el, {
       locale: "es",
-      initialView: "dayGridWeek",
+      initialView: isMobileVersion ? "listWeek" : "dayGridWeek",
       headerToolbar: false,
       height: "auto",
       editable: true,
+      noEventsText: "No hay tareas programadas en esta semana",
       eventClick: (info) => {
         info.jsEvent.preventDefault();
         const occ = info.event.extendedProps.occurrence;

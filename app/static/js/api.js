@@ -18,7 +18,7 @@ const api = {
 
     try {
       const response = await fetch(url, config);
-      
+
       // Si la sesión expiró o no está autenticado, redirigir a login
       if (response.status === 401 && !url.includes("/auth/login")) {
         window.location.href = "/login";
@@ -62,30 +62,30 @@ const api = {
     return this.request(url, { method: "PATCH", body });
   },
 
-  delete(url) {
-    return this.request(url, { method: "DELETE" });
-  }
-};
+    delete (url, body) {
+      return this.request(url, { method: "DELETE", body });
+    }
+  };
 
-/**
- * Muestra un mensaje toast temporal en pantalla
- */
-function showToast(message, type = "info", duration = 3000) {
-  const container = document.getElementById("toast-container");
-  if (!container) return;
+  /**
+   * Muestra un mensaje toast temporal en pantalla
+   */
+  function showToast(message, type = "info", duration = 3000) {
+    const container = document.getElementById("toast-container");
+if (!container) return;
 
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
+const toast = document.createElement("div");
+toast.className = `toast toast-${type}`;
+toast.textContent = message;
 
-  container.appendChild(toast);
+container.appendChild(toast);
 
-  // Animación de entrada
-  setTimeout(() => toast.classList.add("show"), 10);
+// Animación de entrada
+setTimeout(() => toast.classList.add("show"), 10);
 
-  // Auto-eliminación
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 250);
-  }, duration);
+// Auto-eliminación
+setTimeout(() => {
+  toast.classList.remove("show");
+  setTimeout(() => toast.remove(), 250);
+}, duration);
 }

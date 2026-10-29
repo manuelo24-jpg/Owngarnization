@@ -81,8 +81,22 @@ def update_task(db: Session, user_id: int, task_id: int, task_in: TaskUpdate) ->
         return None
 
     update_data = task_in.model_dump(exclude_unset=True)
+    old_start_time = task.start_time
+    old_date = task.date
     for field, value in update_data.items():
         setattr(task, field, value)
+
+    # Si cambió la hora o fecha en la definición de la tarea, sincronizar ocurrencias pendientes y resetear aviso
+    if ("start_time" in update_data and task.start_time != old_start_time) or ("date" in update_data and task.date != old_date):
+        pending_occs = (
+            db.query(TaskOccurrence)
+            .filter(TaskOccurrence.task_id == task.id, TaskOccurrence.status != "done")
+            .all()
+        )
+        for occ in pending_occs:
+            if "start_time" in update_data:
+                occ.start_time = task.start_time
+            occ.reminder_sent_at = None
 
     # Si se cambió a común, la fecha de definición pasa a ser None
     if task.kind == "common":

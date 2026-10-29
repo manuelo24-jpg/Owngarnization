@@ -1,0 +1,62 @@
+<!-- ==============================================
+     MODAL DE PREFERENCIAS DE NOTIFICACIONES
+=================================================== -->
+<div id="notification-settings-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-labelledby="notif-modal-title">
+    <div class="modal-header">
+      <h3 id="notif-modal-title" class="modal-title">🔔 Avisos y notificaciones</h3>
+      <button id="notif-modal-close-btn" class="modal-close" aria-label="Cerrar ajustes de notificaciones">✕</button>
+    </div>
+
+    <div class="task-form">
+      <!-- Aviso para usuarios de iOS sin instalar -->
+      <div id="notif-ios-warning" class="guide-tip" style="display: none; margin-top: 0;">
+        📱 <strong>Estás en iPhone/iPad sin instalar la app:</strong> Apple exige añadir primero la web a la pantalla de inicio (<em>Compartir ⬆️ → Añadir a pantalla de inicio</em>) para poder enviar notificaciones.
+      </div>
+
+      <!-- Estado del permiso del navegador -->
+      <div class="form-group">
+        <label>Estado en este dispositivo</label>
+        <div id="notif-permission-status" class="notif-status-box">Comprobando estado...</div>
+      </div>
+
+      <!-- Botón de suscripción del dispositivo actual -->
+      <div class="form-group">
+        <button type="button" id="btn-toggle-device-push" class="btn btn-primary">
+          Activar avisos en este dispositivo
+        </button>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--line);">
+
+      <!-- Preferencias de cuenta -->
+      <div class="form-row" style="align-items: center; justify-content: space-between;">
+        <label for="notif-enabled-check" style="font-size: 13.5px; font-weight: 600;">Recibir avisos de tareas con hora</label>
+        <input type="checkbox" id="notif-enabled-check" checked style="width: 20px; height: 20px;">
+      </div>
+
+      <div class="form-group">
+        <label for="notif-offset-select">Avisarme con antelación de:</label>
+        <select id="notif-offset-select">
+          <option value="0">A la hora en punto (0 min)</option>
+          <option value="5">5 minutos antes</option>
+          <option value="10" selected>10 minutos antes</option>
+          <option value="15">15 minutos antes</option>
+          <option value="30">30 minutos antes</option>
+          <option value="60">1 hora antes (60 min)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Zona horaria detectada</label>
+        <input type="text" id="notif-timezone-display" readonly style="background: var(--surface); color: var(--ink-soft);">
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <button type="button" id="btn-test-push" class="btn btn-secondary">Probar aviso</button>
+        <button type="button" id="btn-save-notif-prefs" class="btn btn-accent">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+

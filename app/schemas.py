@@ -1,6 +1,9 @@
 import datetime as dt
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from typing import Literal, Optional, List
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, model_validator
+
+VALID_REMINDER_OFFSETS = (0, 5, 10, 15, 30, 60)
 
 
 # Tipos válidos
@@ -28,7 +31,49 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     username: str
+    timezone: str = "Europe/Madrid"
+    reminders_enabled: bool = True
+    reminder_offset_min: int = 10
     created_at: dt.datetime
+
+
+class UserPreferencesUpdate(BaseModel):
+    timezone: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    reminders_enabled: Optional[bool] = None
+    reminder_offset_min: Optional[int] = None
+
+    @model_validator(mode="after")
+    def validate_preferences(self):
+        if self.timezone is not None:
+            try:
+                ZoneInfo(self.timezone)
+            except (ZoneInfoNotFoundError, KeyError, ValueError):
+                raise ValueError("Zona horaria IANA no válida")
+        if self.reminder_offset_min is not None and self.reminder_offset_min not in VALID_REMINDER_OFFSETS:
+            raise ValueError(f"La antelación debe ser una de: {VALID_REMINDER_OFFSETS}")
+        return self
+
+
+class UserPreferencesResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    timezone: str
+    reminders_enabled: bool
+    reminder_offset_min: int
+
+
+class PushSubscriptionKeys(BaseModel):
+    p256dh: str = Field(min_length=1, max_length=255)
+    auth: str = Field(min_length=1, max_length=255)
+
+
+class PushSubscriptionCreate(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=2048)
+    keys: PushSubscriptionKeys
+
+
+class PushSubscriptionDelete(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=2048)
 
 
 # --- TAREAS ---
@@ -103,6 +148,7 @@ class OccurrenceResponse(BaseModel):
     date: dt.date
     status: TaskStatus
     position: int
+    manual_order: bool = False
     start_time: Optional[dt.time] = None
     end_time: Optional[dt.time] = None
     task: TaskResponse

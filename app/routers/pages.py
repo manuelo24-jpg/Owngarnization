@@ -13,13 +13,36 @@ router = APIRouter(include_in_schema=False)
 
 
 @router.get("/", response_class=HTMLResponse)
+@router.get("/app", response_class=HTMLResponse)
 def index(request: Request, current_user: User | None = Depends(get_optional_current_user)):
-    """Página principal de la aplicación. Redirige a /login si no hay sesión."""
+    """Página principal de la versión Web. Redirige a /login si no hay sesión."""
     if not current_user:
         return RedirectResponse(url="/login", status_code=302)
     return templates.TemplateResponse(
         request=request,
         name="app.html",
+        context={"user": current_user}
+    )
+
+
+@router.get("/m", response_class=HTMLResponse)
+def mobile_app_page(request: Request, current_user: User | None = Depends(get_optional_current_user)):
+    """Versión dedicada de la App Móvil (PWA standalone). Redirige a /login si no hay sesión."""
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=302)
+    return templates.TemplateResponse(
+        request=request,
+        name="mobile_app.html",
+        context={"user": current_user}
+    )
+
+
+@router.get("/download", response_class=HTMLResponse)
+def download_mobile_page(request: Request, current_user: User | None = Depends(get_optional_current_user)):
+    """Página para descargar e instalar la aplicación móvil desde la web en Android e iOS."""
+    return templates.TemplateResponse(
+        request=request,
+        name="download_app.html",
         context={"user": current_user}
     )
 

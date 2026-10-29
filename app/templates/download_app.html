@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Descargar App Móvil — Owngarnization{% endblock %}
+
+{% block extra_head %}
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png">
+<link rel="stylesheet" href="/static/css/mobile.css">
+{% endblock %}
+
+{% block content %}
+<div class="download-page-wrapper">
+  <header class="app-header">
+    <div class="header-brand">
+      <a href="/" class="brand-link" title="Volver a la versión Web">
+        <img src="/static/img/logo.png" alt="Owngarnization" class="app-logo">
+      </a>
+    </div>
+    <div class="header-actions">
+      <a href="/" class="btn btn-secondary">← Volver a la versión Web</a>
+      <a href="/m" class="btn btn-primary">Abrir versión Móvil (/m)</a>
+    </div>
+  </header>
+
+  <main class="download-container">
+    <section class="download-hero-card">
+      <img src="/static/img/icons/icon-192.png" alt="Logo App Móvil" class="download-hero-logo">
+      <span class="guide-badge">Gratis · iOS & Android</span>
+      <h1 class="download-title">Owngarnization para Móvil</h1>
+      <p class="download-subtitle">
+        Instala la versión móvil directamente desde esta web, sin pasar por tiendas de aplicaciones.
+        Diseño adaptado al pulgar, pantalla completa y notificaciones para tus tareas con hora.
+      </p>
+
+      <div class="download-cta-row">
+        <button id="btn-direct-install" class="btn btn-primary" style="min-height: 48px; padding: 12px 24px; font-size: 15px;">
+          📲 Instalar App Móvil en este dispositivo
+        </button>
+        <a href="/m" class="btn btn-accent" style="min-height: 48px; padding: 12px 24px; font-size: 15px;">
+          🚀 Abrir App Móvil ahora
+        </a>
+      </div>
+      <p id="install-feedback-msg" class="download-feedback" style="display: none;"></p>
+    </section>
+
+    <div class="download-platforms-grid">
+      <!-- Tarjeta Android -->
+      <div class="download-platform-card">
+        <div class="platform-header">
+          <span class="platform-icon">🤖</span>
+          <h3>Instalar en Android</h3>
+        </div>
+        <ol class="platform-steps">
+          <li>Abre esta página o <a href="/m">la versión móvil (<code>/m</code>)</a> en <strong>Chrome</strong> o <strong>Edge</strong>.</li>
+          <li>Pulsa el botón <strong>"Instalar App Móvil"</strong> de arriba (o abre el menú <code>⋮</code> del navegador y toca <strong>"Instalar aplicación"</strong>).</li>
+          <li>Se añadirá el icono oficial de Owngarnization a tu cajón de aplicaciones a pantalla completa.</li>
+        </ol>
+      </div>
+
+      <!-- Tarjeta iOS -->
+      <div class="download-platform-card">
+        <div class="platform-header">
+          <span class="platform-icon">🍎</span>
+          <h3>Instalar en iPhone / iPad (iOS)</h3>
+        </div>
+        <ol class="platform-steps">
+          <li>Abre esta web desde <strong>Safari</strong> (requiere iOS 16.4 o superior para recibir notificaciones).</li>
+          <li>Toca el icono <strong>Compartir (⬆️)</strong> en la barra inferior de Safari.</li>
+          <li>Desliza y selecciona <strong>"Añadir a pantalla de inicio"</strong> y pulsa <strong>Añadir</strong>.</li>
+        </ol>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pwa.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const directBtn = document.getElementById("btn-direct-install");
+    const msg = document.getElementById("install-feedback-msg");
+
+    directBtn?.addEventListener("click", async () => {
+      if (window.pwaManager && window.pwaManager.deferredPrompt) {
+        window.pwaManager.deferredPrompt.prompt();
+        const { outcome } = await window.pwaManager.deferredPrompt.userChoice;
+        window.pwaManager.deferredPrompt = null;
+        if (outcome === "accepted" && msg) {
+          msg.style.display = "block";
+          msg.textContent = "✓ ¡Instalación iniciada! Busca el icono de Owngarnization en tu pantalla de inicio.";
+        }
+      } else if (window.pwaManager && window.pwaManager.isIOS()) {
+        if (msg) {
+          msg.style.display = "block";
+          msg.textContent = "En iPhone/iPad: pulsa el botón Compartir (⬆️) de Safari y elige «Añadir a pantalla de inicio».";
+        }
+      } else {
+        if (msg) {
+          msg.style.display = "block";
+          msg.textContent = "Usa el icono de «Instalar aplicación» en la barra de direcciones de tu navegador o entra desde tu móvil a /m.";
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
+

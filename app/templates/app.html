@@ -40,6 +40,7 @@
 
 <!-- Componentes Modales y Paneles Deslizantes -->
 {% include "components/task_modal.html" %}
+{% include "components/notification_settings.html" %}
 {% include "components/guide_modal.html" %}
 {% include "components/confirm_modal.html" %}
 {% include "components/detail_drawer.html" %}
@@ -47,6 +48,8 @@
 
 {% block scripts %}
 <!-- Módulos de la Aplicación -->
+<script src="/static/js/pwa.js"></script>
+<script src="/static/js/push.js"></script>
 <script src="/static/js/task_modal.js"></script>
 <script src="/static/js/drawer.js"></script>
 <script src="/static/js/guide.js"></script>
@@ -59,6 +62,7 @@
   // Script de Logout
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
     try {
+      if (window.pwaManager) window.pwaManager.clearApiCache();
       await api.post("/auth/logout");
       window.location.href = "/login";
     } catch (e) {
