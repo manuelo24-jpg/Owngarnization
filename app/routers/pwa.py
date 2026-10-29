@@ -19,19 +19,19 @@ MANIFEST_DATA = {
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "/static/img/icons/icon-192.png",
+            "src": "/static/img/icons/icon-192.png?v=4",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/static/img/icons/icon-512.png",
+            "src": "/static/img/icons/icon-512.png?v=4",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/static/img/icons/maskable-512.png",
+            "src": "/static/img/icons/maskable-512.png?v=4",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
