@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     ENV: str = "development"
     DATABASE_URL: str = "sqlite:///./owngarnization.db"
     PORT: int = 8000
-    VAPID_PUBLIC_KEY: str = ""
-    VAPID_PRIVATE_KEY: str = ""
+    VAPID_PUBLIC_KEY: str = "BO6Wk9w1uBqq5R6qSIUAejta9KJ3cmw7XNzw6t3ilj-AfFnLGxEzg5KB7yy8fq_3o8fXvXwkRwv3FM0GqjTvxSo"
+    VAPID_PRIVATE_KEY: str = "oNVcwaHQIQmxNVngytU9w_5takwW4_iVYwxijN7K2Ag"
     VAPID_SUBJECT: str = "mailto:admin@owngarnization.example.com"
     CRON_SECRET: str = "dev-cron-secret-owngarnization"
 

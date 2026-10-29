@@ -2,7 +2,7 @@
  * Owngarnization — Service Worker (PWA + Web Push + Caché Offline)
  */
 
-const CACHE_VERSION = "owngarnization-v2";
+const CACHE_VERSION = "owngarnization-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
