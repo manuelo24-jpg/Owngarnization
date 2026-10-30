@@ -3,12 +3,12 @@
    Arquitectura modular de estilos (CSS Modular Architecture)
    ========================================================= */
 
-@import url("variables.css");
-@import url("base.css");
-@import url("auth.css");
-@import url("layout.css");
-@import url("board.css");
-@import url("calendar.css");
-@import url("modals.css");
-@import url("guide.css");
-@import url("responsive.css");
+@import url("variables.css?v=6");
+@import url("base.css?v=6");
+@import url("auth.css?v=6");
+@import url("layout.css?v=6");
+@import url("board.css?v=6");
+@import url("calendar.css?v=6");
+@import url("modals.css?v=6");
+@import url("guide.css?v=6");
+@import url("responsive.css?v=6");

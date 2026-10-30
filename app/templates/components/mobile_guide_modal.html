@@ -1,0 +1,173 @@
+<!-- ==============================================
+     MODAL DE MANUAL DE USUARIO — VERSIÓN MÓVIL (/m)
+=================================================== -->
+<div id="guide-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card guide-modal-card mobile-guide-card" role="dialog" aria-labelledby="guide-modal-title">
+    <div class="modal-header">
+      <div class="guide-modal-title-wrapper">
+        <span class="guide-badge">Guía Móvil</span>
+        <h3 id="guide-modal-title" class="modal-title">Cómo usar la App Móvil</h3>
+      </div>
+      <button id="guide-close-btn" class="modal-close" aria-label="Cerrar guía móvil">✕</button>
+    </div>
+
+    <!-- Pestañas pensadas para el pulgar (cuadrícula 2x2 limpia en móvil) -->
+    <div class="guide-tabs mobile-guide-tabs" role="tablist" aria-label="Secciones de la guía móvil">
+      <button type="button" class="guide-tab-btn active" data-tab="mtab-basics" role="tab" aria-selected="true">📱 Uso Básico</button>
+      <button type="button" class="guide-tab-btn" data-tab="mtab-tasks" role="tab" aria-selected="false">📌 Tus Tareas</button>
+      <button type="button" class="guide-tab-btn" data-tab="mtab-alerts" role="tab" aria-selected="false">🔔 Avisos</button>
+      <button type="button" class="guide-tab-btn" data-tab="mtab-install" role="tab" aria-selected="false">📲 Instalar</button>
+    </div>
+
+    <div class="guide-content">
+      <!-- Pestaña 1: Uso Básico -->
+      <div id="mtab-basics" class="guide-panel active">
+        <div class="guide-intro-banner">
+          <h3>Todo al alcance de tu pulgar 👋</h3>
+          <p>La versión móvil está pensada para que organices tu día con una sola mano de forma rápida y sencilla.</p>
+        </div>
+
+        <div class="mobile-guide-list">
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">＋</div>
+            <div class="mobile-guide-text">
+              <strong>Crear nueva tarea</strong>
+              <p>Toca el botón redondo negro <strong>«＋»</strong> abajo a la derecha desde cualquier pantalla.</p>
+            </div>
+          </div>
+
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">📌</div>
+            <div class="mobile-guide-text">
+              <strong>Cambiar entre «Del día» y «Comunes»</strong>
+              <p>Arriba tienes dos pestañas: <strong>📌 Del día</strong> (cosas puntuales de hoy) y <strong>🔁 Comunes</strong> (tus rutinas habituales).</p>
+            </div>
+          </div>
+
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">🗓️</div>
+            <div class="mobile-guide-text">
+              <strong>Barra de navegación inferior</strong>
+              <p>Abajo del todo puedes cambiar entre <strong>Día</strong>, <strong>Semana</strong> (modo agenda), <strong>Mes</strong> y abrir el panel de <strong>Filtros</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 2: Tus Tareas -->
+      <div id="mtab-tasks" class="guide-panel">
+        <div class="mobile-guide-list">
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">✓</div>
+            <div class="mobile-guide-text">
+              <strong>Avanzar estado con un toque</strong>
+              <p>Toca el icono de la esquina izquierda de cualquier nota para pasar de <strong>○ Sin empezar</strong> → <strong>◐ En proceso</strong> → <strong>✓ Finalizada</strong>.</p>
+            </div>
+          </div>
+
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">⏱️</div>
+            <div class="mobile-guide-text">
+              <strong>Orden automático inteligente</strong>
+              <p>Arriba aparecen siempre tus <strong>tareas con hora</strong> (ordenadas por hora) y debajo las que no tienen hora (ordenadas por prioridad).</p>
+            </div>
+          </div>
+
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">🔄</div>
+            <div class="mobile-guide-text">
+              <strong>Nada se queda olvidado</strong>
+              <p>Si una tarea puntual <em>Del día</em> no la terminas hoy, mañana pasa sola al nuevo día automáticamente.</p>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="guide-section-subtitle" style="margin-top: 16px;">Colores según prioridad</h4>
+        <div class="guide-importance-grid mobile-importance-grid">
+          <div class="importance-card pi-low">
+            <span class="tag-label">Baja</span>
+            <p>Tareas ligeras</p>
+          </div>
+          <div class="importance-card pi-medium">
+            <span class="tag-label">Media</span>
+            <p>Ritmo normal</p>
+          </div>
+          <div class="importance-card pi-high">
+            <span class="tag-label">Alta</span>
+            <p>Importantes</p>
+          </div>
+          <div class="importance-card pi-urgent">
+            <span class="tag-label">Urgente</span>
+            <p>Prioridad máxima</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 3: Avisos en el Móvil -->
+      <div id="mtab-alerts" class="guide-panel">
+        <div class="guide-intro-banner">
+          <h3>Recibe avisos de tus tareas con hora ⏰</h3>
+          <p>Cuando le pongas hora de inicio a una tarea, tu móvil te avisará con una notificación.</p>
+        </div>
+
+        <div class="guide-grid-steps">
+          <div class="guide-step-card">
+            <div class="step-num">1</div>
+            <h4>Toca la campana 🔔</h4>
+            <p>Pulsa el botón <strong>🔔</strong> arriba a la derecha en la cabecera de la app.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="step-num">2</div>
+            <h4>Activa este dispositivo</h4>
+            <p>Pulsa <strong>«Activar avisos en este dispositivo»</strong> y acepta el permiso de tu móvil.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="step-num">3</div>
+            <h4>Elige la antelación</h4>
+            <p>Escoge si quieres el aviso a la hora en punto o <strong>5, 10, 15, 30 o 60 min antes</strong> y pulsa <strong>Guardar</strong>.</p>
+          </div>
+        </div>
+
+        <div class="guide-tip">
+          💡 <strong>Nota para iPhone:</strong> Apple exige que primero añadas la app a tu pantalla de inicio y la abras desde su icono para poder activar las notificaciones.
+        </div>
+      </div>
+
+      <!-- Pestaña 4: Cómo Instalar -->
+      <div id="mtab-install" class="guide-panel">
+        <div class="guide-cards-duo">
+          <div class="guide-feature-box">
+            <div class="feature-header">
+              <span class="feature-icon">🍎</span>
+              <h4>En iPhone / iPad (Safari)</h4>
+            </div>
+            <ol class="mobile-guide-steps-ol">
+              <li>Abre esta web desde <strong>Safari</strong>.</li>
+              <li>Toca el botón <strong>Compartir (⬆️)</strong> en la barra de Safari.</li>
+              <li>Elige <strong>«Añadir a pantalla de inicio»</strong> y pulsa <strong>Añadir</strong>.</li>
+              <li>Ábrela siempre desde el nuevo icono en tu pantalla de inicio.</li>
+            </ol>
+          </div>
+
+          <div class="guide-feature-box">
+            <div class="feature-header">
+              <span class="feature-icon">🤖</span>
+              <h4>En Android (Chrome)</h4>
+            </div>
+            <ol class="mobile-guide-steps-ol">
+              <li>Toca el botón <strong>«Instalar»</strong> si te aparece en la franja superior.</li>
+              <li>O toca el menú de tres puntos <strong>(⋮)</strong> arriba a la derecha en Chrome.</li>
+              <li>Selecciona <strong>«Instalar aplicación»</strong> o <strong>«Añadir a pantalla de inicio»</strong>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer guide-footer">
+      <div class="guide-footer-hint">Guía rápida de la App Móvil</div>
+      <button type="button" id="guide-ok-btn" class="btn btn-primary">¡Entendido!</button>
+    </div>
+  </div>
+</div>
+

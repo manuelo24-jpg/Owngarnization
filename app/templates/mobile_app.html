@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png?v=4">
 
 <!-- Estilos exclusivos de la Versión Móvil -->
-<link rel="stylesheet" href="/static/css/mobile.css">
+<link rel="stylesheet" href="/static/css/mobile.css?v=6">
 
 <!-- FullCalendar CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
@@ -35,12 +35,14 @@
     <div class="header-search">
       <div class="search-input-wrapper">
         <span class="search-icon">🔍</span>
-        <input type="search" id="search-input" placeholder="Buscar tareas..." autocomplete="off" aria-label="Buscar tareas">
+        <input type="search" id="search-input" placeholder="Buscar tareas..." autocomplete="off"
+          aria-label="Buscar tareas">
       </div>
     </div>
 
     <div class="header-actions">
-      <button id="btn-notifications" class="btn-guide-icon" title="Ajustes de avisos" aria-label="Abrir ajustes de notificaciones">
+      <button id="btn-notifications" class="btn-guide-icon" title="Ajustes de avisos"
+        aria-label="Abrir ajustes de notificaciones">
         <span class="guide-qmark">🔔</span>
       </button>
       <button id="btn-guide" class="btn-guide-icon" title="Manual de ayuda" aria-label="Abrir manual de usuario">
@@ -85,7 +87,7 @@
 {% include "components/mobile_nav.html" %}
 {% include "components/task_modal.html" %}
 {% include "components/notification_settings.html" %}
-{% include "components/guide_modal.html" %}
+{% include "components/mobile_guide_modal.html" %}
 {% include "components/confirm_modal.html" %}
 {% include "components/detail_drawer.html" %}
 {% endblock %}
@@ -95,7 +97,7 @@
 <script src="/static/js/push.js"></script>
 <script src="/static/js/task_modal.js"></script>
 <script src="/static/js/drawer.js"></script>
-<script src="/static/js/guide.js"></script>
+<script src="/static/js/guide.js?v=6"></script>
 <script src="/static/js/modal.js"></script>
 <script src="/static/js/board.js"></script>
 <script src="/static/js/calendar.js"></script>
@@ -113,4 +115,3 @@
   });
 </script>
 {% endblock %}
-

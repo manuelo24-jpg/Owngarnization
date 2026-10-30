@@ -2,7 +2,7 @@
  * Owngarnization — Service Worker (PWA + Web Push + Caché Offline)
  */
 
-const CACHE_VERSION = "owngarnization-v4";
+const CACHE_VERSION = "owngarnization-v6";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -10,16 +10,16 @@ const STATIC_ASSETS = [
   "/",
   "/m",
   "/download",
-  "/static/css/styles.css",
-  "/static/css/variables.css",
-  "/static/css/base.css",
-  "/static/css/layout.css",
-  "/static/css/board.css",
-  "/static/css/calendar.css",
-  "/static/css/modals.css",
-  "/static/css/guide.css",
-  "/static/css/responsive.css",
-  "/static/css/mobile.css",
+  "/static/css/styles.css?v=6",
+  "/static/css/variables.css?v=6",
+  "/static/css/base.css?v=6",
+  "/static/css/layout.css?v=6",
+  "/static/css/board.css?v=6",
+  "/static/css/calendar.css?v=6",
+  "/static/css/modals.css?v=6",
+  "/static/css/guide.css?v=6",
+  "/static/css/responsive.css?v=6",
+  "/static/css/mobile.css?v=6",
   "/static/js/api.js",
   "/static/js/app.js",
   "/static/js/board.js",
@@ -27,13 +27,13 @@ const STATIC_ASSETS = [
   "/static/js/modal.js",
   "/static/js/task_modal.js",
   "/static/js/drawer.js",
-  "/static/js/guide.js",
+  "/static/js/guide.js?v=6",
   "/static/js/pwa.js",
   "/static/js/push.js",
-  "/static/img/logo.png",
-  "/static/img/favicon.ico",
-  "/static/img/icons/icon-192.png",
-  "/static/img/icons/icon-512.png",
+  "/static/img/logo.png?v=4",
+  "/static/img/favicon.ico?v=4",
+  "/static/img/icons/icon-192.png?v=4",
+  "/static/img/icons/icon-512.png?v=4",
   "/static/img/icons/badge-72.png"
 ];
 
@@ -91,7 +91,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch(() => {
-        // Ignorar fallos individuales si alguna ruta requiere sesión activa
+        // Ignorar fallos individuales
       });
     })
   );
@@ -133,21 +133,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Archivos estáticos: Cache-First con actualización en segundo plano
+  // Archivos estáticos: Network-First con respaldo en caché para reflejar cambios de diseño al instante
   if (url.pathname.startsWith("/static/")) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        const networkFetch = fetch(request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const copy = response.clone();
-              caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy));
-            }
-            return response;
-          })
-          .catch(() => cached);
-        return cached || networkFetch;
-      })
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
@@ -171,7 +168,7 @@ self.addEventListener("push", (event) => {
   let payload = {
     title: "⏰ Recordatorio — Owngarnization",
     body: "Tienes una tarea programada.",
-    icon: "/static/img/icons/icon-192.png",
+    icon: "/static/img/icons/icon-192.png?v=4",
     badge: "/static/img/icons/badge-72.png",
     tag: "owngarnization-reminder",
     data: { url: "/m" }
@@ -188,7 +185,7 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: payload.body,
-    icon: payload.icon || "/static/img/icons/icon-192.png",
+    icon: payload.icon || "/static/img/icons/icon-192.png?v=4",
     badge: payload.badge || "/static/img/icons/badge-72.png",
     tag: payload.tag || "owngarnization-reminder",
     renotify: true,

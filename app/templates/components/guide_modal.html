@@ -1,23 +1,28 @@
 <!-- ==============================================
-     MODAL DE MANUAL DE USUARIO (GUÍA VISUAL)
+     MODAL DE MANUAL DE USUARIO — VERSIÓN WEB
 =================================================== -->
 <div id="guide-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
   <div class="modal-card guide-modal-card" role="dialog" aria-labelledby="guide-modal-title">
     <div class="modal-header">
       <div class="guide-modal-title-wrapper">
-        <span class="guide-badge">Guía visual</span>
+        <span class="guide-badge">Guía Web</span>
         <h3 id="guide-modal-title" class="modal-title">Manual de Uso de Owngarnization</h3>
       </div>
       <button id="guide-close-btn" class="modal-close" aria-label="Cerrar manual">✕</button>
     </div>
 
-    <!-- Pestañas de navegación rápida del manual -->
-    <div class="guide-tabs" role="tablist">
-      <button class="guide-tab-btn active" data-tab="tab-intro">🏁 Inicio Rápido</button>
-      <button class="guide-tab-btn" data-tab="tab-tasks">📋 Tipos de Tareas</button>
-      <button class="guide-tab-btn" data-tab="tab-calendar">📅 Calendario & Vistas</button>
-      <button class="guide-tab-btn" data-tab="tab-postits">📌 Tablero & Estados</button>
-      <button class="guide-tab-btn" data-tab="tab-shortcuts">⌨️ Atajos</button>
+    <!-- Pestañas de navegación rápida del manual (Segmented Control sin barra de scroll) -->
+    <div class="guide-tabs" role="tablist" aria-label="Secciones del manual">
+      <button type="button" class="guide-tab-btn active" data-tab="tab-intro" role="tab" aria-selected="true">🏁 Inicio
+        Rápido</button>
+      <button type="button" class="guide-tab-btn" data-tab="tab-tasks" role="tab" aria-selected="false">📋 Tipos y
+        Orden</button>
+      <button type="button" class="guide-tab-btn" data-tab="tab-calendar" role="tab" aria-selected="false">📅 Vistas y
+        Filtros</button>
+      <button type="button" class="guide-tab-btn" data-tab="tab-postits" role="tab" aria-selected="false">📌 Colores y
+        Estados</button>
+      <button type="button" class="guide-tab-btn" data-tab="tab-shortcuts" role="tab" aria-selected="false">🔔 Avisos y
+        Atajos</button>
     </div>
 
     <div class="guide-content">
@@ -25,166 +30,288 @@
       <div id="tab-intro" class="guide-panel active">
         <div class="guide-intro-banner">
           <h3>¡Bienvenido a Owngarnization! 📋🗓️</h3>
-          <p>Owngarnization combina la agilidad de un tablero de post-its con la perspectiva de un calendario interactivo. Organiza tus rutinas diarias y compromisos puntuales con claridad, calma y total privacidad.</p>
+          <p>Tu organizador personal minimalista que combina un tablero de notas post-it con calendario semanal y
+            mensual. Todo separado con claridad entre tus rutinas habituales y tus tareas puntuales del día.</p>
         </div>
-        <div class="guide-image-container">
-          <img src="/static/img/guide/guide_dashboard.png" alt="Panel principal de Owngarnization" class="guide-screenshot">
-          <p class="guide-caption">Vista principal del día con buscador global, panel de tareas comunes, tareas del día y filtros interactivos.</p>
-        </div>
+
         <div class="guide-grid-steps">
           <div class="guide-step-card">
             <div class="step-num">1</div>
-            <h4>Crea tu primera tarea</h4>
-            <p>Pulsa en <strong>"＋ Nueva tarea"</strong> o presiona la tecla <kbd>N</kbd> en tu teclado.</p>
+            <h4>Crea una tarea</h4>
+            <p>Pulsa en <strong>«＋ Nueva tarea»</strong> arriba a la derecha o presiona la tecla <kbd>N</kbd> en tu
+              teclado.</p>
           </div>
           <div class="guide-step-card">
             <div class="step-num">2</div>
-            <h4>Elige el tipo</h4>
-            <p>Define si es una <strong>Rutina Común</strong> (se repite en los días que elijas) o una <strong>Tarea del Día</strong> (fecha puntual).</p>
+            <h4>Elige su tipo y hora</h4>
+            <p>Define si es una <strong>Tarea del Día</strong> (fecha puntual) o una <strong>Tarea Común</strong>
+              (rutina que se repite), y añade hora si necesitas recordatorio.</p>
           </div>
           <div class="guide-step-card">
             <div class="step-num">3</div>
-            <h4>Gestiona tu progreso</h4>
-            <p>Haz clic en el icono de estado de cualquier post-it para alternar entre <strong>Sin empezar</strong>, <strong>En proceso</strong> y <strong>Finalizada</strong>.</p>
+            <h4>Avanza el estado</h4>
+            <p>Haz clic en el símbolo de estado (<strong>○ → ◐ → ✓</strong>) en la esquina del post-it para completarla
+              al instante.</p>
           </div>
         </div>
-      </div>
 
-      <!-- Pestaña 2: Tipos de Tareas -->
-      <div id="tab-tasks" class="guide-panel">
-        <div class="guide-cards-duo">
-          <div class="guide-feature-box">
-            <div class="feature-header">
-              <span class="feature-icon">🔁</span>
-              <h4>Tareas Comunes (Rutinas)</h4>
+        <!-- Maqueta visual estética del Tablero del Día -->
+        <div class="guide-visual-preview">
+          <div class="guide-preview-header">
+            <div class="preview-dots">
+              <span class="preview-dot"></span>
+              <span class="preview-dot"></span>
+              <span class="preview-dot"></span>
             </div>
-            <p>Son tareas habituales o periódicas (p. ej. <em>"Beber 2 litros de agua"</em>, <em>"Gimnasio"</em>, <em>"Revisar correo"</em>).</p>
-            <ul>
-              <li><strong>Selección flexible de días</strong>: Puedes configurarlas para <em>Todos los días</em>, <em>Lunes a Viernes (laborables)</em>, <em>Fines de semana</em> o <em>Días personalizados (L, X, V...)</em>.</li>
-              <li><strong>Estado independiente diario</strong>: Si la marcas como finalizada hoy, mañana volverá a aparecer sin empezar automáticamente.</li>
-            </ul>
+            <span class="preview-title">Ejemplo visual — Tablero del Día con dos paneles diferenciados</span>
+            <span class="preview-header-pill">Orden por hora y prioridad</span>
           </div>
-          <div class="guide-feature-box">
-            <div class="feature-header">
-              <span class="feature-icon">📌</span>
-              <h4>Tareas del Día (Puntuales)</h4>
+
+          <div class="guide-preview-columns">
+            <!-- Mini Columna: Tareas Comunes -->
+            <div class="guide-preview-col preview-col-common">
+                <div class="preview-col-head">
+                  <div class="preview-col-title">
+                    <span>🔁 Tareas comunes</span>
+                    <span class="column-badge">2</span>
+                  </div>
+                  <span class="preview-badge">Rutinas</span>
+                </div>
+
+                  <div class="preview-postit importance-medium">
+                    <div class="preview-postit-top">
+                      <span class="preview-status-circle">○</span>
+                      <span class="preview-meta-tag">🔁 L, M, X, J, V</span>
+                    </div>
+                    <div class="preview-postit-title">Revisar correo y agenda</div>
+                    <div class="preview-postit-footer">
+                      <span class="preview-time-chip">⏰ 09:00</span>
+                      <span class="preview-prio-label">Media</span>
+                    </div>
+                  </div>
+
+                  <div class="preview-postit importance-low status-done">
+                    <div class="preview-postit-top">
+                      <span class="preview-status-circle">✓</span>
+                      <span class="preview-meta-tag">🔁 Todos los días</span>
+                    </div>
+                    <div class="preview-postit-title" style="text-decoration: line-through;">Beber 2 litros de agua
+                    </div>
+                    <div class="preview-postit-footer">
+                      <span class="preview-time-chip">Sin hora</span>
+                      <span class="preview-prio-label">Baja</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mini Columna: Tareas del Día -->
+                <div class="guide-preview-col preview-col-daily">
+                    <div class="preview-col-head">
+                      <div class="preview-col-title">
+                        <span>📌 Tareas del día</span>
+                        <span class="column-badge">2</span>
+                      </div>
+                      <span class="preview-badge preview-badge-dark">Hoy</span>
+                    </div>
+
+                      <div class="preview-postit importance-high">
+                        <div class="preview-postit-top">
+                          <span class="preview-status-circle">◐</span>
+                          <span class="preview-meta-tag">🔔 Aviso activo</span>
+                        </div>
+                        <div class="preview-postit-title">Reunión con cliente</div>
+                        <div class="preview-postit-footer">
+                          <span class="preview-time-chip">⏰ 11:30 – 12:30</span>
+                          <span class="preview-prio-label">Alta</span>
+                        </div>
+                      </div>
+
+                      <div class="preview-postit importance-urgent">
+                        <div class="preview-postit-top">
+                          <span class="preview-status-circle">○</span>
+                          <span class="preview-meta-tag">📌 Puntual</span>
+                        </div>
+                        <div class="preview-postit-title">Entregar presupuesto final</div>
+                        <div class="preview-postit-footer">
+                          <span class="preview-time-chip">Sin hora</span>
+                          <span class="preview-prio-label">Urgente</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pestaña 2: Tipos de Tareas y Orden Automático -->
+              <div id="tab-tasks" class="guide-panel">
+                <div class="guide-cards-duo">
+                  <div class="guide-feature-box">
+                    <div class="feature-header">
+                      <span class="feature-icon">🔁</span>
+                      <h4>Tareas Comunes (Rutinas)</h4>
+                    </div>
+                    <p>Hábitos o actividades periódicas (ej. <em>«Gimnasio»</em>, <em>«Lectura»</em>, <em>«Revisar
+                        correo»</em>).</p>
+                    <ul>
+                      <li><strong>Días configurables:</strong> Elige <em>Todos los días</em>, <em>Lunes a Viernes</em>,
+                        <em>Fines de semana</em> o marca días sueltos (L, M, X, J, V, S, D).</li>
+                      <li><strong>Reinicio diario:</strong> Al marcarla como finalizada hoy, mañana vuelve a aparecer
+                        lista para empezar.</li>
+                    </ul>
+                  </div>
+                  <div class="guide-feature-box">
+                    <div class="feature-header">
+                      <span class="feature-icon">📌</span>
+                      <h4>Tareas del Día (Puntuales)</h4>
+                    </div>
+                    <p>Compromisos de una fecha concreta (ej. <em>«Médico a las 10:30»</em>, <em>«Pagar recibo»</em>).
+                    </p>
+                    <ul>
+                      <li><strong>Traspaso automático (Rollover):</strong> Si termina el día y quedó pendiente, pasa
+                        automáticamente al día siguiente para que nunca se olvide.</li>
+                      <li><strong>Histórico intacto:</strong> En cuanto la marcas como <em>Finalizada (✓)</em>, queda
+                        guardada en su fecha.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="guide-feature-box" style="margin-top: 12px;">
+                  <div class="feature-header">
+                    <span class="feature-icon">⏱️</span>
+                    <h4>Ordenación Inteligente por Defecto</h4>
+                  </div>
+                  <p>En cada columna, las tareas se ordenan automáticamente para que sepas qué hacer primero:</p>
+                  <ul>
+                    <li><strong>1.º Tareas con hora:</strong> Aparecen arriba del todo ordenadas de más temprano a más
+                      tarde (ej. <code>09:00</code> antes que <code>12:30</code>).</li>
+                    <li><strong>2.º Tareas sin hora:</strong> Aparecen justo debajo ordenadas de mayor a menor prioridad
+                      (<strong>Urgente → Alta → Media → Baja</strong>).</li>
+                    <li><strong>3.º Orden manual libre:</strong> Si arrastras un post-it con el ratón para cambiar su
+                      posición, se respeta el orden que tú elijas.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Pestaña 3: Calendario, Vistas y Filtros -->
+              <div id="tab-calendar" class="guide-panel">
+                <div class="guide-views-list">
+                  <div class="guide-view-item">
+                    <span class="view-pill">Día</span>
+                    <div>
+                      <strong>Tablero de Post-its:</strong> Muestra el panel de <em>Tareas comunes</em> (borde superior
+                      marrón) y el de <em>Tareas del día</em> (borde superior negro). Si filtras por tipo en la barra
+                      lateral, el otro panel se oculta y el activo se centra limpiamente.
+                    </div>
+                  </div>
+                  <div class="guide-view-item">
+                    <span class="view-pill">Semana</span>
+                    <div>
+                      <strong>Planificador Semanal:</strong> Visualiza los 7 días de la semana en columnas. Puedes
+                      <strong>arrastrar tareas de un día a otro</strong> para reprogramar su fecha al instante.
+                    </div>
+                  </div>
+                  <div class="guide-view-item">
+                    <span class="view-pill">Mes</span>
+                    <div>
+                      <strong>Calendario Mensual:</strong> Visión panorámica de todo el mes. Haz clic en cualquier
+                      casilla del calendario para saltar directamente al tablero de ese día.
+                    </div>
+                  </div>
+                </div>
+                <div class="guide-tip">
+                  💡 <strong>Filtros combinables:</strong> Usa la columna izquierda para filtrar por <em>Tipo</em>,
+                  <em>Estado</em> o <em>Importancia</em>, o escribe en el buscador superior para localizar cualquier
+                  tarea al instante.
+                </div>
+              </div>
+
+              <!-- Pestaña 4: Colores y Estados -->
+              <div id="tab-postits" class="guide-panel">
+                <h4 class="guide-section-subtitle">Colores por Nivel de Importancia</h4>
+                <p class="guide-section-desc">Cada post-it adopta un tono cálido según su prioridad:</p>
+                <div class="guide-importance-grid">
+                  <div class="importance-card pi-low">
+                    <span class="tag-label">Baja</span>
+                    <p>Beige suave para tareas secundarias o ligeras.</p>
+                  </div>
+                  <div class="importance-card pi-medium">
+                    <span class="tag-label">Media</span>
+                    <p>Marrón claro para tu ritmo habitual del día.</p>
+                  </div>
+                  <div class="importance-card pi-high">
+                    <span class="tag-label">Alta</span>
+                    <p>Marrón tostado para compromisos importantes.</p>
+                  </div>
+                  <div class="importance-card pi-urgent">
+                    <span class="tag-label">Urgente</span>
+                    <p>Negro intenso con texto claro para máxima prioridad.</p>
+                  </div>
+                </div>
+
+                <h4 class="guide-section-subtitle" style="margin-top: 22px;">Ciclo de Estados (1 clic)</h4>
+                <div class="guide-status-flow">
+                  <div class="status-flow-step">
+                    <span class="status-sym">○</span>
+                    <strong>Sin empezar</strong>
+                    <span>Pendiente</span>
+                  </div>
+                  <span class="flow-arrow">→</span>
+                  <div class="status-flow-step">
+                    <span class="status-sym">◐</span>
+                    <strong>En proceso</strong>
+                    <span>En marcha</span>
+                  </div>
+                  <span class="flow-arrow">→</span>
+                  <div class="status-flow-step">
+                    <span class="status-sym">✓</span>
+                    <strong>Finalizada</strong>
+                    <span>Completada</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pestaña 5: Avisos, App Móvil y Atajos -->
+              <div id="tab-shortcuts" class="guide-panel">
+                <div class="guide-cards-duo">
+                  <div class="guide-feature-box">
+                    <div class="feature-header">
+                      <span class="feature-icon">🔔</span>
+                      <h4>Avisos de Tareas con Hora</h4>
+                    </div>
+                    <p>Pulsa el icono de la campana <strong>🔔</strong> en la cabecera para activar las notificaciones
+                      en tu navegador o móvil y elegir con cuántos minutos de antelación quieres recibir el aviso.</p>
+                  </div>
+                  <div class="guide-feature-box">
+                    <div class="feature-header">
+                      <span class="feature-icon">📲</span>
+                      <h4>App Móvil Gratuita</h4>
+                    </div>
+                    <p>Pulsa en <strong>«📲 App Móvil»</strong> arriba a la derecha para instalar gratis la versión
+                      móvil optimizada en tu <strong>iPhone</strong> o <strong>Android</strong>.</p>
+                  </div>
+                </div>
+
+                <h4 class="guide-section-subtitle" style="margin-top: 16px;">Atajos Rápidos de Teclado</h4>
+                <div class="guide-shortcuts-table">
+                  <div class="shortcut-row">
+                    <div class="shortcut-keys"><kbd>N</kbd></div>
+                    <div class="shortcut-desc">Abrir el formulario para crear una <strong>Nueva tarea</strong>.</div>
+                  </div>
+                  <div class="shortcut-row">
+                    <div class="shortcut-keys"><kbd>?</kbd></div>
+                    <div class="shortcut-desc">Abrir este <strong>Manual de uso</strong> en cualquier momento.</div>
+                  </div>
+                  <div class="shortcut-row">
+                    <div class="shortcut-keys"><kbd>Esc</kbd></div>
+                    <div class="shortcut-desc">Cerrar la ventana o panel lateral que esté abierto.</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p>Tareas únicas asignadas a una fecha determinada (p. ej. <em>"Reunión con cliente"</em>, <em>"Pagar factura de luz"</em>).</p>
-            <ul>
-              <li><strong>Traspaso Automático (Rollover)</strong>: Si llega el final del día y la tarea quedó pendiente, <strong>se traspasa automáticamente al día de hoy</strong> para que nada se quede olvidado en el pasado.</li>
-              <li><strong>Histórico asegurado</strong>: Las tareas completadas permanecen guardadas en su fecha de cumplimiento.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="guide-image-container">
-          <img src="/static/img/guide/guide_modal.png" alt="Formulario de creación con selector de días" class="guide-screenshot">
-          <p class="guide-caption">Formulario para crear y editar tareas con selector de días de la semana y horarios opcionales.</p>
-        </div>
-      </div>
 
-      <!-- Pestaña 3: Calendario & Vistas -->
-      <div id="tab-calendar" class="guide-panel">
-        <div class="guide-text-block">
-          <p>Owngarnization ofrece tres vistas sincronizadas accesibles desde la esquina superior derecha:</p>
-        </div>
-        <div class="guide-views-list">
-          <div class="guide-view-item">
-            <span class="view-pill">Día</span>
-            <div>
-              <strong>Tablero Post-its:</strong> Tu espacio de enfoque diario. Muestra tus rutinas activas a la izquierda y las tareas puntuales a la derecha. Arrastra las notas para ordenarlas a tu gusto.
-            </div>
-          </div>
-          <div class="guide-view-item">
-            <span class="view-pill">Semana</span>
-            <div>
-              <strong>Planificador Semanal:</strong> Visualiza los 7 días en columnas continuas. Puedes <strong>arrastrar tareas entre diferentes días</strong> para reprogramarlas al instante.
-            </div>
-          </div>
-          <div class="guide-view-item">
-            <span class="view-pill">Mes</span>
-            <div>
-              <strong>Visión Global:</strong> Vista mensual estilo calendario tradicional. Haz clic en cualquier día para saltar directamente a su tablero de tareas.
+            <div class="modal-footer guide-footer">
+              <div class="guide-footer-hint">Pulsa <kbd>Esc</kbd> para cerrar</div>
+              <button type="button" id="guide-ok-btn" class="btn btn-primary">¡Entendido!</button>
             </div>
           </div>
         </div>
-        <div class="guide-image-container">
-          <img src="/static/img/guide/guide_week.png" alt="Vista semanal del calendario" class="guide-screenshot">
-          <p class="guide-caption">Vista semanal con columnas por día y reprogramación interactiva arrastrando eventos.</p>
-        </div>
-      </div>
-
-      <!-- Pestaña 4: Tablero & Estados -->
-      <div id="tab-postits" class="guide-panel">
-        <h4 style="font-size: 15px; font-weight: 700; color: var(--ink);">Colores por Nivel de Importancia</h4>
-        <p style="font-size: 13px; color: var(--ink-soft); margin-top: 4px;">Cada nota adhesiva adopta una tonalidad cálida según su prioridad:</p>
-        <div class="guide-importance-grid">
-          <div class="importance-card pi-low">
-            <span class="tag-label">Baja</span>
-            <p>Beige suave para tareas cotidianas o secundarias.</p>
-          </div>
-          <div class="importance-card pi-medium">
-            <span class="tag-label">Media</span>
-            <p>Marrón claro para el ritmo estándar de trabajo.</p>
-          </div>
-          <div class="importance-card pi-high">
-            <span class="tag-label">Alta</span>
-            <p>Marrón tostado para compromisos destacados.</p>
-          </div>
-          <div class="importance-card pi-urgent">
-            <span class="tag-label">Urgente</span>
-            <p>Negro profundo con tipografía clara para máxima prioridad.</p>
-          </div>
-        </div>
-
-        <h4 style="font-size: 15px; font-weight: 700; color: var(--ink); margin-top: 24px;">Ciclo de Estados</h4>
-        <div class="guide-status-flow">
-          <div class="status-flow-step">
-            <span class="status-sym">○</span>
-            <strong>Sin empezar</strong>
-            <span>Pendiente de iniciar</span>
-          </div>
-          <span class="flow-arrow">→</span>
-          <div class="status-flow-step">
-            <span class="status-sym">◐</span>
-            <strong>En proceso</strong>
-            <span>Estás trabajando en ella</span>
-          </div>
-          <span class="flow-arrow">→</span>
-          <div class="status-flow-step">
-            <span class="status-sym">✓</span>
-            <strong>Finalizada</strong>
-            <span>Completada con éxito</span>
-          </div>
-        </div>
-        <div class="guide-tip">
-          💡 <strong>Consejo rápido:</strong> Haz clic directamente en el símbolo de estado en la esquina del post-it para avanzar su estado con un solo toque.
-        </div>
-      </div>
-
-      <!-- Pestaña 5: Atajos -->
-      <div id="tab-shortcuts" class="guide-panel">
-        <h4 style="font-size: 15px; font-weight: 700; color: var(--ink);">Atajos de Teclado</h4>
-        <p style="font-size: 13px; color: var(--ink-soft); margin-top: 4px;">Acelera tu flujo de trabajo sin tocar el ratón:</p>
-        <div class="guide-shortcuts-table">
-          <div class="shortcut-row">
-            <div class="shortcut-keys"><kbd>N</kbd></div>
-            <div class="shortcut-desc">Abrir el formulario para crear una <strong>Nueva tarea</strong>.</div>
-          </div>
-          <div class="shortcut-row">
-            <div class="shortcut-keys"><kbd>?</kbd></div>
-            <div class="shortcut-desc">Abrir este <strong>Manual de usuario</strong> en cualquier momento.</div>
-          </div>
-          <div class="shortcut-row">
-            <div class="shortcut-keys"><kbd>Esc</kbd></div>
-            <div class="shortcut-desc">Cerrar el modal activo, panel de detalle o el manual de usuario.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer guide-footer">
-      <div class="guide-footer-hint">Presiona <kbd>Esc</kbd> para salir en cualquier momento</div>
-      <button type="button" id="guide-ok-btn" class="btn btn-primary">¡Entendido!</button>
-    </div>
-  </div>
-</div>

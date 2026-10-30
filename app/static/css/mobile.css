@@ -395,3 +395,32 @@
   color: var(--ink);
 }
 
+
+/* Ajustes de botones circulares y Manual Móvil en /m */
+.mobile-version-layout .btn-guide-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  margin-right: 0;
+}
+
+.mobile-guide-card {
+  max-width: 500px;
+  width: 96%;
+  max-height: 86dvh;
+}
+
+.mobile-guide-card .guide-content {
+  padding: 16px;
+}
+
+.mobile-guide-card .modal-header {
+  padding: 14px 16px;
+}
+
+.mobile-guide-card .guide-footer {
+  padding: 12px 16px;
+}

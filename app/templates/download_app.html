@@ -6,7 +6,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png?v=4">
-<link rel="stylesheet" href="/static/css/mobile.css">
+<link rel="stylesheet" href="/static/css/mobile.css?v=6">
 {% endblock %}
 
 {% block content %}
@@ -34,7 +34,8 @@
       </p>
 
       <div class="download-cta-row">
-        <button id="btn-direct-install" class="btn btn-primary" style="min-height: 48px; padding: 12px 24px; font-size: 15px;">
+        <button id="btn-direct-install" class="btn btn-primary"
+          style="min-height: 48px; padding: 12px 24px; font-size: 15px;">
           📲 Instalar App Móvil en este dispositivo
         </button>
         <a href="/m" class="btn btn-accent" style="min-height: 48px; padding: 12px 24px; font-size: 15px;">
@@ -52,8 +53,10 @@
           <h3>Instalar en Android</h3>
         </div>
         <ol class="platform-steps">
-          <li>Abre esta página o <a href="/m">la versión móvil (<code>/m</code>)</a> en <strong>Chrome</strong> o <strong>Edge</strong>.</li>
-          <li>Pulsa el botón <strong>"Instalar App Móvil"</strong> de arriba (o abre el menú <code>⋮</code> del navegador y toca <strong>"Instalar aplicación"</strong>).</li>
+          <li>Abre esta página o <a href="/m">la versión móvil (<code>/m</code>)</a> en <strong>Chrome</strong> o
+            <strong>Edge</strong>.</li>
+          <li>Pulsa el botón <strong>"Instalar App Móvil"</strong> de arriba (o abre el menú <code>⋮</code> del
+            navegador y toca <strong>"Instalar aplicación"</strong>).</li>
           <li>Se añadirá el icono oficial de Owngarnization a tu cajón de aplicaciones a pantalla completa.</li>
         </ol>
       </div>
@@ -65,7 +68,8 @@
           <h3>Instalar en iPhone / iPad (iOS)</h3>
         </div>
         <ol class="platform-steps">
-          <li>Abre esta web desde <strong>Safari</strong> (requiere iOS 16.4 o superior para recibir notificaciones).</li>
+          <li>Abre esta web desde <strong>Safari</strong> (requiere iOS 16.4 o superior para recibir notificaciones).
+          </li>
           <li>Toca el icono <strong>Compartir (⬆️)</strong> en la barra inferior de Safari.</li>
           <li>Desliza y selecciona <strong>"Añadir a pantalla de inicio"</strong> y pulsa <strong>Añadir</strong>.</li>
         </ol>
@@ -106,4 +110,3 @@
   });
 </script>
 {% endblock %}
-

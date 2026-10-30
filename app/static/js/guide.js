@@ -1,6 +1,6 @@
 /**
  * Owngarnization — Manual de Usuario Interactivo (Modal & Tabs)
- * Encapsula la lógica de la ventana emergente de ayuda, navegación de pestañas y atajos.
+ * Soporta tanto el Manual Web (guide_modal.html) como el Manual Móvil (mobile_guide_modal.html).
  */
 
 const guide = {
@@ -18,11 +18,20 @@ const guide = {
     document.querySelectorAll(".guide-tab-btn").forEach(tabBtn => {
       tabBtn.addEventListener("click", () => {
         const targetId = tabBtn.dataset.tab;
-        document.querySelectorAll(".guide-tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".guide-tab-btn").forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-selected", "false");
+        });
         document.querySelectorAll(".guide-panel").forEach(p => p.classList.remove("active"));
+
         tabBtn.classList.add("active");
+        tabBtn.setAttribute("aria-selected", "true");
+
         const targetPanel = document.getElementById(targetId);
         if (targetPanel) targetPanel.classList.add("active");
+
+        const contentEl = guideModal?.querySelector(".guide-content");
+        if (contentEl) contentEl.scrollTop = 0;
       });
     });
   },
