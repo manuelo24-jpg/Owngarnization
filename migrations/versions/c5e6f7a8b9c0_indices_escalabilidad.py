@@ -38,3 +38,4 @@ def downgrade() -> None:
     """Downgrade schema."""
     op.drop_index('ix_occurrences_date_status', table_name='task_occurrences')
     op.drop_index('ix_tasks_user_active_kind', table_name='tasks')
+
