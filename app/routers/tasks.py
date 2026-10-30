@@ -56,6 +56,7 @@ def get_occurrences(
         status=status_filter,
         importance=importance_filter,
         kind=kind_filter,
+        user_timezone=current_user.timezone,
     )
 
 

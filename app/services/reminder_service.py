@@ -46,7 +46,9 @@ def dispatch_due_reminders(db: Session, now_utc: Optional[dt.datetime] = None) -
         now_local = ref_utc.astimezone(tz)
         today_local = now_local.date()
 
-        occurrence_service.rollover_uncompleted_daily_tasks(db, user.id, ref_utc)
+        occurrence_service.rollover_uncompleted_daily_tasks(
+            db, user.id, ref_utc, user_timezone=user.timezone
+        )
         occurrence_service.ensure_occurrences(db, user.id, today_local, today_local)
 
         candidates = (
@@ -103,4 +105,3 @@ def dispatch_due_reminders(db: Session, now_utc: Optional[dt.datetime] = None) -
         "occurrences_notified": occurrences_notified,
         "messages_sent": messages_sent,
     }
-

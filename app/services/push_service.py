@@ -10,14 +10,21 @@ from app.models import PushSubscription, User
 logger = logging.getLogger(__name__)
 
 
-def _deliver_webpush(subscription_info: Dict[str, Any], data: str, vapid_private_key: str, vapid_claims: Dict[str, Any]) -> None:
-    """Wrapper sobre pywebpush.webpush para facilitar la inyección/simulación en tests."""
+def _deliver_webpush(
+    subscription_info: Dict[str, Any],
+    data: str,
+    vapid_private_key: str,
+    vapid_claims: Dict[str, Any],
+    timeout: int = 8,
+) -> None:
+    """Wrapper sobre pywebpush.webpush con timeout de red defensivo para evitar congelar workers."""
     from pywebpush import webpush
     webpush(
         subscription_info=subscription_info,
         data=data,
         vapid_private_key=vapid_private_key,
         vapid_claims=vapid_claims,
+        timeout=timeout,
     )
 
 
@@ -104,4 +111,3 @@ def send_push_to_user(db: Session, user: User, payload: Dict[str, Any]) -> int:
                 logger.warning("Fallo al enviar Web Push a sub %s: %s", sub.id, exc)
 
     return sent_count
-

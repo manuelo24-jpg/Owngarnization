@@ -13,6 +13,7 @@ class AppState {
       q: ""
     };
     this.searchDebounceTimer = null;
+    this.reloadRequestId = 0;
   }
 
   init() {
@@ -58,63 +59,63 @@ class AppState {
       this.onDateChanged();
     });
 
-      // Selector de vistas (Segmented Control y Barra inferior móvil)
-      document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const view = btn.dataset.view;
-          this.closeMobileFilters();
-          this.switchView(view);
-        });
-      });
-
-      // Bottom sheet de filtros en móvil
-      document.getElementById("btn-mobile-filters")?.addEventListener("click", () => {
-        this.toggleMobileFilters();
-      });
-      document.getElementById("btn-close-mobile-filters")?.addEventListener("click", () => {
+    // Selector de vistas (Segmented Control y Barra inferior móvil)
+    document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const view = btn.dataset.view;
         this.closeMobileFilters();
+        this.switchView(view);
       });
-      document.getElementById("mobile-sheet-backdrop")?.addEventListener("click", () => {
-        this.closeMobileFilters();
-      });
+    });
 
-      // Buscador con debounce
-      const searchInput = document.getElementById("search-input");
-      searchInput?.addEventListener("input", (e) => {
-        clearTimeout(this.searchDebounceTimer);
-        this.searchDebounceTimer = setTimeout(() => {
-          this.filters.q = e.target.value.trim();
+    // Bottom sheet de filtros en móvil
+    document.getElementById("btn-mobile-filters")?.addEventListener("click", () => {
+      this.toggleMobileFilters();
+    });
+    document.getElementById("btn-close-mobile-filters")?.addEventListener("click", () => {
+      this.closeMobileFilters();
+    });
+    document.getElementById("mobile-sheet-backdrop")?.addEventListener("click", () => {
+      this.closeMobileFilters();
+    });
+
+    // Buscador con debounce
+    const searchInput = document.getElementById("search-input");
+    searchInput?.addEventListener("input", (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        this.filters.q = e.target.value.trim();
+        this.checkFiltersActive();
+        this.reloadCurrentView();
+      }, 250);
+    });
+
+    // Chips de filtros
+    document.querySelectorAll(".filter-chips").forEach(container => {
+      const filterKey = container.dataset.filter;
+      container.querySelectorAll(".chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          container.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          this.filters[filterKey] = chip.dataset.value;
           this.checkFiltersActive();
           this.reloadCurrentView();
-        }, 250);
-      });
-
-      // Chips de filtros
-      document.querySelectorAll(".filter-chips").forEach(container => {
-        const filterKey = container.dataset.filter;
-        container.querySelectorAll(".chip").forEach(chip => {
-          chip.addEventListener("click", () => {
-            container.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-            chip.classList.add("active");
-            this.filters[filterKey] = chip.dataset.value;
-            this.checkFiltersActive();
-            this.reloadCurrentView();
-          });
         });
       });
+    });
 
-      // Botón "Limpiar filtros"
-      document.getElementById("btn-reset-filters")?.addEventListener("click", () => {
-        this.resetFilters();
-      });
-    }
+    // Botón "Limpiar filtros"
+    document.getElementById("btn-reset-filters")?.addEventListener("click", () => {
+      this.resetFilters();
+    });
+  }
 
   checkFiltersActive() {
     const activeCount = [
-        this.filters.kind,
-        this.filters.status,
-        this.filters.importance,
-        this.filters.q
+      this.filters.kind,
+      this.filters.status,
+      this.filters.importance,
+      this.filters.q
     ].filter(Boolean).length;
 
     const hasActiveFilters = activeCount > 0;
@@ -190,57 +191,57 @@ class AppState {
   switchView(newView) {
     this.currentView = newView;
 
-      // Actualizar botones de vista (escritorio y móvil)
-      document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
-        const isActive = btn.dataset.view === newView;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
+    // Actualizar botones de vista (escritorio y móvil)
+    document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
+      const isActive = btn.dataset.view === newView;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
 
-      // Mostrar sección correspondiente
-      const views = {
-        day: document.getElementById("view-day"),
-        week: document.getElementById("view-week"),
-        month: document.getElementById("view-month")
-      };
+    // Mostrar sección correspondiente
+    const views = {
+      day: document.getElementById("view-day"),
+      week: document.getElementById("view-week"),
+      month: document.getElementById("view-month")
+    };
 
-      for (const [key, el] of Object.entries(views)) {
-        if (el) {
-          el.style.display = key === newView ? "block" : "none";
-        }
+    for (const [key, el] of Object.entries(views)) {
+      if (el) {
+        el.style.display = key === newView ? "block" : "none";
       }
-
-      this.updatePeriodLabel();
-
-      // Redimensionar calendario al hacerse visible
-      if (newView === "month" && window.calendarManager?.calendarMonth) {
-        setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
-      } else if (newView === "week" && window.calendarManager?.calendarWeek) {
-        setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
-      }
-
-      this.reloadCurrentView();
     }
+
+    this.updatePeriodLabel();
+
+    // Redimensionar calendario al hacerse visible
+    if (newView === "month" && window.calendarManager?.calendarMonth) {
+      setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
+    } else if (newView === "week" && window.calendarManager?.calendarWeek) {
+      setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
+    }
+
+    this.reloadCurrentView();
+  }
 
   getCurrentDateFormatted() {
-      const y = this.currentDate.getFullYear();
-      const m = String(this.currentDate.getMonth() + 1).padStart(2, "0");
-      const d = String(this.currentDate.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
+    const y = this.currentDate.getFullYear();
+    const m = String(this.currentDate.getMonth() + 1).padStart(2, "0");
+    const d = String(this.currentDate.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
 
   formatDate(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
 
   updatePeriodLabel() {
-      const labelEl = document.getElementById("current-period-label");
-      if(!labelEl) return;
+    const labelEl = document.getElementById("current-period-label");
+    if (!labelEl) return;
 
-      if(this.currentView === "day") {
+    if (this.currentView === "day") {
       labelEl.textContent = this.currentDate.toLocaleDateString("es-ES", {
         weekday: "long",
         day: "numeric",
@@ -290,6 +291,7 @@ class AppState {
   }
 
   async reloadCurrentView() {
+    const requestId = ++this.reloadRequestId;
     let startStr, endStr;
 
     if (this.currentView === "day") {
@@ -313,6 +315,8 @@ class AppState {
 
     try {
       const occurrences = await api.get("/api/occurrences", params);
+      // Evitar condiciones de carrera: si el usuario cambió de vista o fecha mientras cargaba, ignorar
+      if (requestId !== this.reloadRequestId) return;
       if (!occurrences) return;
 
       if (this.currentView === "day" && window.board) {
@@ -331,8 +335,10 @@ class AppState {
         }
       }
     } catch (err) {
-      console.error("Error al cargar ocurrencias:", err);
-      showToast("Error al cargar las tareas", "error");
+      if (requestId === this.reloadRequestId) {
+        console.error("Error al cargar ocurrencias:", err);
+        showToast("Error al cargar las tareas", "error");
+      }
     }
   }
 }

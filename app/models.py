@@ -51,12 +51,12 @@ class Task(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), server_default=func.now(), nullable=False)
 
-
     user = relationship("User", back_populates="tasks")
     occurrences = relationship("TaskOccurrence", back_populates="task", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_tasks_user_date", "user_id", "date"),
+        Index("ix_tasks_user_active_kind", "user_id", "is_active", "kind"),
     )
 
 
@@ -78,6 +78,7 @@ class TaskOccurrence(Base):
     __table_args__ = (
         UniqueConstraint("task_id", "date", name="uq_task_occurrence_date"),
         Index("ix_occurrences_task_date", "task_id", "date"),
+        Index("ix_occurrences_date_status", "date", "status"),
     )
 
 

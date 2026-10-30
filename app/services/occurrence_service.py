@@ -8,10 +8,17 @@ from app.models import User, Task, TaskOccurrence
 from app.schemas import OccurrenceUpdate, OccurrenceReorder, TaskStatus, TaskImportance, TaskKind
 
 
-def get_user_today(db: Session, user_id: int, now_utc: Optional[dt.datetime] = None) -> dt.date:
+def get_user_today(
+    db: Session,
+    user_id: int,
+    now_utc: Optional[dt.datetime] = None,
+    user_timezone: Optional[str] = None,
+) -> dt.date:
     """Calcula la fecha de 'hoy' en la zona horaria IANA del usuario."""
-    user = db.query(User).filter(User.id == user_id).first()
-    tz_name = (user.timezone if user and user.timezone else "Europe/Madrid")
+    tz_name = user_timezone
+    if not tz_name:
+        user_tz = db.query(User.timezone).filter(User.id == user_id).first()
+        tz_name = user_tz[0] if user_tz and user_tz[0] else "Europe/Madrid"
     try:
         tz = ZoneInfo(tz_name)
     except (ZoneInfoNotFoundError, KeyError, ValueError):
@@ -22,52 +29,61 @@ def get_user_today(db: Session, user_id: int, now_utc: Optional[dt.datetime] = N
     return ref_utc.astimezone(tz).date()
 
 
-def rollover_uncompleted_daily_tasks(db: Session, user_id: int, now_utc: Optional[dt.datetime] = None) -> None:
+def rollover_uncompleted_daily_tasks(
+    db: Session,
+    user_id: int,
+    now_utc: Optional[dt.datetime] = None,
+    user_timezone: Optional[str] = None,
+) -> None:
     """
     Traspasa automáticamente al día de hoy (en la zona horaria del usuario)
     las tareas del día puntuales que quedaron sin completar en fechas pasadas.
+    Optimizado en consultas por lotes O(1) para máxima escalabilidad (evita N+1 queries).
     """
-    today = get_user_today(db, user_id, now_utc)
-    past_daily_tasks = (
-        db.query(Task)
+    today = get_user_today(db, user_id, now_utc, user_timezone=user_timezone)
+
+    # 1. Obtener de un solo golpe las ocurrencias pasadas incompletas junto con su tarea
+    pending_past_pairs = (
+        db.query(TaskOccurrence, Task)
+        .join(Task, TaskOccurrence.task_id == Task.id)
         .filter(
             Task.user_id == user_id,
             Task.kind == "daily",
             Task.is_active == True,
             Task.date < today,
+            TaskOccurrence.date == Task.date,
+            TaskOccurrence.status != "done",
         )
         .all()
     )
 
-    if not past_daily_tasks:
+    if not pending_past_pairs:
         return
 
-    for task in past_daily_tasks:
-        past_occ = (
-            db.query(TaskOccurrence)
-            .filter(
-                TaskOccurrence.task_id == task.id,
-                TaskOccurrence.date == task.date
-            )
-            .first()
+    # 2. Consultar en una sola consulta IN si ya existe ocurrencia para hoy en esas tareas
+    task_ids = [task.id for _, task in pending_past_pairs]
+    existing_today_task_ids = set(
+        r[0]
+        for r in db.query(TaskOccurrence.task_id)
+        .filter(
+            TaskOccurrence.task_id.in_(task_ids),
+            TaskOccurrence.date == today
         )
+        .all()
+    )
 
-        if past_occ and past_occ.status != "done":
-            existing_today = (
-                db.query(TaskOccurrence)
-                .filter(
-                    TaskOccurrence.task_id == task.id,
-                    TaskOccurrence.date == today
-                )
-                .first()
-            )
-            if not existing_today:
-                past_occ.date = today
-                task.date = today
-            else:
-                task.date = today
+    modified = False
+    for past_occ, task in pending_past_pairs:
+        if task.id not in existing_today_task_ids:
+            past_occ.date = today
+            task.date = today
+            existing_today_task_ids.add(task.id)
+        else:
+            task.date = today
+        modified = True
 
-    db.commit()
+    if modified:
+        db.commit()
 
 
 def ensure_occurrences(db: Session, user_id: int, start_date: dt.date, end_date: dt.date) -> None:
@@ -160,7 +176,9 @@ def ensure_occurrences(db: Session, user_id: int, start_date: dt.date, end_date:
                 db.add(new_occ)
                 existing_daily_set.add((task.id, task.date))
 
-    db.commit()
+    # Commit solo si hubo nuevas inserciones, evitando bloqueos innecesarios
+    if db.new:
+        db.commit()
 
 
 def get_occurrences_in_range(
@@ -172,12 +190,13 @@ def get_occurrences_in_range(
     status: Optional[TaskStatus] = None,
     importance: Optional[TaskImportance] = None,
     kind: Optional[TaskKind] = None,
+    user_timezone: Optional[str] = None,
 ) -> List[TaskOccurrence]:
     """
     Obtiene las ocurrencias filtradas y ordenadas para el rango solicitado.
     """
     # 1. Traspasar pendientes y asegurar generación lazy
-    rollover_uncompleted_daily_tasks(db, user_id)
+    rollover_uncompleted_daily_tasks(db, user_id, user_timezone=user_timezone)
     ensure_occurrences(db, user_id, start, end)
 
     # 2. Consulta con JOIN
@@ -290,20 +309,29 @@ def update_occurrence(
 
 
 def reorder_occurrences(db: Session, user_id: int, reorder_in: OccurrenceReorder) -> None:
-    """Actualiza la posición ordinal de los post-its para una fecha."""
-    for position, occ_id in enumerate(reorder_in.ordered_ids):
-        occ = (
-            db.query(TaskOccurrence)
-            .join(Task)
-            .filter(
-                TaskOccurrence.id == occ_id,
-                TaskOccurrence.date == reorder_in.date,
-                Task.user_id == user_id
-            )
-            .first()
+    """Actualiza la posición ordinal de los post-its para una fecha en una sola consulta por lotes."""
+    if not reorder_in.ordered_ids:
+        return
+
+    occs = (
+        db.query(TaskOccurrence)
+        .join(Task)
+        .filter(
+            TaskOccurrence.id.in_(reorder_in.ordered_ids),
+            TaskOccurrence.date == reorder_in.date,
+            Task.user_id == user_id
         )
+        .all()
+    )
+
+    occ_map = {o.id: o for o in occs}
+    modified = False
+    for position, occ_id in enumerate(reorder_in.ordered_ids):
+        occ = occ_map.get(occ_id)
         if occ:
             occ.position = position
             occ.manual_order = True
+            modified = True
 
-    db.commit()
+    if modified:
+        db.commit()

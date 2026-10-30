@@ -128,24 +128,28 @@ const board = {
     if (mobileCountCommon) mobileCountCommon.textContent = commons.length;
     if (mobileCountDaily) mobileCountDaily.textContent = dailies.length;
 
-    // Renderizar comunes
+    // Renderizar comunes por lotes con DocumentFragment para minimizar reflows
     if (commons.length === 0) {
       if (emptyCommon) emptyCommon.style.display = "flex";
     } else {
       if (emptyCommon) emptyCommon.style.display = "none";
+      const fragmentCommon = document.createDocumentFragment();
       commons.forEach(occ => {
-        listCommon.appendChild(this.createPostitElement(occ));
+        fragmentCommon.appendChild(this.createPostitElement(occ));
       });
+      listCommon.appendChild(fragmentCommon);
     }
 
-    // Renderizar del día
+    // Renderizar del día por lotes con DocumentFragment
     if (dailies.length === 0) {
       if (emptyDaily) emptyDaily.style.display = "flex";
     } else {
       if (emptyDaily) emptyDaily.style.display = "none";
+      const fragmentDaily = document.createDocumentFragment();
       dailies.forEach(occ => {
-        listDaily.appendChild(this.createPostitElement(occ));
+        fragmentDaily.appendChild(this.createPostitElement(occ));
       });
+      listDaily.appendChild(fragmentDaily);
     }
   },
 
@@ -213,7 +217,6 @@ const board = {
         <span class="postit-importance-tag">${task.importance}</span>
       </div>
     `;
-
 
     // Clic en la tarjeta abre el detalle
     card.addEventListener("click", (e) => {
