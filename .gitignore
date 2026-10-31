@@ -24,9 +24,17 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Virtual Environment & Secrets
 .env
+.env.*
+!.env.example
 .venv*
+CLAVES*
+claves*
+*CLAVES*
+*claves*
+*SECRETS*
+*secrets*
 
 # SQLite Database
 *.db
