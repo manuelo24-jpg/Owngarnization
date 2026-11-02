@@ -2,7 +2,7 @@
  * Owngarnization — Service Worker (PWA + Web Push + Caché Offline)
  */
 
-const CACHE_VERSION = "owngarnization-v6";
+const CACHE_VERSION = "owngarnization-v7";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -10,26 +10,26 @@ const STATIC_ASSETS = [
   "/",
   "/m",
   "/download",
-  "/static/css/styles.css?v=6",
-  "/static/css/variables.css?v=6",
-  "/static/css/base.css?v=6",
-  "/static/css/layout.css?v=6",
-  "/static/css/board.css?v=6",
-  "/static/css/calendar.css?v=6",
-  "/static/css/modals.css?v=6",
-  "/static/css/guide.css?v=6",
-  "/static/css/responsive.css?v=6",
-  "/static/css/mobile.css?v=6",
-  "/static/js/api.js",
-  "/static/js/app.js",
-  "/static/js/board.js",
-  "/static/js/calendar.js",
-  "/static/js/modal.js",
-  "/static/js/task_modal.js",
-  "/static/js/drawer.js",
-  "/static/js/guide.js?v=6",
-  "/static/js/pwa.js",
-  "/static/js/push.js",
+  "/static/css/styles.css?v=7",
+  "/static/css/variables.css?v=7",
+  "/static/css/base.css?v=7",
+  "/static/css/layout.css?v=7",
+  "/static/css/board.css?v=7",
+  "/static/css/calendar.css?v=7",
+  "/static/css/modals.css?v=7",
+  "/static/css/guide.css?v=7",
+  "/static/css/responsive.css?v=7",
+  "/static/css/mobile.css?v=7",
+  "/static/js/api.js?v=7",
+  "/static/js/app.js?v=7",
+  "/static/js/board.js?v=7",
+  "/static/js/calendar.js?v=7",
+  "/static/js/modal.js?v=7",
+  "/static/js/task_modal.js?v=7",
+  "/static/js/drawer.js?v=7",
+  "/static/js/guide.js?v=7",
+  "/static/js/pwa.js?v=7",
+  "/static/js/push.js?v=7",
   "/static/img/logo.png?v=4",
   "/static/img/favicon.ico?v=4",
   "/static/img/icons/icon-192.png?v=4",
@@ -189,6 +189,7 @@ self.addEventListener("push", (event) => {
     badge: payload.badge || "/static/img/icons/badge-72.png",
     tag: payload.tag || "owngarnization-reminder",
     renotify: true,
+    requireInteraction: false,
     data: { url: payload.url || payload.data?.url || "/m" },
     vibrate: [150, 70, 150]
   };

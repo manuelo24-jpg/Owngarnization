@@ -16,8 +16,16 @@ const board = {
     this.bindEvents();
   },
 
+  setMobileActiveTab(tabName) {
+    this.mobileActiveTab = tabName;
+    document.querySelectorAll(".mobile-day-tab").forEach(t => {
+      const active = t.dataset.dayTab === this.mobileActiveTab;
+      t.classList.toggle("active", active);
+      t.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  },
+
   bindEvents() {
-    // Botón de añadir rápido en el estado vacío del día
     document.querySelector(".btn-quick-add")?.addEventListener("click", () => {
       if (window.modal) window.modal.openTaskModal("create");
     });
@@ -25,12 +33,21 @@ const board = {
     // Pestañas segmentadas en la versión móvil (/m)
     document.querySelectorAll(".mobile-day-tab").forEach(tab => {
       tab.addEventListener("click", () => {
-        this.mobileActiveTab = tab.dataset.dayTab;
-        document.querySelectorAll(".mobile-day-tab").forEach(t => {
-          const active = t.dataset.dayTab === this.mobileActiveTab;
-          t.classList.toggle("active", active);
-          t.setAttribute("aria-selected", active ? "true" : "false");
-        });
+        const targetTab = tab.dataset.dayTab;
+        this.setMobileActiveTab(targetTab);
+
+        // Si había un filtro de tipo opuesto activo, limpiarlo para mostrar la pestaña pulsada
+        if (window.appState && window.appState.filters.kind && window.appState.filters.kind !== targetTab) {
+          window.appState.filters.kind = "";
+          const kindContainer = document.querySelector('.filter-chips[data-filter="kind"]');
+          kindContainer?.querySelectorAll(".chip").forEach(c => {
+            c.classList.toggle("active", c.dataset.value === "");
+          });
+          window.appState.checkFiltersActive();
+          window.appState.reloadCurrentView();
+          return;
+        }
+
         this.updateColumnVisibility();
       });
     });
@@ -45,9 +62,11 @@ const board = {
     if (currentKindFilter === "daily") {
       colCommon.style.display = "none";
       colDaily.style.display = "";
+      if (this.isMobileMode()) this.setMobileActiveTab("daily");
     } else if (currentKindFilter === "common") {
       colCommon.style.display = "";
       colDaily.style.display = "none";
+      if (this.isMobileMode()) this.setMobileActiveTab("common");
     } else if (this.isMobileMode()) {
       colCommon.style.display = this.mobileActiveTab === "common" ? "" : "none";
       colDaily.style.display = this.mobileActiveTab === "daily" ? "" : "none";
@@ -69,7 +88,7 @@ const board = {
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
-        onEnd: (evt) => this.handleReorder(listCommon)
+        onEnd: () => this.handleReorder(listCommon)
       });
     }
 
@@ -81,7 +100,7 @@ const board = {
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
-        onEnd: (evt) => this.handleReorder(listDaily)
+        onEnd: () => this.handleReorder(listDaily)
       });
     }
   },
@@ -114,38 +133,53 @@ const board = {
 
     if (!listCommon || !listDaily) return;
 
+    const commons = occurrences.filter(o => o.task.kind === "common");
+    const dailies = occurrences.filter(o => o.task.kind === "daily");
+
+    // Si en móvil hay filtros activos y la pestaña actual queda vacía pero la otra sí tiene resultados,
+    // cambiar automáticamente a la pestaña con coincidencias para que el usuario vea el resultado del filtro.
+    if (this.isMobileMode() && window.appState) {
+      const f = window.appState.filters;
+      const hasSearchOrFilter = Boolean(f.status || f.importance || f.q);
+      if (hasSearchOrFilter && !f.kind) {
+        if (this.mobileActiveTab === "daily" && dailies.length === 0 && commons.length > 0) {
+          this.setMobileActiveTab("common");
+        } else if (this.mobileActiveTab === "common" && commons.length === 0 && dailies.length > 0) {
+          this.setMobileActiveTab("daily");
+        }
+      }
+    }
+
     this.updateColumnVisibility();
 
     listCommon.innerHTML = "";
     listDaily.innerHTML = "";
 
-    const commons = occurrences.filter(o => o.task.kind === "common");
-    const dailies = occurrences.filter(o => o.task.kind === "daily");
-
-    // Actualizar badges numéricos
     if (badgeCommon) badgeCommon.textContent = commons.length;
     if (badgeDaily) badgeDaily.textContent = dailies.length;
     if (mobileCountCommon) mobileCountCommon.textContent = commons.length;
     if (mobileCountDaily) mobileCountDaily.textContent = dailies.length;
 
-    // Renderizar comunes
     if (commons.length === 0) {
       if (emptyCommon) emptyCommon.style.display = "flex";
     } else {
       if (emptyCommon) emptyCommon.style.display = "none";
+      const fragCommon = document.createDocumentFragment();
       commons.forEach(occ => {
-        listCommon.appendChild(this.createPostitElement(occ));
+        fragCommon.appendChild(this.createPostitElement(occ));
       });
+      listCommon.appendChild(fragCommon);
     }
 
-    // Renderizar del día
     if (dailies.length === 0) {
       if (emptyDaily) emptyDaily.style.display = "flex";
     } else {
       if (emptyDaily) emptyDaily.style.display = "none";
+      const fragDaily = document.createDocumentFragment();
       dailies.forEach(occ => {
-        listDaily.appendChild(this.createPostitElement(occ));
+        fragDaily.appendChild(this.createPostitElement(occ));
       });
+      listDaily.appendChild(fragDaily);
     }
   },
 
@@ -156,7 +190,6 @@ const board = {
     card.dataset.occId = occ.id;
     card.dataset.taskId = task.id;
 
-    // Icono según estado
     const statusIcons = {
       not_started: "○",
       in_progress: "◐",
@@ -168,7 +201,6 @@ const board = {
       done: "Finalizada (clic para reiniciar)"
     };
 
-    // Horario
     let timeHtml = "";
     const startTime = occ.start_time || task.start_time;
     const endTime = occ.end_time || task.end_time;
@@ -182,7 +214,6 @@ const board = {
       `;
     }
 
-    // Descripción previa
     let descHtml = "";
     if (task.description && task.description.trim()) {
       descHtml = `<p class="postit-desc-preview">${this.escapeHtml(task.description)}</p>`;
@@ -214,15 +245,11 @@ const board = {
       </div>
     `;
 
-
-    // Clic en la tarjeta abre el detalle
     card.addEventListener("click", (e) => {
-      // Si el clic fue en el botón de estado, no abrir drawer
       if (e.target.closest(".postit-status-btn")) return;
       if (window.modal) window.modal.openDetailDrawer(occ);
     });
 
-    // Clic en el botón de estado: cambiar cíclicamente (not_started -> in_progress -> done -> not_started)
     const statusBtn = card.querySelector(".postit-status-btn");
     statusBtn?.addEventListener("click", async (e) => {
       e.stopPropagation();
@@ -237,7 +264,6 @@ const board = {
         const updated = await api.patch(`/api/occurrences/${occ.id}`, { status: nextStatus });
         occ.status = updated.status;
 
-        // Actualizar visualmente la tarjeta de inmediato
         card.className = `postit-card importance-${task.importance} status-${occ.status}`;
         statusBtn.textContent = statusIcons[occ.status];
         statusBtn.title = statusTitles[occ.status];

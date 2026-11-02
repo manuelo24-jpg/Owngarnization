@@ -3,8 +3,8 @@
     <div class="filters-header">
       <span class="filters-title">Filtros</span>
       <div class="filters-header-actions">
-        <button id="btn-reset-filters" class="btn-text" style="display: none;">Limpiar</button>
-        <button id="btn-close-mobile-filters" class="btn-close-mobile-filters" aria-label="Cerrar filtros">✕</button>
+        <button type="button" id="btn-reset-filters" class="btn-text" style="display: none;">Limpiar</button>
+        <button type="button" id="btn-close-mobile-filters" class="btn-close-mobile-filters" aria-label="Cerrar filtros">✕</button>
       </div>
     </div>
 
@@ -12,9 +12,9 @@
     <div class="filter-section">
       <label class="filter-label">Tipo de tarea</label>
       <div class="filter-chips" data-filter="kind">
-        <button class="chip active" data-value="">Todas</button>
-        <button class="chip" data-value="common">Comunes</button>
-        <button class="chip" data-value="daily">Del día</button>
+        <button type="button" class="chip active" data-value="">Todas</button>
+        <button type="button" class="chip" data-value="common">Comunes</button>
+        <button type="button" class="chip" data-value="daily">Del día</button>
       </div>
     </div>
 
@@ -22,10 +22,10 @@
     <div class="filter-section">
       <label class="filter-label">Estado</label>
       <div class="filter-chips" data-filter="status">
-        <button class="chip active" data-value="">Todos</button>
-        <button class="chip" data-value="not_started"><span class="status-icon">○</span> Sin empezar</button>
-        <button class="chip" data-value="in_progress"><span class="status-icon">◐</span> En proceso</button>
-        <button class="chip" data-value="done"><span class="status-icon">✓</span> Finalizada</button>
+        <button type="button" class="chip active" data-value="">Todos</button>
+        <button type="button" class="chip" data-value="not_started"><span class="status-icon">○</span> Sin empezar</button>
+        <button type="button" class="chip" data-value="in_progress"><span class="status-icon">◐</span> En proceso</button>
+        <button type="button" class="chip" data-value="done"><span class="status-icon">✓</span> Finalizada</button>
       </div>
     </div>
 
@@ -33,12 +33,19 @@
     <div class="filter-section">
       <label class="filter-label">Importancia</label>
       <div class="filter-chips" data-filter="importance">
-        <button class="chip active" data-value="">Todas</button>
-        <button class="chip chip-importance pi-low" data-value="low">Baja</button>
-        <button class="chip chip-importance pi-medium" data-value="medium">Media</button>
-        <button class="chip chip-importance pi-high" data-value="high">Alta</button>
-        <button class="chip chip-importance pi-urgent" data-value="urgent">Urgente</button>
+        <button type="button" class="chip active" data-value="">Todas</button>
+        <button type="button" class="chip chip-importance pi-low" data-value="low">Baja</button>
+        <button type="button" class="chip chip-importance pi-medium" data-value="medium">Media</button>
+        <button type="button" class="chip chip-importance pi-high" data-value="high">Alta</button>
+        <button type="button" class="chip chip-importance pi-urgent" data-value="urgent">Urgente</button>
       </div>
+    </div>
+
+    <!-- Acciones del panel móvil de filtros -->
+    <div class="mobile-filters-footer">
+      <button type="button" id="btn-apply-mobile-filters" class="btn btn-primary" style="width: 100%;">
+        Ver resultados
+      </button>
     </div>
 
     <!-- Atajos de teclado en la barra lateral -->

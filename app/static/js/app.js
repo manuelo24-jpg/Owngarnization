@@ -13,16 +13,17 @@ class AppState {
       q: ""
     };
     this.searchDebounceTimer = null;
+    this.loadRequestId = 0;
   }
 
   init() {
-    // Inicializar componentes
     if (window.modal) window.modal.init();
     if (window.board) window.board.init();
     if (window.calendarManager) window.calendarManager.init();
 
     this.applyUrlDeepLink();
     this.bindControls();
+    this.syncMobileDayTabsVisibility();
     this.updatePeriodLabel();
     this.reloadCurrentView();
   }
@@ -39,6 +40,13 @@ class AppState {
     if (occParam) {
       this.pendingHighlightOccId = Number(occParam);
     }
+  }
+
+  getMobileFiltersBackdrop() {
+    return (
+      document.getElementById("mobile-filters-backdrop") ||
+      document.getElementById("mobile-sheet-backdrop")
+    );
   }
 
   bindControls() {
@@ -58,63 +66,75 @@ class AppState {
       this.onDateChanged();
     });
 
-      // Selector de vistas (Segmented Control y Barra inferior móvil)
-      document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const view = btn.dataset.view;
-          this.closeMobileFilters();
-          this.switchView(view);
-        });
-      });
-
-      // Bottom sheet de filtros en móvil
-      document.getElementById("btn-mobile-filters")?.addEventListener("click", () => {
-        this.toggleMobileFilters();
-      });
-      document.getElementById("btn-close-mobile-filters")?.addEventListener("click", () => {
+    // Selector de vistas (Segmented Control y Barra inferior móvil)
+    document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const view = btn.dataset.view;
         this.closeMobileFilters();
+        this.switchView(view);
       });
-      document.getElementById("mobile-sheet-backdrop")?.addEventListener("click", () => {
-        this.closeMobileFilters();
-      });
+    });
 
-      // Buscador con debounce
-      const searchInput = document.getElementById("search-input");
-      searchInput?.addEventListener("input", (e) => {
-        clearTimeout(this.searchDebounceTimer);
-        this.searchDebounceTimer = setTimeout(() => {
-          this.filters.q = e.target.value.trim();
+    // Bottom sheet de filtros en móvil
+    document.getElementById("btn-mobile-filters")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.toggleMobileFilters();
+    });
+    document.getElementById("btn-close-mobile-filters")?.addEventListener("click", () => {
+      this.closeMobileFilters();
+    });
+    document.getElementById("btn-apply-mobile-filters")?.addEventListener("click", () => {
+      this.closeMobileFilters();
+    });
+    this.getMobileFiltersBackdrop()?.addEventListener("click", () => {
+      this.closeMobileFilters();
+    });
+
+    // Buscador con debounce
+    const searchInput = document.getElementById("search-input");
+    searchInput?.addEventListener("input", (e) => {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = setTimeout(() => {
+        this.filters.q = e.target.value.trim();
+        this.checkFiltersActive();
+        this.reloadCurrentView();
+      }, 250);
+    });
+
+    // Chips de filtros
+    document.querySelectorAll(".filter-chips").forEach(container => {
+      const filterKey = container.dataset.filter;
+      container.querySelectorAll(".chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          container.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          const val = chip.dataset.value || "";
+          this.filters[filterKey] = val;
+
+          // Si en móvil se filtra por tipo ("daily" o "common"), sincronizar la pestaña activa del día
+          if (filterKey === "kind" && (val === "daily" || val === "common") && window.board) {
+            window.board.setMobileActiveTab(val);
+          }
+
           this.checkFiltersActive();
           this.reloadCurrentView();
-        }, 250);
-      });
-
-      // Chips de filtros
-      document.querySelectorAll(".filter-chips").forEach(container => {
-        const filterKey = container.dataset.filter;
-        container.querySelectorAll(".chip").forEach(chip => {
-          chip.addEventListener("click", () => {
-            container.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-            chip.classList.add("active");
-            this.filters[filterKey] = chip.dataset.value;
-            this.checkFiltersActive();
-            this.reloadCurrentView();
-          });
         });
       });
+    });
 
-      // Botón "Limpiar filtros"
-      document.getElementById("btn-reset-filters")?.addEventListener("click", () => {
-        this.resetFilters();
-      });
-    }
+    // Botón "Limpiar filtros"
+    document.getElementById("btn-reset-filters")?.addEventListener("click", () => {
+      this.resetFilters();
+    });
+  }
 
   checkFiltersActive() {
     const activeCount = [
-        this.filters.kind,
-        this.filters.status,
-        this.filters.importance,
-        this.filters.q
+      this.filters.kind,
+      this.filters.status,
+      this.filters.importance,
+      this.filters.q
     ].filter(Boolean).length;
 
     const hasActiveFilters = activeCount > 0;
@@ -132,27 +152,46 @@ class AppState {
 
   toggleMobileFilters() {
     const sidebar = document.getElementById("sidebar-filters");
-    const backdrop = document.getElementById("mobile-sheet-backdrop");
+    const backdrop = this.getMobileFiltersBackdrop();
+    const filterBtn = document.getElementById("btn-mobile-filters");
     if (!sidebar) return;
-    const isOpen = sidebar.classList.toggle("mobile-open");
-    if (backdrop) backdrop.style.display = isOpen ? "block" : "none";
+
+    const isOpen = !sidebar.classList.contains("sheet-open");
+    sidebar.classList.toggle("sheet-open", isOpen);
+    sidebar.classList.toggle("mobile-open", isOpen);
+
+    if (backdrop) {
+      backdrop.classList.toggle("open", isOpen);
+      backdrop.style.display = isOpen ? "block" : "none";
+      backdrop.setAttribute("aria-hidden", isOpen ? "false" : "true");
+    }
+    if (filterBtn) {
+      filterBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
   }
 
   closeMobileFilters() {
     const sidebar = document.getElementById("sidebar-filters");
-    const backdrop = document.getElementById("mobile-sheet-backdrop");
-    sidebar?.classList.remove("mobile-open");
-    if (backdrop) backdrop.style.display = "none";
+    const backdrop = this.getMobileFiltersBackdrop();
+    const filterBtn = document.getElementById("btn-mobile-filters");
+
+    sidebar?.classList.remove("sheet-open", "mobile-open");
+    if (backdrop) {
+      backdrop.classList.remove("open");
+      backdrop.style.display = "none";
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+    if (filterBtn) {
+      filterBtn.setAttribute("aria-expanded", "false");
+    }
   }
 
   resetFilters() {
     this.filters = { kind: "", status: "", importance: "", q: "" };
 
-    // Limpiar input de búsqueda
     const searchInput = document.getElementById("search-input");
     if (searchInput) searchInput.value = "";
 
-    // Resetear chips activos
     document.querySelectorAll(".filter-chips").forEach(container => {
       container.querySelectorAll(".chip").forEach(chip => {
         chip.classList.toggle("active", chip.dataset.value === "");
@@ -187,60 +226,74 @@ class AppState {
     this.onDateChanged();
   }
 
+  syncMobileDayTabsVisibility() {
+    const layoutEl = document.querySelector(".app-layout");
+    if (layoutEl) {
+      layoutEl.dataset.currentView = this.currentView;
+    }
+    const mobileDayTabs = document.getElementById("mobile-day-tabs");
+    if (mobileDayTabs) {
+      mobileDayTabs.style.display = this.currentView === "day" ? "flex" : "none";
+    }
+  }
+
   switchView(newView) {
     this.currentView = newView;
 
-      // Actualizar botones de vista (escritorio y móvil)
-      document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
-        const isActive = btn.dataset.view === newView;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-selected", isActive ? "true" : "false");
-      });
+    // Actualizar botones de vista (escritorio y móvil)
+    document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
+      const isActive = btn.dataset.view === newView;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
 
-      // Mostrar sección correspondiente
-      const views = {
-        day: document.getElementById("view-day"),
-        week: document.getElementById("view-week"),
-        month: document.getElementById("view-month")
-      };
+    // Ocultar selector de tareas Del día / Comunes en Semana y Mes
+    this.syncMobileDayTabsVisibility();
 
-      for (const [key, el] of Object.entries(views)) {
-        if (el) {
-          el.style.display = key === newView ? "block" : "none";
-        }
+    // Mostrar sección correspondiente
+    const views = {
+      day: document.getElementById("view-day"),
+      week: document.getElementById("view-week"),
+      month: document.getElementById("view-month")
+    };
+
+    for (const [key, el] of Object.entries(views)) {
+      if (el) {
+        el.style.display = key === newView ? "block" : "none";
       }
-
-      this.updatePeriodLabel();
-
-      // Redimensionar calendario al hacerse visible
-      if (newView === "month" && window.calendarManager?.calendarMonth) {
-        setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
-      } else if (newView === "week" && window.calendarManager?.calendarWeek) {
-        setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
-      }
-
-      this.reloadCurrentView();
     }
+
+    this.updatePeriodLabel();
+
+    // Redimensionar calendario al hacerse visible
+    if (newView === "month" && window.calendarManager?.calendarMonth) {
+      setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
+    } else if (newView === "week" && window.calendarManager?.calendarWeek) {
+      setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
+    }
+
+    this.reloadCurrentView();
+  }
 
   getCurrentDateFormatted() {
-      const y = this.currentDate.getFullYear();
-      const m = String(this.currentDate.getMonth() + 1).padStart(2, "0");
-      const d = String(this.currentDate.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
+    const y = this.currentDate.getFullYear();
+    const m = String(this.currentDate.getMonth() + 1).padStart(2, "0");
+    const d = String(this.currentDate.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
 
   formatDate(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
-    }
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
 
   updatePeriodLabel() {
-      const labelEl = document.getElementById("current-period-label");
-      if(!labelEl) return;
+    const labelEl = document.getElementById("current-period-label");
+    if (!labelEl) return;
 
-      if(this.currentView === "day") {
+    if (this.currentView === "day") {
       labelEl.textContent = this.currentDate.toLocaleDateString("es-ES", {
         weekday: "long",
         day: "numeric",
@@ -279,7 +332,6 @@ class AppState {
     const firstDay = new Date(y, m, 1);
     const lastDay = new Date(y, m + 1, 0);
 
-    // Añadir margen de seguridad para cubrir la cuadrícula completa del mes
     const start = new Date(firstDay);
     start.setDate(firstDay.getDate() - 7);
 
@@ -290,6 +342,7 @@ class AppState {
   }
 
   async reloadCurrentView() {
+    const requestId = ++this.loadRequestId;
     let startStr, endStr;
 
     if (this.currentView === "day") {
@@ -313,7 +366,7 @@ class AppState {
 
     try {
       const occurrences = await api.get("/api/occurrences", params);
-      if (!occurrences) return;
+      if (requestId !== this.loadRequestId || !occurrences) return;
 
       if (this.currentView === "day" && window.board) {
         window.board.renderOccurrences(occurrences);
@@ -337,7 +390,6 @@ class AppState {
   }
 }
 
-// Inicializar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
   window.appState = new AppState();
   window.appState.init();

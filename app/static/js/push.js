@@ -9,7 +9,7 @@ const pushManagerClient = {
 
   init() {
     this.bindModalEvents();
-    this.syncTimezoneSilently();
+    this.syncTimezoneAndSubscriptionSilently();
   },
 
   bindModalEvents() {
@@ -19,6 +19,8 @@ const pushManagerClient = {
     const saveBtn = document.getElementById("btn-save-notif-prefs");
     const testBtn = document.getElementById("btn-test-push");
     const toggleDeviceBtn = document.getElementById("btn-toggle-device-push");
+    const enabledCheck = document.getElementById("notif-enabled-check");
+    const offsetSelect = document.getElementById("notif-offset-select");
 
     openBtn?.addEventListener("click", () => this.openModal());
     closeBtn?.addEventListener("click", () => this.closeModal());
@@ -29,7 +31,11 @@ const pushManagerClient = {
 
     toggleDeviceBtn?.addEventListener("click", () => this.toggleDeviceSubscription());
     testBtn?.addEventListener("click", () => this.sendTestNotification());
-    saveBtn?.addEventListener("click", () => this.savePreferences());
+    saveBtn?.addEventListener("click", () => this.savePreferences({ closeOnSave: true }));
+
+    // Guardado automático al cambiar opciones para que no se pierdan si cierra el modal directamente
+    enabledCheck?.addEventListener("change", () => this.savePreferences({ silent: true }));
+    offsetSelect?.addEventListener("change", () => this.savePreferences({ silent: true }));
   },
 
   async ensureServiceWorkerReady() {
@@ -41,20 +47,46 @@ const pushManagerClient = {
     return await navigator.serviceWorker.ready;
   },
 
-  async syncTimezoneSilently() {
+  async syncTimezoneAndSubscriptionSilently() {
     try {
       const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (!detectedTz) return;
-      const key = "owngarnization_synced_tz";
-      if (sessionStorage.getItem(key) === detectedTz) return;
-
-      const prefs = await api.get("/api/me/preferences");
-      if (prefs && prefs.timezone !== detectedTz) {
-        await api.patch("/api/me/preferences", { timezone: detectedTz });
+      const tzKey = "owngarnization_synced_tz";
+      if (detectedTz && sessionStorage.getItem(tzKey) !== detectedTz) {
+        const prefs = await api.get("/api/me/preferences");
+        if (prefs && prefs.timezone !== detectedTz) {
+          await api.patch("/api/me/preferences", { timezone: detectedTz });
+        }
+        sessionStorage.setItem(tzKey, detectedTz);
       }
-      sessionStorage.setItem(key, detectedTz);
+
+      // Si el navegador ya tiene permiso y suscripción activa, asegurar que el backend la tenga registrada
+      const subKey = "owngarnization_synced_sub";
+      if (
+        !sessionStorage.getItem(subKey) &&
+        "serviceWorker" in navigator &&
+        "PushManager" in window &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        const reg = await this.ensureServiceWorkerReady();
+        const sub = reg ? await reg.pushManager.getSubscription() : null;
+        if (sub) {
+          const subJson = sub.toJSON();
+          if (subJson?.endpoint && subJson?.keys?.p256dh && subJson?.keys?.auth) {
+            await api.post("/api/push/subscriptions", {
+              endpoint: subJson.endpoint,
+              keys: {
+                p256dh: subJson.keys.p256dh,
+                auth: subJson.keys.auth
+              },
+              user_agent: navigator.userAgent
+            });
+            sessionStorage.setItem(subKey, "1");
+          }
+        }
+      }
     } catch {
-      // Ignorar si no hay sesión activa
+      // Ignorar errores silenciosos en el arranque
     }
   },
 
@@ -114,8 +146,6 @@ const pushManagerClient = {
     const isIOS = window.pwaManager?.isIOS();
     const isStandalone = window.pwaManager?.isStandalone();
 
-    // En iPhone/iPad, si no se ha abierto desde el icono instalado en la pantalla de inicio,
-    // iOS oculta las APIs PushManager y Notification.
     if (isIOS && !isStandalone) {
       if (iosWarning) iosWarning.style.display = "block";
     } else if (iosWarning) {
@@ -150,138 +180,150 @@ const pushManagerClient = {
       const sub = reg ? await reg.pushManager.getSubscription() : null;
       this.currentSubscription = sub;
 
-          if (sub) {
-            if (statusBox) {
-              statusBox.textContent = "✅ Avisos activos en este dispositivo";
-            }
-            if (toggleBtn) {
-              toggleBtn.textContent = "Desactivar avisos en este dispositivo";
-              toggleBtn.disabled = false;
-            }
-            if (testBtn) testBtn.disabled = false;
-          } else {
-            if (statusBox) {
-              statusBox.textContent = this.configured
-                ? "🔕 Avisos inactivos en este dispositivo (pulsa abajo para activar)"
-                : "⚠️ Falta configurar claves VAPID en el servidor";
-            }
-            if (toggleBtn) {
-              toggleBtn.textContent = "Activar avisos en este dispositivo";
-              toggleBtn.disabled = !this.configured;
-            }
-            if (testBtn) testBtn.disabled = true;
-          }
-        } catch (err) {
-          console.error("Error comprobando Service Worker:", err);
-          if (statusBox) {
-            statusBox.textContent = "⚠️ No se pudo inicializar el Service Worker";
-          }
+      if (sub) {
+        if (statusBox) {
+          statusBox.textContent = "✅ Avisos activos en este dispositivo";
         }
-      },
+        if (toggleBtn) {
+          toggleBtn.textContent = "Desactivar avisos en este dispositivo";
+          toggleBtn.disabled = false;
+        }
+        if (testBtn) testBtn.disabled = false;
+      } else {
+        if (statusBox) {
+          statusBox.textContent = this.configured
+            ? "🔕 Avisos inactivos en este dispositivo (pulsa abajo para activar)"
+            : "⚠️ Falta configurar claves VAPID en el servidor";
+        }
+        if (toggleBtn) {
+          toggleBtn.textContent = "Activar avisos en este dispositivo";
+          toggleBtn.disabled = !this.configured;
+        }
+        if (testBtn) testBtn.disabled = true;
+      }
+    } catch (err) {
+      console.error("Error comprobando Service Worker:", err);
+      if (statusBox) {
+        statusBox.textContent = "⚠️ No se pudo inicializar el Service Worker";
+      }
+    }
+  },
 
-      urlBase64ToUint8Array(base64String) {
-        const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-        const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; ++i) {
-          outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-      },
+  urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  },
 
   async toggleDeviceSubscription() {
-          if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-            showToast("En iPhone debes añadir la app a la pantalla de inicio desde Safari y abrirla desde su icono", "error");
-            return;
-          }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+      showToast("En iPhone debes añadir la app a la pantalla de inicio desde Safari y abrirla desde su icono", "error");
+      return;
+    }
 
-          try {
-              // Si ya teníamos suscripción activa, desuscribir
-              if (this.currentSubscription) {
-                await api.delete("/api/push/subscriptions", { endpoint: this.currentSubscription.endpoint });
-                await this.currentSubscription.unsubscribe();
-                this.currentSubscription = null;
-                showToast("Notificaciones desactivadas en este dispositivo", "info");
-                await this.refreshDeviceSubscriptionUI();
-                return;
-              }
+    try {
+      if (this.currentSubscription) {
+        await api.delete("/api/push/subscriptions", { endpoint: this.currentSubscription.endpoint });
+        await this.currentSubscription.unsubscribe();
+        this.currentSubscription = null;
+        sessionStorage.removeItem("owngarnization_synced_sub");
+        showToast("Notificaciones desactivadas en este dispositivo", "info");
+        await this.refreshDeviceSubscriptionUI();
+        return;
+      }
 
-              if (!this.configured || !this.vapidPublicKey) {
-                showToast("El servidor aún no tiene claves VAPID configuradas", "error");
-                return;
-              }
+      if (!this.configured || !this.vapidPublicKey) {
+        showToast("El servidor aún no tiene claves VAPID configuradas", "error");
+        return;
+      }
 
-              // IMPORTANTE para iOS/iPhone (WebKit): solicitar Notification.requestPermission()
-              // inmediatamente dentro del gesto táctil del usuario antes de otros awaits.
-              const permission = await Notification.requestPermission();
-              if (permission !== "granted") {
-                showToast("Debes conceder permiso de notificaciones en el aviso de tu iPhone", "error");
-                await this.refreshDeviceSubscriptionUI();
-                return;
-              }
+      // Solicitar Notification.requestPermission() inmediatamente dentro del gesto táctil (requisito iOS WebKit)
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        showToast("Debes conceder permiso de notificaciones en el aviso de tu teléfono", "error");
+        await this.refreshDeviceSubscriptionUI();
+        return;
+      }
 
-              const reg = await this.ensureServiceWorkerReady();
-              const existing = await reg.pushManager.getSubscription();
-              if (existing) {
-                await existing.unsubscribe();
-              }
+      const reg = await this.ensureServiceWorkerReady();
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) {
+        await existing.unsubscribe();
+      }
 
-              const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
-              });
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
+      });
 
-              this.currentSubscription = sub;
-              const subJson = sub.toJSON();
-              await api.post("/api/push/subscriptions", {
-                endpoint: subJson.endpoint,
-                keys: {
-                  p256dh: subJson.keys?.p256dh || "",
-                  auth: subJson.keys?.auth || ""
-                },
-                user_agent: navigator.userAgent
-              });
+      this.currentSubscription = sub;
+      const subJson = sub.toJSON();
+      await api.post("/api/push/subscriptions", {
+        endpoint: subJson.endpoint,
+        keys: {
+          p256dh: subJson.keys?.p256dh || "",
+          auth: subJson.keys?.auth || ""
+        },
+        user_agent: navigator.userAgent
+      });
+      sessionStorage.setItem("owngarnization_synced_sub", "1");
 
-              showToast("¡Avisos activados en este dispositivo!", "success");
-              await this.refreshDeviceSubscriptionUI();
-            } catch (err) {
-              console.error("Error al gestionar suscripción Push:", err);
-              showToast(err.message || "Error al activar notificaciones", "error");
-            }
-          },
+      // Asegurar que las preferencias de avisos y zona horaria queden activas en la cuenta
+      const enabledCheck = document.getElementById("notif-enabled-check");
+      if (enabledCheck) enabledCheck.checked = true;
+      await this.savePreferences({ silent: true });
 
-  async savePreferences() {
-            const enabledCheck = document.getElementById("notif-enabled-check");
-            const offsetSelect = document.getElementById("notif-offset-select");
-            const tzInput = document.getElementById("notif-timezone-display");
+      showToast("¡Avisos activados en este dispositivo!", "success");
+      await this.refreshDeviceSubscriptionUI();
+    } catch (err) {
+      console.error("Error al gestionar suscripción Push:", err);
+      showToast(err.message || "Error al activar notificaciones", "error");
+    }
+  },
 
-            const payload = {
-              reminders_enabled: Boolean(enabledCheck?.checked),
-              reminder_offset_min: Number(offsetSelect?.value || 0),
-              timezone: (tzInput?.value || "Europe/Madrid").trim()
-            };
+  async savePreferences({ silent = false, closeOnSave = false } = {}) {
+    const enabledCheck = document.getElementById("notif-enabled-check");
+    const offsetSelect = document.getElementById("notif-offset-select");
+    const tzInput = document.getElementById("notif-timezone-display");
+    const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Madrid";
 
-            try {
-              await api.patch("/api/me/preferences", payload);
-              showToast("Preferencias de avisos guardadas", "success");
-              this.closeModal();
-            } catch (err) {
-              showToast(err.message || "Error al guardar preferencias", "error");
-            }
-          },
+    const payload = {
+      reminders_enabled: Boolean(enabledCheck ? enabledCheck.checked : true),
+      reminder_offset_min: Number(offsetSelect?.value ?? 10),
+      timezone: (tzInput?.value || detectedTz).trim()
+    };
+
+    try {
+      await api.patch("/api/me/preferences", payload);
+      if (!silent) {
+        showToast("Preferencias de avisos guardadas", "success");
+      }
+      if (closeOnSave) {
+        this.closeModal();
+      }
+    } catch (err) {
+      if (!silent) {
+        showToast(err.message || "Error al guardar preferencias", "error");
+      }
+    }
+  },
 
   async sendTestNotification() {
-            try {
-              await api.post("/api/push/test", {});
-              showToast("Notificación de prueba enviada", "success");
-            } catch (err) {
-              showToast(err.message || "No se pudo enviar la prueba", "error");
-            }
-          }
-        };
+    try {
+      await api.post("/api/push/test", {});
+      showToast("Notificación de prueba enviada", "success");
+    } catch (err) {
+      showToast(err.message || "No se pudo enviar la prueba", "error");
+    }
+  }
+};
 
-        document.addEventListener("DOMContentLoaded", () => {
-          window.pushManagerClient = pushManagerClient;
-          pushManagerClient.init();
-        });
+document.addEventListener("DOMContentLoaded", () => {
+  window.pushManagerClient = pushManagerClient;
+  pushManagerClient.init();
+});

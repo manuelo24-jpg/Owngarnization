@@ -17,7 +17,10 @@ def _deliver_webpush(subscription_info: Dict[str, Any], data: str, vapid_private
         subscription_info=subscription_info,
         data=data,
         vapid_private_key=vapid_private_key,
-        vapid_claims=vapid_claims,
+        vapid_claims=dict(vapid_claims),
+        ttl=3600,
+        headers={"Urgency": "high"},
+        timeout=10,
     )
 
 
@@ -104,4 +107,3 @@ def send_push_to_user(db: Session, user: User, payload: Dict[str, Any]) -> int:
                 logger.warning("Fallo al enviar Web Push a sub %s: %s", sub.id, exc)
 
     return sent_count
-

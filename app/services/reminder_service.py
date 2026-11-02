@@ -1,10 +1,14 @@
 import datetime as dt
+import logging
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from typing import Dict, Optional
 from sqlalchemy.orm import Session, joinedload
 
+from app.database import SessionLocal
 from app.models import User, Task, TaskOccurrence, PushSubscription
 from app.services import occurrence_service, push_service
+
+logger = logging.getLogger(__name__)
 
 IMPORTANCE_LABELS = {
     "low": "Prioridad baja",
@@ -22,6 +26,7 @@ def dispatch_due_reminders(db: Session, now_utc: Optional[dt.datetime] = None) -
     - Ventana de envío: [inicio - antelación, inicio + 15 min].
     - Marca reminder_sent_at en la misma transacción para evitar duplicados.
     """
+    is_realtime_tick = now_utc is None
     ref_utc = now_utc or dt.datetime.now(dt.timezone.utc)
     if ref_utc.tzinfo is None:
         ref_utc = ref_utc.replace(tzinfo=dt.timezone.utc)
@@ -75,6 +80,17 @@ def dispatch_due_reminders(db: Session, now_utc: Optional[dt.datetime] = None) -
             window_close = start_dt_local + dt.timedelta(minutes=15)
 
             if window_open <= now_local <= window_close:
+                # Si estamos en el bucle en tiempo real y el usuario acaba de crear/editar la tarea
+                # hace menos de 8 segundos, damos margen para que pueda salir de la app o bloquear
+                # la pantalla antes de recibir la notificación push.
+                if is_realtime_tick and occ.task.updated_at:
+                    updated_utc = occ.task.updated_at
+                    if updated_utc.tzinfo is None:
+                        updated_utc = updated_utc.replace(tzinfo=dt.timezone.utc)
+                    age_sec = (ref_utc - updated_utc).total_seconds()
+                    if 0 <= age_sec < 8:
+                        continue
+
                 time_str = effective_time.strftime("%H:%M")
                 imp_label = IMPORTANCE_LABELS.get(occ.task.importance, "Prioridad media")
                 if offset_min > 0:
@@ -104,3 +120,14 @@ def dispatch_due_reminders(db: Session, now_utc: Optional[dt.datetime] = None) -
         "messages_sent": messages_sent,
     }
 
+
+def run_due_reminders_session() -> Dict[str, int]:
+    """Ejecuta el despacho de recordatorios abriendo y cerrando su propia sesión de BD."""
+    db = SessionLocal()
+    try:
+        return dispatch_due_reminders(db)
+    except Exception as exc:
+        logger.warning("Error ejecutando ciclo de recordatorios en segundo plano: %s", exc)
+        return {"users_checked": 0, "occurrences_notified": 0, "messages_sent": 0}
+    finally:
+        db.close()

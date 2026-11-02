@@ -342,3 +342,8 @@ kbd {
   cursor: pointer;
   padding: 4px 8px;
 }
+
+
+.mobile-filters-footer {
+  display: none;
+}

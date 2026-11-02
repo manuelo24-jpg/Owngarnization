@@ -424,3 +424,60 @@
 .mobile-guide-card .guide-footer {
   padding: 12px 16px;
 }
+
+
+/* Ocultar selector Del día / Comunes cuando la vista activa es Semana o Mes */
+.mobile-version-layout[data-current-view="week"] .mobile-day-tabs,
+.mobile-version-layout[data-current-view="month"] .mobile-day-tabs {
+  display: none !important;
+}
+
+/* Soporte completo para el Bottom Sheet de filtros en móvil */
+.mobile-version-layout .sidebar-filters.sheet-open,
+.mobile-version-layout .sidebar-filters.mobile-open {
+  transform: translateY(0);
+}
+
+.mobile-version-layout .btn-close-mobile-filters {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.mobile-version-layout .sidebar-filters .filter-chips {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  gap: 8px;
+}
+
+.mobile-version-layout .sidebar-filters .chip {
+  min-height: 38px;
+  padding: 7px 14px;
+  font-size: 13px;
+}
+
+.mobile-version-layout .mobile-filters-footer {
+  display: block;
+  margin-top: 8px;
+}
+
+/* Ajuste compacto del contenedor de calendario en móvil (1 tarea por día) */
+.mobile-version-layout .calendar-container {
+  padding: 12px 10px;
+  min-height: 420px;
+}
+
+.mobile-version-layout .fc .fc-daygrid-event {
+  font-size: 11px;
+  line-height: 1.25;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

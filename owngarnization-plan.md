@@ -92,17 +92,22 @@ owngarnization/
 │       │   └── app.js       # Coordinador de estado global y vistas
 │       └── img/             # Logo oficial y capturas de las guías
 │
-│   # --- Módulo de Proyectos (Fases 12-14; mismo patrón modular) ---
+│   # --- Selector de espacio + Módulo de Proyectos (Fases 12-14; mismo patrón modular) ---
+│   ├── routers/spaces.py                # Página /spaces: elegir "Organización personal" o "Proyectos"
 │   ├── routers/projects.py              # Thin Controller: /api/projects/... y páginas /projects
-│   ├── services/project_service.py      # Proyectos, miembros, roles y permisos
-│   ├── services/project_task_service.py # Tareas, mover entre columnas, reordenar, asignar
-│   ├── templates/projects/              # projects.html (listado) · project_board.html (tablero)
-│   ├── templates/components/projects/   # project_card, board_column, task_card, task_drawer,
-│   │                                    # project_modal, members_modal, projects_guide_modal
+│   ├── services/project_service.py      # Proyectos, miembros, permisos y roles de equipo
+│   ├── services/project_task_service.py # Tareas, horario, mover entre columnas, reordenar, asignar
+│   ├── services/project_schedule_service.py # Vistas por hora (día/semana) y carga horaria por persona
+│   ├── templates/spaces.html            # Pantalla selectora (dos tarjetas grandes)
+│   ├── templates/projects/              # projects.html (selector de proyecto) · project.html (espacio del proyecto)
+│   ├── templates/components/projects/   # project_header (selector 1 a 1), project_tabs, board_column,
+│   │                                    # task_card, task_drawer, hour_timeline, people_panel,
+│   │                                    # role_modal, project_modal, projects_guide_modal
 │   └── static/
-│       ├── css/projects.css (+ projects_board.css, projects_guide.css)
-│       ├── js/projects/                 # projects_list.js, project_board.js, project_drawer.js,
-│       │                                # project_members.js, projects_guide.js
+│       ├── css/spaces.css · css/projects.css (+ projects_board.css, projects_people.css, projects_guide.css)
+│       ├── js/spaces.js                 # Selección de espacio y recordar el último usado
+│       ├── js/projects/                 # projects_list.js, project_board.js, project_timeline.js,
+│       │                                # project_drawer.js, project_people.js, projects_guide.js
 │       └── img/guide/projects/          # Capturas del manual de Proyectos
 │
 │   # --- App móvil PWA y notificaciones (Fases 15-18) ---
@@ -157,12 +162,25 @@ owngarnization/
 
 ### 5.1 Modelo de datos del módulo de Proyectos
 
-**Project**
-- `id`, `owner_id` (FK User), `name` (obligatorio), `description`, `color` (opcional), `is_archived`, `is_active` (borrado lógico), `created_at`, `updated_at`
+**User** (ampliación)
+- `last_space`: `"personal"` | `"projects"` (opcional, para recordar el último espacio elegido)
+- `last_project_id` (FK Project, opcional, para reabrir el último proyecto)
 
-**ProjectMember** (quién participa y con qué rol)
-- `id`, `project_id` (FK), `user_id` (FK), `role`: `"owner"` | `"member"` | `"viewer"`
+**Project**
+- `id`, `owner_id` (FK User), `name` (obligatorio), `description`, `color` (opcional), `icon` (emoji opcional), `is_archived`, `is_active` (borrado lógico), `created_at`, `updated_at`
+
+**ProjectRole** (rol de equipo, definido por proyecto: "Diseño", "Desarrollo", "Cliente"...)
+- `id`, `project_id` (FK), `name` (obligatorio), `color` (de la paleta de la app), `position`
+- Restricción única `(project_id, name)`. Al crear un proyecto se crea un rol por defecto "General".
+
+**ProjectMember** (quién participa, con qué permiso y con qué rol de equipo)
+- `id`, `project_id` (FK), `user_id` (FK)
+- `permission`: `"owner"` | `"admin"` | `"member"` | `"viewer"` (qué puede hacer)
+- `role_id` (FK ProjectRole, opcional) — su función dentro del equipo (qué es)
+- `weekly_hours` (opcional, capacidad semanal para ver la carga horaria), `joined_at`
 - Restricción única `(project_id, user_id)`. El propietario se inserta como miembro `owner` al crear el proyecto.
+
+> Se separan **permiso** (seguridad, comprobado en servicios) y **rol de equipo** (organización, libre y editable). Así el cliente puede ser "Cliente" con permiso `viewer`, y un diseñador "Diseño" con permiso `member`.
 
 **ProjectColumn** (celda/estado del tablero)
 - `id`, `project_id` (FK), `name`, `position` (orden), `is_done` (marca la columna que cuenta como "completada" para el % de progreso)
@@ -171,15 +189,20 @@ owngarnization/
 **ProjectTask**
 - `id`, `project_id` (FK), `column_id` (FK), `title` (obligatorio), `description`
 - `priority`: `"low"` | `"medium"` | `"high"` | `"urgent"`
-- `position` (orden dentro de la columna), `due_date` (opcional), `is_active`, `created_by` (FK User), `created_at`, `updated_at`
+- `position` (orden dentro de la columna), `is_active`, `created_by` (FK User), `created_at`, `updated_at`
+- **Horario** (misma lógica que las tareas personales): `date` (opcional), `start_time`, `end_time` (opcionales; validar `end_time > start_time`)
+- `due_date` (fecha límite opcional, distinta del día en que se trabaja), `estimated_minutes` (opcional), `role_id` (FK ProjectRole, opcional: "tarea de Diseño")
+- `completed_at` (se rellena al moverla a una columna `is_done`), `reminder_sent_at` (reutiliza el sistema de avisos push)
 
 **ProjectTaskAssignee** (asignación N:M)
 - `task_id` (FK), `user_id` (FK) — solo se puede asignar a miembros del proyecto. PK compuesta `(task_id, user_id)`.
 
 **Reglas clave**
 - Toda consulta filtra por pertenencia: un usuario solo ve proyectos donde es miembro.
-- Permisos por rol comprobados en la capa de servicios, no en el router.
-- Mover una tarea a una columna `is_done` registra la finalización; índices en `(project_id, column_id, position)`.
+- Permisos comprobados en la capa de servicios, no en el router.
+- Mover una tarea a una columna `is_done` registra `completed_at`; índices en `(project_id, column_id, position)` y `(project_id, date, start_time)`.
+- **Solapes**: al asignar una tarea con hora, el servicio avisa (no bloquea) si la persona ya tiene otra tarea del proyecto en esa franja.
+- Los datos personales (`Task`/`TaskOccurrence`) y los de proyectos (`Project*`) viven en tablas separadas: un espacio nunca mezcla datos del otro.
 
 ### 5.2 Modelo de datos de notificaciones (PWA)
 
@@ -295,43 +318,99 @@ Campos:
 5. Estado inicial (por defecto "sin empezar")
 6. **Hora inicio y hora fin (opcionales)** con validación de coherencia
 
-### 9.6 Módulo de Proyectos (pantalla aparte)
-**Objetivo**: gestionar proyectos personales o en equipo con un tablero visual por estados, independiente del calendario de tareas diarias.
+### 9.6 Espacios de trabajo: Organización personal y Proyectos
 
-**Navegación**: nueva entrada "Proyectos" en la cabecera principal que abre `/projects` (otra pantalla, con su propia plantilla, CSS y JS; el calendario no se carga aquí).
+**Objetivo**: dividir la app en **dos espacios independientes** que comparten cuenta, diseño y patrones de interacción:
 
-**Listado de proyectos (`/projects`)**
-- Tarjetas con nombre, descripción corta, nº de tareas, progreso (% en columna final) y avatares de miembros.
-- Botón "＋ Nuevo proyecto" (modal con nombre obligatorio, descripción y color/icono opcionales).
-- Archivar y eliminar proyectos (borrado lógico).
+| Espacio | Qué es | Pantalla |
+|---|---|---|
+| 🗓️ **Organización personal** | Lo que ya existe: tareas comunes y del día, calendario día/semana/mes, post-its, avisos. **No cambia.** | `/` (web) · `/m` (móvil) |
+| 📁 **Proyectos** | Trabajo en equipo: un proyecto cada vez, con personas, roles, tareas y planificación por horas. | `/projects` → `/projects/{id}` |
 
-**Tablero del proyecto (`/projects/{id}`)**
-- Columnas (celdas) por estado, por defecto: **Pendiente · En curso · En revisión · Hecho**. Se pueden **añadir, renombrar, reordenar y eliminar** columnas (mínimo 1).
-- Tarjetas de tarea con: título, prioridad (color + etiqueta: baja/media/alta/urgente), asignados (avatares/iniciales), fecha límite opcional y contador de subtareas/comentarios opcional.
-- **Drag & drop** de tarjetas entre columnas y reorden dentro de la columna (SortableJS); el orden persiste.
-- Panel lateral de detalle/edición de tarea (reutiliza el patrón de *drawer*): descripción, prioridad, columna, asignados, fecha límite, borrar.
-- **Asignación a personas**: el propietario invita miembros por email (usuarios ya registrados) y asigna tareas a uno o varios miembros. Roles: `owner` (todo), `member` (crea/edita/mueve tareas), `viewer` (solo lectura).
-- Filtros: por prioridad, por asignado (incluido "sin asignar" y "mis tareas"), búsqueda por texto.
-- Estados vacíos, toasts de error/éxito y atajos (`N` nueva tarea del proyecto, `Esc` cerrar).
+#### 9.6.1 Selector de espacio (antes de entrar)
+- Nueva pantalla **`/spaces`**: tras el login (y al abrir la app instalada) se muestran **dos tarjetas grandes** estilo post-it, centradas, con el logo arriba:
+  - **Organización personal** — subtítulo "Tus tareas, rutinas y calendario" + resumen rápido (p. ej. "4 tareas hoy · 2 hechas").
+  - **Proyectos** — subtítulo "Trabaja con tu equipo" + resumen ("3 proyectos activos · 5 tareas asignadas a ti").
+- Casilla opcional **"Recordar mi elección"** (`users.last_space`): si está marcada, el login lleva directamente al último espacio usado; el selector sigue accesible.
+- **Cambio de espacio en cualquier momento**: en la cabecera, junto al logo, un conmutador segmentado `Personal | Proyectos` (en móvil, en la barra inferior o en el menú del avatar).
+- Compatibilidad: `/` sigue siendo el espacio personal (no se rompen enlaces, PWA ni tests); solo cambia el destino tras el login (`/spaces`).
+- En móvil la misma pantalla se apila en vertical (tarjetas a ancho completo, áreas táctiles ≥ 44 px).
 
-**Alcance fuera de esta versión** (futuro): comentarios, adjuntos, notificaciones por email, plantillas de proyecto.
+#### 9.6.2 Selección de proyecto (de 1 en 1)
+- **`/projects`** muestra la lista de proyectos del usuario como tarjetas (nombre, icono/color, descripción corta, nº de tareas, % de progreso, avatares de miembros y "tu rol").
+- Se entra en **un único proyecto a la vez**: al pulsar una tarjeta se abre `/projects/{id}` y todo lo que se ve (tablero, horario, personas) pertenece solo a ese proyecto.
+- En la cabecera del proyecto, el **nombre del proyecto es un desplegable** para saltar a otro proyecto sin volver al listado; se recuerda el último abierto (`users.last_project_id`).
+- Botón "＋ Nuevo proyecto" (modal: nombre obligatorio, descripción, color de la paleta e icono/emoji opcionales). Archivar y eliminar (borrado lógico) solo para `owner`.
+- Estado vacío amable: "Aún no tienes proyectos. Crea el primero o pide que te inviten".
 
-**API JSON de Proyectos** (requiere sesión; permisos por rol en servicios)
+#### 9.6.3 Dentro de un proyecto: pestañas
+Cabecera del proyecto + tres pestañas (en móvil, como la barra inferior Día/Semana/Mes):
+
+**① Tablero** (vista Kanban, la lógica de post-its de la app)
+- Columnas por estado, por defecto **Pendiente · En curso · En revisión · Hecho**; se pueden añadir, renombrar, reordenar y eliminar (mínimo 1).
+- Tarjetas post-it con: título, prioridad (mismo código de color que las tareas personales), hora si la tiene (`⏰ 10:00–11:30`), rol de la tarea (etiqueta de color), asignados (iniciales/avatares) y fecha límite.
+- **Drag & drop** entre columnas y reorden (SortableJS, táctil en móvil); el orden persiste.
+- Filtros: prioridad, persona (incl. "mis tareas" y "sin asignar"), rol, búsqueda por texto.
+
+**② Horario** (planificación **por horas**)
+- Vista **Día** como línea de tiempo vertical por horas (07:00–22:00, configurable) con las tareas con hora como bloques; las tareas sin hora quedan en una franja superior "Sin hora".
+- Vista **Semana** en cuadrícula días × horas, igual que el calendario personal.
+- Modo **"Por persona"**: columnas por miembro para ver quién hace qué y a qué hora; los **solapes** se marcan con borde de aviso.
+- Arrastrar un bloque cambia su hora/día; estirar su borde inferior cambia la hora de fin (en móvil, editar desde el drawer).
+- Resumen de **carga horaria**: horas planificadas por persona en la semana frente a su capacidad (`weekly_hours`), con barra de progreso.
+
+**③ Personas** (equipo, permisos y roles)
+- Lista de miembros: avatar/iniciales, nombre, email, **rol de equipo** (etiqueta de color), **permiso**, horas planificadas esta semana y tareas abiertas.
+- **Invitar** por email a usuarios ya registrados (owner/admin), eligiendo permiso y rol al invitar.
+- **Roles de equipo** personalizables por proyecto (crear, renombrar, colorear, borrar; el borrado deja a los miembros sin rol, no los expulsa).
+- **Permisos**:
+
+| Permiso | Ver | Crear/editar/mover tareas | Gestionar personas y roles | Editar/archivar proyecto |
+|---|:-:|:-:|:-:|:-:|
+| `owner` | ✅ | ✅ | ✅ | ✅ (único que puede borrar) |
+| `admin` | ✅ | ✅ | ✅ (salvo al owner) | ✅ |
+| `member` | ✅ | ✅ | — | — |
+| `viewer` | ✅ | — | — | — |
+
+- Debe quedar siempre al menos un `owner`; un usuario puede abandonar un proyecto salvo que sea el único owner.
+
+#### 9.6.4 Detalle de tarea del proyecto (drawer)
+Reutiliza el panel deslizante de la app: título, descripción, columna/estado, prioridad, **día + hora inicio/fin** (opcionales, misma validación que las tareas personales), duración estimada, fecha límite, rol, **asignados** (solo miembros; muestra aviso si alguno tiene un solape), borrar.
+
+#### 9.6.5 Integración con la organización personal (sin mezclar datos)
+- Las tareas de proyecto **no** se copian a la organización personal. Opcionalmente, en la vista Día personal aparece una franja plegable "📁 De tus proyectos hoy" (solo lectura, enlaza al proyecto).
+- **Avisos push**: si una tarea de proyecto tiene hora y estás asignado, recibes el recordatorio igual que en las personales (reutiliza `reminder_service`, con `reminder_sent_at` propio). Al pulsar se abre `/projects/{id}?task={task_id}` (o `/m/projects/{id}` en móvil).
+
+#### 9.6.6 Diseño (sigue la lógica de la app)
+- Misma paleta blanco/negro/marrón claro, tipografía, sombras suaves y tarjetas tipo post-it; mismos colores de prioridad y mismos iconos de estado.
+- Mismos patrones: drawer lateral, modales con `Esc`, toasts, atajos (`N` nueva tarea, `1/2/3` cambiar pestaña, `Esc` cerrar), estados vacíos ilustrados.
+- Los roles usan una paleta acotada de 8 tonos derivados del marrón/neutros para no romper la estética.
+- Móvil: pestañas en la barra inferior, drawer como *bottom sheet*, horario en vista Día por defecto.
+
+**Fuera de esta versión** (futuro): comentarios, adjuntos, registro de horas reales trabajadas (time tracking), invitaciones a emails no registrados, plantillas de proyecto.
+
+**API JSON de Proyectos** (requiere sesión; permisos comprobados en servicios)
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET / POST | `/api/projects` | Listar mis proyectos / crear proyecto (genera columnas por defecto) |
+| PATCH | `/api/me/space` | Guardar último espacio / último proyecto (`{last_space, last_project_id}`) |
+| GET | `/api/spaces/summary` | Resúmenes para las tarjetas del selector |
+| GET / POST | `/api/projects` | Listar mis proyectos / crear proyecto (genera columnas y rol "General") |
 | GET / PATCH / DELETE | `/api/projects/{id}` | Detalle con columnas y tareas / editar o archivar / borrado lógico |
-| GET / POST | `/api/projects/{id}/members` | Listar / invitar miembro por email |
-| PATCH / DELETE | `/api/projects/{id}/members/{user_id}` | Cambiar rol / quitar miembro |
+| GET / POST | `/api/projects/{id}/members` | Listar / invitar miembro por email (con permiso y rol) |
+| PATCH / DELETE | `/api/projects/{id}/members/{user_id}` | Cambiar permiso, rol o capacidad / quitar miembro (o abandonar) |
+| GET / POST | `/api/projects/{id}/roles` | Listar / crear rol de equipo |
+| PATCH / DELETE | `/api/projects/{id}/roles/{role_id}` | Renombrar o recolorear / eliminar rol |
 | POST | `/api/projects/{id}/columns` | Crear columna |
 | PATCH / DELETE | `/api/projects/{id}/columns/{col_id}` | Renombrar / eliminar (mueve sus tareas a otra columna) |
 | POST | `/api/projects/{id}/columns/reorder` | Reordenar columnas |
-| POST | `/api/projects/{id}/tasks` | Crear tarea |
-| GET / PATCH / DELETE | `/api/projects/{id}/tasks/{task_id}` | Detalle / editar (prioridad, asignados, fecha) / eliminar |
+| POST | `/api/projects/{id}/tasks` | Crear tarea (con hora, rol y asignados opcionales) |
+| GET / PATCH / DELETE | `/api/projects/{id}/tasks/{task_id}` | Detalle / editar / eliminar |
 | POST | `/api/projects/{id}/tasks/move` | Mover tarea a columna y posición `{task_id, column_id, position}` |
+| GET | `/api/projects/{id}/schedule?start=&end=&by=person` | Tareas con hora en un rango, agrupables por persona, con solapes marcados |
+| GET | `/api/projects/{id}/workload?week=` | Horas planificadas vs. capacidad por miembro |
 
-Páginas HTML: `GET /projects` y `GET /projects/{id}` (redirigen a `/login` si no hay sesión).
+Páginas HTML: `GET /spaces`, `GET /projects`, `GET /projects/{id}` (y versiones móviles `/m/projects`, `/m/projects/{id}`); todas redirigen a `/login` sin sesión y devuelven 404 si el usuario no es miembro del proyecto.
 
 ### 9.7 Manual de usuario integrado (ventana emergente)
 - Icono de ayuda con símbolo de pregunta (`?`) situado en la cabecera principal junto a las acciones de usuario.
@@ -471,23 +550,25 @@ Ver sección 11.
 - **Frontend JS (Desacoplamiento)**: Desglosar módulos con responsabilidad única (`task_modal.js`, `drawer.js`, `guide.js`).
 - **Criterio de hecho**: Ningún archivo con acumulación excesiva de líneas, código legible y mantenible según estándares de ingeniería de software senior, y 100% de los tests pasando sin regresiones.
 
-### Fase 12 — Proyectos: modelo de datos y API (backend)
-- Modelos `Project`, `ProjectMember`, `ProjectColumn`, `ProjectTask` (ver sección 5.1) y migración Alembic.
-- `app/services/project_service.py` (CRUD de proyectos, miembros, permisos) y `app/services/project_task_service.py` (CRUD de tareas, mover entre columnas, reordenar, asignar).
-- `app/routers/projects.py` como *Thin Controller* con los endpoints de la sección 9.6.
-- Tests: aislamiento entre usuarios, permisos por rol, mover/reordenar tareas, asignación solo a miembros, columnas por defecto al crear proyecto.
-- **Criterio de hecho**: los tests nuevos y los 16 existentes pasan en verde.
+### Fase 12 — Espacios y Proyectos: modelo de datos y API (backend)
+- Ampliación de `User` (`last_space`, `last_project_id`) y modelos `Project`, `ProjectRole`, `ProjectMember`, `ProjectColumn`, `ProjectTask`, `ProjectTaskAssignee` (ver sección 5.1) con migración Alembic.
+- `app/services/project_service.py` (proyectos, miembros, permisos, roles de equipo), `app/services/project_task_service.py` (CRUD con horario, mover, reordenar, asignar, aviso de solapes) y `app/services/project_schedule_service.py` (rango horario, agrupación por persona, carga semanal).
+- `app/routers/projects.py` y `app/routers/spaces.py` como *Thin Controllers* con los endpoints de la sección 9.6. Tras el login se redirige a `/spaces` (o al último espacio si se marcó "Recordar").
+- Tests: aislamiento entre usuarios y entre proyectos, matriz de permisos (owner/admin/member/viewer), siempre ≥ 1 owner, asignación solo a miembros, validación de horas, detección de solapes, carga horaria, columnas y rol "General" por defecto, y que el espacio personal no cambia.
+- **Criterio de hecho**: los tests nuevos y todos los existentes pasan en verde.
 
-### Fase 13 — Proyectos: pantalla de tablero (frontend)
-- Ruta de página `/projects` (listado) y `/projects/{id}` (tablero), enlazadas desde la cabecera principal.
-- Componentes Jinja2 en `app/templates/projects/` y `components/projects/`, estilos en `css/projects.css` y JS modular en `js/projects/`.
-- Tablero tipo Kanban con celdas/columnas por estado, drag & drop de tarjetas entre columnas y reorden (SortableJS), prioridad por color, avatares de asignados, filtros y buscador.
-- **Criterio de hecho**: crear proyecto → crear tareas → moverlas entre columnas → priorizar → asignar a miembros → recargar y comprobar que todo persiste, también en móvil.
+### Fase 13 — Espacios y Proyectos: pantallas (frontend)
+- Pantalla selectora `/spaces` (dos tarjetas + "Recordar mi elección") y conmutador `Personal | Proyectos` en la cabecera.
+- `/projects` (selector de proyecto, de 1 en 1) y `/projects/{id}` con desplegable para cambiar de proyecto y pestañas **Tablero · Horario · Personas**.
+- Tablero Kanban con post-its, drag & drop (SortableJS) y filtros; Horario por horas (día, semana, por persona, solapes, carga); Personas (invitar, permisos, roles personalizables, capacidad semanal); drawer de tarea con día y horas.
+- Versión móvil (`/m/projects/...`) con pestañas en barra inferior y *bottom sheets*; avisos push para tareas de proyecto con hora asignadas al usuario.
+- Componentes Jinja2, CSS y JS propios del módulo (ningún archivo > ~250 líneas), reutilizando paleta, drawer, toasts y atajos de la app.
+- **Criterio de hecho**: login → elegir Proyectos → crear proyecto → crear roles e invitar personas → crear tareas con hora y asignarlas → moverlas en el tablero y en el horario → cambiar a otro proyecto → volver a Personal sin perder nada; todo persiste al recargar, también en móvil.
 
 ### Fase 14 — Proyectos: manual de usuario independiente
-- Icono `?` en la pantalla de proyectos que abre un modal propio (`projects_guide_modal.html` + `projects_guide.js`) con pestañas: crear proyecto, columnas y estados, tareas y prioridades, asignar personas, atajos.
-- Capturas reales del tablero en `static/img/guide/projects/`.
-- Se mantiene el manual existente para tareas/calendario como documento aparte (un manual por sección de la app).
+- Icono `?` en las pantallas de proyectos que abre un modal propio (`projects_guide_modal.html` + `projects_guide.js`) con pestañas: elegir espacio y proyecto, tablero y estados, horario por horas, personas/roles/permisos, atajos. Versión móvil sencilla en el manual móvil.
+- Capturas reales en `static/img/guide/projects/`.
+- Se mantiene el manual existente para la organización personal como documento aparte (un manual por espacio).
 - **Criterio de hecho**: cada pantalla tiene su manual contextual, abierto con `?` y cerrado con `Esc`.
 
 ### Bloque móvil (Fases 15-18) — planificado con Review Driven Development (RDD)
@@ -657,7 +738,11 @@ Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `
 - [ ] `README.md` con instalación local, variables de entorno y despliegue.
 - [x] Manual de usuario interactivo y guiado accesible desde el icono de ayuda (`?`) en la cabecera.
 - [x] Arquitectura modular escalable: archivos concisos con responsabilidad única (SRP), capa de servicios en backend y componentes Jinja2 desacoplados.
-- [ ] **Proyectos**: pantalla aparte (`/projects`) donde crear proyectos personales, gestionar sus tareas en un tablero de columnas por estado, ordenarlas, priorizarlas y asignarlas a personas.
+- [ ] **Espacios**: tras el login se elige entre **Organización personal** (la app actual, sin cambios) y **Proyectos**, con opción de recordar la elección y conmutador en la cabecera para cambiar en cualquier momento.
+- [ ] **Proyectos**: se trabaja en un proyecto cada vez (`/projects/{id}`), con desplegable para cambiar de proyecto, y pestañas Tablero · Horario · Personas.
+- [ ] Cada proyecto gestiona **personas** (invitar, quitar), **permisos** (owner/admin/member/viewer) y **roles de equipo** personalizables.
+- [ ] Las tareas de proyecto tienen estado, prioridad, asignados, rol y **día y hora** opcionales; el horario por horas muestra día/semana/por persona, solapes y carga horaria.
+- [ ] El diseño de Proyectos sigue la lógica de la app (paleta, post-its, drawer, toasts, atajos) en web y móvil.
 - [ ] Los proyectos y sus tareas son privados por usuario (y compartidos solo con los miembros invitados), con tests de aislamiento y permisos.
 - [ ] El módulo de proyectos respeta la arquitectura modular (router delgado + servicios + componentes + CSS/JS propios, ningún archivo > ~250 líneas).
 - [ ] Manual de usuario independiente para Proyectos, accesible desde un icono `?` en la propia pantalla de proyectos.

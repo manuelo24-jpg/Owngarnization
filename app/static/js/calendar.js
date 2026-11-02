@@ -25,8 +25,69 @@ const calendarManager = {
     }
   },
 
+  getImportanceWeight(importance) {
+    switch (importance) {
+      case "urgent":
+        return 1;
+      case "high":
+        return 2;
+      case "medium":
+        return 3;
+      case "low":
+      default:
+        return 4;
+    }
+  },
+
+  /**
+   * Agrupa las ocurrencias por fecha y selecciona únicamente la tarea principal
+   * de cada día para evitar sobrecargar las vistas de Semana y Mes.
+   * Prioriza: pendientes > completadas, tareas puntuales del día > rutinas comunes,
+   * mayor importancia y hora más temprana.
+   */
+  selectSinglePerDay(occurrences) {
+    const byDate = new Map();
+    for (const occ of occurrences) {
+      if (!byDate.has(occ.date)) {
+        byDate.set(occ.date, []);
+      }
+      byDate.get(occ.date).push(occ);
+    }
+
+    const result = [];
+    for (const [, dayOccs] of byDate.entries()) {
+      const sorted = [...dayOccs].sort((a, b) => {
+        const aDone = a.status === "done" ? 1 : 0;
+        const bDone = b.status === "done" ? 1 : 0;
+        if (aDone !== bDone) return aDone - bDone;
+
+        const aKind = a.task.kind === "daily" ? 0 : 1;
+        const bKind = b.task.kind === "daily" ? 0 : 1;
+        if (aKind !== bKind) return aKind - bKind;
+
+        const aImp = this.getImportanceWeight(a.task.importance);
+        const bImp = this.getImportanceWeight(b.task.importance);
+        if (aImp !== bImp) return aImp - bImp;
+
+        const aTime = a.start_time || a.task.start_time || "99:99:99";
+        const bTime = b.start_time || b.task.start_time || "99:99:99";
+        return aTime.localeCompare(bTime);
+      });
+
+      result.push({
+        occ: sorted[0],
+        extraCount: sorted.length - 1,
+        totalCount: sorted.length
+      });
+    }
+
+    return result;
+  },
+
   formatEvents(occurrences) {
-    return occurrences.map(occ => {
+    const singlePerDay = this.selectSinglePerDay(occurrences);
+
+    return singlePerDay.map(({ occ, extraCount, totalCount }) => {
       const task = occ.task;
       const colors = this.getImportanceColors(task.importance);
 
@@ -42,10 +103,11 @@ const calendarManager = {
 
       const prefix = task.kind === "common" ? "🔁 " : "";
       const statusIcon = occ.status === "done" ? "✓ " : occ.status === "in_progress" ? "◐ " : "";
+      const extraSuffix = extraCount > 0 ? ` (+${extraCount})` : "";
 
       return {
         id: String(occ.id),
-        title: `${statusIcon}${prefix}${task.title}`,
+        title: `${statusIcon}${prefix}${task.title}${extraSuffix}`,
         start: start,
         end: end,
         allDay: !Boolean(occ.start_time),
@@ -53,10 +115,22 @@ const calendarManager = {
         borderColor: colors.border,
         textColor: colors.text,
         extendedProps: {
-          occurrence: occ
+          occurrence: occ,
+          extraCount: extraCount,
+          totalCount: totalCount
         }
       };
     });
+  },
+
+  openDayFromCalendar(dateStrOrObj) {
+    if (!window.appState) return;
+    const targetDate =
+      typeof dateStrOrObj === "string"
+        ? new Date(dateStrOrObj.split("T")[0] + "T00:00:00")
+        : new Date(dateStrOrObj);
+    window.appState.setDate(targetDate);
+    window.appState.switchView("day");
   },
 
   initMonthCalendar() {
@@ -66,17 +140,16 @@ const calendarManager = {
     this.calendarMonth = new FullCalendar.Calendar(el, {
       locale: "es",
       initialView: "dayGridMonth",
-      headerToolbar: false, // Usamos nuestra propia barra de navegación superior
+      headerToolbar: false,
       height: "auto",
       editable: true,
-      dayMaxEvents: 3,
-      moreLinkContent: (args) => `+${args.num} más`,
+      dayMaxEvents: false,
+      navLinks: true,
+      navLinkDayClick: (date) => {
+        this.openDayFromCalendar(date);
+      },
       dateClick: (info) => {
-        // Al hacer clic en un día en la vista mes, cambiar a vista Día para esa fecha
-        if (window.appState) {
-          window.appState.setDate(new Date(info.dateStr + "T00:00:00"));
-          window.appState.switchView("day");
-        }
+        this.openDayFromCalendar(info.dateStr);
       },
       eventClick: (info) => {
         info.jsEvent.preventDefault();
@@ -115,6 +188,11 @@ const calendarManager = {
       headerToolbar: false,
       height: "auto",
       editable: true,
+      dayMaxEvents: false,
+      navLinks: true,
+      navLinkDayClick: (date) => {
+        this.openDayFromCalendar(date);
+      },
       noEventsText: "No hay tareas programadas en esta semana",
       eventClick: (info) => {
         info.jsEvent.preventDefault();
