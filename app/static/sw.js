@@ -2,7 +2,7 @@
  * Owngarnization — Service Worker (PWA + Web Push + Caché Offline)
  */
 
-const CACHE_VERSION = "owngarnization-v7";
+const CACHE_VERSION = "owngarnization-v8";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -10,26 +10,26 @@ const STATIC_ASSETS = [
   "/",
   "/m",
   "/download",
-  "/static/css/styles.css?v=7",
-  "/static/css/variables.css?v=7",
-  "/static/css/base.css?v=7",
-  "/static/css/layout.css?v=7",
-  "/static/css/board.css?v=7",
-  "/static/css/calendar.css?v=7",
-  "/static/css/modals.css?v=7",
-  "/static/css/guide.css?v=7",
-  "/static/css/responsive.css?v=7",
-  "/static/css/mobile.css?v=7",
-  "/static/js/api.js?v=7",
-  "/static/js/app.js?v=7",
-  "/static/js/board.js?v=7",
-  "/static/js/calendar.js?v=7",
-  "/static/js/modal.js?v=7",
-  "/static/js/task_modal.js?v=7",
-  "/static/js/drawer.js?v=7",
-  "/static/js/guide.js?v=7",
-  "/static/js/pwa.js?v=7",
-  "/static/js/push.js?v=7",
+  "/static/css/styles.css?v=8",
+  "/static/css/variables.css?v=8",
+  "/static/css/base.css?v=8",
+  "/static/css/layout.css?v=8",
+  "/static/css/board.css?v=8",
+  "/static/css/calendar.css?v=8",
+  "/static/css/modals.css?v=8",
+  "/static/css/guide.css?v=8",
+  "/static/css/responsive.css?v=8",
+  "/static/css/mobile.css?v=8",
+  "/static/js/api.js?v=8",
+  "/static/js/app.js?v=8",
+  "/static/js/board.js?v=8",
+  "/static/js/calendar.js?v=8",
+  "/static/js/modal.js?v=8",
+  "/static/js/task_modal.js?v=8",
+  "/static/js/drawer.js?v=8",
+  "/static/js/guide.js?v=8",
+  "/static/js/pwa.js?v=8",
+  "/static/js/push.js?v=8",
   "/static/img/logo.png?v=4",
   "/static/img/favicon.ico?v=4",
   "/static/img/icons/icon-192.png?v=4",
@@ -117,7 +117,6 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Lectura de ocurrencias: Network-First con respaldo en caché para consulta offline
   if (url.pathname.startsWith("/api/occurrences")) {
     event.respondWith(
       fetch(request)
@@ -133,7 +132,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Archivos estáticos: Network-First con respaldo en caché para reflejar cambios de diseño al instante
   if (url.pathname.startsWith("/static/")) {
     event.respondWith(
       fetch(request)
@@ -149,7 +147,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navegación HTML: Network-First con fallback a caché o tarjeta sin conexión
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(async () => {
@@ -163,7 +160,6 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-// Recepción de Notificaciones Web Push
 self.addEventListener("push", (event) => {
   let payload = {
     title: "⏰ Recordatorio — Owngarnization",
@@ -197,7 +193,6 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(payload.title, options));
 });
 
-// Clic en la notificación -> Abrir o enfocar la App Móvil en la fecha/tarea correspondiente
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || "/m";

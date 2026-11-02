@@ -229,3 +229,124 @@
   gap: 12px;
 }
 
+
+
+/* =========================================================
+   Skeletons de Post-its y Animaciones de Entrada (Vista Día)
+   ========================================================= */
+
+.postit-skeleton-card {
+  position: relative;
+  padding: 16px 16px 14px 16px;
+  border-radius: var(--radius-sm);
+  background-color: #F6F2EB;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  animation: skeletonCardPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonCardPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.postit-skeleton-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.postit-skeleton-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.postit-skeleton-badge {
+  width: 68px;
+  height: 11px;
+  border-radius: var(--radius-full);
+}
+
+.postit-skeleton-title {
+  width: 82%;
+  height: 15px;
+  border-radius: var(--radius-xs);
+}
+
+.postit-skeleton-desc {
+  width: 58%;
+  height: 11px;
+  border-radius: var(--radius-xs);
+}
+
+.postit-skeleton-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.postit-skeleton-time {
+  width: 76px;
+  height: 11px;
+}
+
+.postit-skeleton-tag {
+  width: 46px;
+  height: 11px;
+}
+
+/* Entrada escalonada y suave de tarjetas reales tras cargar */
+@keyframes postitEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.postit-card.postit-enter {
+  animation: postitEnter 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--card-idx, 0) * 32ms);
+}
+
+.postit-card.status-done.postit-enter {
+  animation: postitEnterDone 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--card-idx, 0) * 32ms);
+}
+
+@keyframes postitEnterDone {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 0.62;
+    transform: translateY(0);
+  }
+}
+
+/* Botón de estado del post-it actualizando */
+.postit-status-btn.is-updating {
+  pointer-events: none;
+  animation: owngSpin 0.65s linear infinite;
+  opacity: 0.7;
+}
+
+.empty-state {
+  animation: viewFadeSlideIn 0.22s ease-out both;
+}

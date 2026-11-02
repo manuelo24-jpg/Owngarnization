@@ -182,3 +182,106 @@ button, input, select, textarea {
   background-color: var(--danger);
 }
 
+
+
+/* =========================================================
+   Sistema de Carga, Skeletons y Transiciones Fluidas
+   ========================================================= */
+
+/* Barra de progreso superior global */
+.top-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 2500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  overflow: hidden;
+  background-color: rgba(201, 180, 154, 0.22);
+}
+
+.top-loading-bar.active {
+  opacity: 1;
+}
+
+.top-loading-bar-progress {
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-strong), var(--ink), var(--accent-strong));
+  border-radius: var(--radius-full);
+  animation: owngTopProgress 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes owngTopProgress {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(240%);
+  }
+}
+
+/* Shimmer cálido para Skeletons */
+@keyframes owngShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    #EAE3D7 25%,
+    #F5F0E7 50%,
+    #EAE3D7 75%
+  );
+  background-size: 200% 100%;
+  animation: owngShimmer 1.45s ease-in-out infinite;
+  border-radius: var(--radius-xs);
+}
+
+/* Spinner inline en botones y acciones */
+@keyframes owngSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: owngSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+.btn.is-loading,
+.status-opt.is-loading {
+  pointer-events: none;
+  opacity: 0.78;
+}
+
+/* Transición suave al cambiar de vista (Día / Semana / Mes) */
+@keyframes viewFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-section.view-animate-in {
+  animation: viewFadeSlideIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

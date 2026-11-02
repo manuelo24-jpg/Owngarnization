@@ -38,3 +38,31 @@
   color: var(--ink-soft);
 }
 
+
+
+/* Estado de carga y skeleton para el Calendario (Semana y Mes) */
+.calendar-container {
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.calendar-container.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    rgba(250, 248, 245, 0.55) 25%,
+    rgba(239, 233, 224, 0.78) 50%,
+    rgba(250, 248, 245, 0.55) 75%
+  );
+  background-size: 200% 100%;
+  animation: owngShimmer 1.35s ease-in-out infinite;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.fc .fc-event {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+}

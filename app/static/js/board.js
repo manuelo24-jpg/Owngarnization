@@ -36,7 +36,6 @@ const board = {
         const targetTab = tab.dataset.dayTab;
         this.setMobileActiveTab(targetTab);
 
-        // Si había un filtro de tipo opuesto activo, limpiarlo para mostrar la pestaña pulsada
         if (window.appState && window.appState.filters.kind && window.appState.filters.kind !== targetTab) {
           window.appState.filters.kind = "";
           const kindContainer = document.querySelector('.filter-chips[data-filter="kind"]');
@@ -121,6 +120,46 @@ const board = {
     }
   },
 
+  createSkeletonCardHtml(titleWidth = "80%", showDesc = true) {
+    return `
+      <div class="postit-skeleton-card" aria-hidden="true">
+        <div class="postit-skeleton-header">
+          <div class="skeleton-block postit-skeleton-circle"></div>
+          <div class="skeleton-block postit-skeleton-badge"></div>
+        </div>
+        <div class="skeleton-block postit-skeleton-title" style="width: ${titleWidth};"></div>
+        ${showDesc ? '<div class="skeleton-block postit-skeleton-desc"></div>' : ""}
+        <div class="postit-skeleton-footer">
+          <div class="skeleton-block postit-skeleton-time"></div>
+          <div class="skeleton-block postit-skeleton-tag"></div>
+        </div>
+      </div>
+    `;
+  },
+
+  showSkeletons() {
+    const listCommon = document.getElementById("list-common");
+    const listDaily = document.getElementById("list-daily");
+    const emptyCommon = document.getElementById("empty-common");
+    const emptyDaily = document.getElementById("empty-daily");
+
+    if (!listCommon || !listDaily) return;
+
+    this.updateColumnVisibility();
+
+    if (emptyCommon) emptyCommon.style.display = "none";
+    if (emptyDaily) emptyDaily.style.display = "none";
+
+    const skeletonHtml =
+      this.createSkeletonCardHtml("82%", true) +
+      this.createSkeletonCardHtml("68%", false);
+
+    listCommon.setAttribute("aria-busy", "true");
+    listDaily.setAttribute("aria-busy", "true");
+    listCommon.innerHTML = skeletonHtml;
+    listDaily.innerHTML = skeletonHtml;
+  },
+
   renderOccurrences(occurrences) {
     const listCommon = document.getElementById("list-common");
     const listDaily = document.getElementById("list-daily");
@@ -136,8 +175,6 @@ const board = {
     const commons = occurrences.filter(o => o.task.kind === "common");
     const dailies = occurrences.filter(o => o.task.kind === "daily");
 
-    // Si en móvil hay filtros activos y la pestaña actual queda vacía pero la otra sí tiene resultados,
-    // cambiar automáticamente a la pestaña con coincidencias para que el usuario vea el resultado del filtro.
     if (this.isMobileMode() && window.appState) {
       const f = window.appState.filters;
       const hasSearchOrFilter = Boolean(f.status || f.importance || f.q);
@@ -152,6 +189,8 @@ const board = {
 
     this.updateColumnVisibility();
 
+    listCommon.setAttribute("aria-busy", "false");
+    listDaily.setAttribute("aria-busy", "false");
     listCommon.innerHTML = "";
     listDaily.innerHTML = "";
 
@@ -165,8 +204,8 @@ const board = {
     } else {
       if (emptyCommon) emptyCommon.style.display = "none";
       const fragCommon = document.createDocumentFragment();
-      commons.forEach(occ => {
-        fragCommon.appendChild(this.createPostitElement(occ));
+      commons.forEach((occ, idx) => {
+        fragCommon.appendChild(this.createPostitElement(occ, idx));
       });
       listCommon.appendChild(fragCommon);
     }
@@ -176,17 +215,18 @@ const board = {
     } else {
       if (emptyDaily) emptyDaily.style.display = "none";
       const fragDaily = document.createDocumentFragment();
-      dailies.forEach(occ => {
-        fragDaily.appendChild(this.createPostitElement(occ));
+      dailies.forEach((occ, idx) => {
+        fragDaily.appendChild(this.createPostitElement(occ, idx));
       });
       listDaily.appendChild(fragDaily);
     }
   },
 
-  createPostitElement(occ) {
+  createPostitElement(occ, idx = 0) {
     const task = occ.task;
     const card = document.createElement("div");
-    card.className = `postit-card importance-${task.importance} status-${occ.status}`;
+    card.className = `postit-card importance-${task.importance} status-${occ.status} postit-enter`;
+    card.style.setProperty("--card-idx", String(Math.min(idx, 8)));
     card.dataset.occId = occ.id;
     card.dataset.taskId = task.id;
 
@@ -259,6 +299,7 @@ const board = {
         done: "not_started"
       };
       const nextStatus = cycle[occ.status] || "not_started";
+      statusBtn.classList.add("is-updating");
 
       try {
         const updated = await api.patch(`/api/occurrences/${occ.id}`, { status: nextStatus });
@@ -271,6 +312,8 @@ const board = {
         showToast(`Estado: ${occ.status === "done" ? "Finalizada ✓" : occ.status === "in_progress" ? "En proceso ◐" : "Sin empezar ○"}`, "info", 1500);
       } catch (err) {
         showToast("Error al cambiar estado", "error");
+      } finally {
+        statusBtn.classList.remove("is-updating");
       }
     });
 

@@ -11,6 +11,11 @@ const calendarManager = {
     this.initWeekCalendar();
   },
 
+  setLoading(isLoading) {
+    document.getElementById("calendar-month")?.classList.toggle("is-loading", Boolean(isLoading));
+    document.getElementById("calendar-week")?.classList.toggle("is-loading", Boolean(isLoading));
+  },
+
   getImportanceColors(importance) {
     switch (importance) {
       case "low":
@@ -42,8 +47,6 @@ const calendarManager = {
   /**
    * Agrupa las ocurrencias por fecha y selecciona únicamente la tarea principal
    * de cada día para evitar sobrecargar las vistas de Semana y Mes.
-   * Prioriza: pendientes > completadas, tareas puntuales del día > rutinas comunes,
-   * mayor importancia y hora más temprana.
    */
   selectSinglePerDay(occurrences) {
     const byDate = new Map();
@@ -220,12 +223,14 @@ const calendarManager = {
   },
 
   updateMonthEvents(occurrences) {
+    this.setLoading(false);
     if (!this.calendarMonth) return;
     this.calendarMonth.removeAllEvents();
     this.calendarMonth.addEventSource(this.formatEvents(occurrences));
   },
 
   updateWeekEvents(occurrences) {
+    this.setLoading(false);
     if (!this.calendarWeek) return;
     this.calendarWeek.removeAllEvents();
     this.calendarWeek.addEventSource(this.formatEvents(occurrences));

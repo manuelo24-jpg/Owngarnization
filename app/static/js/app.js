@@ -25,7 +25,14 @@ class AppState {
     this.bindControls();
     this.syncMobileDayTabsVisibility();
     this.updatePeriodLabel();
-    this.reloadCurrentView();
+    this.reloadCurrentView({ showSkeleton: true });
+  }
+
+  setGlobalLoading(isLoading) {
+    const topBar = document.getElementById("top-loading-bar");
+    if (topBar) {
+      topBar.classList.toggle("active", Boolean(isLoading));
+    }
   }
 
   applyUrlDeepLink() {
@@ -50,7 +57,6 @@ class AppState {
   }
 
   bindControls() {
-    // Botón "+ Nueva tarea" y FAB móvil
     document.getElementById("btn-new-task")?.addEventListener("click", () => {
       if (window.modal) window.modal.openTaskModal("create");
     });
@@ -58,7 +64,6 @@ class AppState {
       if (window.modal) window.modal.openTaskModal("create");
     });
 
-    // Navegación: Anterior, Hoy, Siguiente
     document.getElementById("btn-prev")?.addEventListener("click", () => this.navigate(-1));
     document.getElementById("btn-next")?.addEventListener("click", () => this.navigate(1));
     document.getElementById("btn-today")?.addEventListener("click", () => {
@@ -66,7 +71,6 @@ class AppState {
       this.onDateChanged();
     });
 
-    // Selector de vistas (Segmented Control y Barra inferior móvil)
     document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
       btn.addEventListener("click", () => {
         const view = btn.dataset.view;
@@ -75,7 +79,6 @@ class AppState {
       });
     });
 
-    // Bottom sheet de filtros en móvil
     document.getElementById("btn-mobile-filters")?.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -91,18 +94,16 @@ class AppState {
       this.closeMobileFilters();
     });
 
-    // Buscador con debounce
     const searchInput = document.getElementById("search-input");
     searchInput?.addEventListener("input", (e) => {
       clearTimeout(this.searchDebounceTimer);
       this.searchDebounceTimer = setTimeout(() => {
         this.filters.q = e.target.value.trim();
         this.checkFiltersActive();
-        this.reloadCurrentView();
+        this.reloadCurrentView({ showSkeleton: true });
       }, 250);
     });
 
-    // Chips de filtros
     document.querySelectorAll(".filter-chips").forEach(container => {
       const filterKey = container.dataset.filter;
       container.querySelectorAll(".chip").forEach(chip => {
@@ -112,18 +113,16 @@ class AppState {
           const val = chip.dataset.value || "";
           this.filters[filterKey] = val;
 
-          // Si en móvil se filtra por tipo ("daily" o "common"), sincronizar la pestaña activa del día
           if (filterKey === "kind" && (val === "daily" || val === "common") && window.board) {
             window.board.setMobileActiveTab(val);
           }
 
           this.checkFiltersActive();
-          this.reloadCurrentView();
+          this.reloadCurrentView({ showSkeleton: true });
         });
       });
     });
 
-    // Botón "Limpiar filtros"
     document.getElementById("btn-reset-filters")?.addEventListener("click", () => {
       this.resetFilters();
     });
@@ -199,7 +198,7 @@ class AppState {
     });
 
     this.checkFiltersActive();
-    this.reloadCurrentView();
+    this.reloadCurrentView({ showSkeleton: true });
   }
 
   setDate(newDate) {
@@ -212,7 +211,7 @@ class AppState {
     if (window.calendarManager) {
       window.calendarManager.gotoDate(this.currentDate);
     }
-    this.reloadCurrentView();
+    this.reloadCurrentView({ showSkeleton: true });
   }
 
   navigate(step) {
@@ -240,17 +239,14 @@ class AppState {
   switchView(newView) {
     this.currentView = newView;
 
-    // Actualizar botones de vista (escritorio y móvil)
     document.querySelectorAll(".view-btn, .mobile-nav-btn[data-view]").forEach(btn => {
       const isActive = btn.dataset.view === newView;
       btn.classList.toggle("active", isActive);
       btn.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
-    // Ocultar selector de tareas Del día / Comunes en Semana y Mes
     this.syncMobileDayTabsVisibility();
 
-    // Mostrar sección correspondiente
     const views = {
       day: document.getElementById("view-day"),
       week: document.getElementById("view-week"),
@@ -259,20 +255,27 @@ class AppState {
 
     for (const [key, el] of Object.entries(views)) {
       if (el) {
-        el.style.display = key === newView ? "block" : "none";
+        if (key === newView) {
+          el.style.display = "block";
+          el.classList.remove("view-animate-in");
+          void el.offsetWidth; // Reflow para reiniciar animación suave de entrada
+          el.classList.add("view-animate-in");
+        } else {
+          el.style.display = "none";
+          el.classList.remove("view-animate-in");
+        }
       }
     }
 
     this.updatePeriodLabel();
 
-    // Redimensionar calendario al hacerse visible
     if (newView === "month" && window.calendarManager?.calendarMonth) {
       setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
     } else if (newView === "week" && window.calendarManager?.calendarWeek) {
       setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
     }
 
-    this.reloadCurrentView();
+    this.reloadCurrentView({ showSkeleton: true });
   }
 
   getCurrentDateFormatted() {
@@ -341,7 +344,7 @@ class AppState {
     return { start, end };
   }
 
-  async reloadCurrentView() {
+  async reloadCurrentView({ showSkeleton = false } = {}) {
     const requestId = ++this.loadRequestId;
     let startStr, endStr;
 
@@ -363,6 +366,15 @@ class AppState {
       end: endStr,
       ...this.filters
     };
+
+    this.setGlobalLoading(true);
+    if (showSkeleton) {
+      if (this.currentView === "day" && window.board) {
+        window.board.showSkeletons();
+      } else if (window.calendarManager) {
+        window.calendarManager.setLoading(true);
+      }
+    }
 
     try {
       const occurrences = await api.get("/api/occurrences", params);
@@ -386,6 +398,13 @@ class AppState {
     } catch (err) {
       console.error("Error al cargar ocurrencias:", err);
       showToast("Error al cargar las tareas", "error");
+    } finally {
+      if (requestId === this.loadRequestId) {
+        this.setGlobalLoading(false);
+        if (window.calendarManager) {
+          window.calendarManager.setLoading(false);
+        }
+      }
     }
   }
 }

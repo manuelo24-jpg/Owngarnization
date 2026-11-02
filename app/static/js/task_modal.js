@@ -17,7 +17,6 @@ const taskModal = {
 
     document.getElementById("task-form")?.addEventListener("submit", (e) => this.handleSubmit(e));
 
-    // Selector de tipo: alternar entre fecha puntual o selector de días
     const kindSelect = document.getElementById("task-kind");
     kindSelect?.addEventListener("change", (e) => {
       const dateGroup = document.getElementById("date-group");
@@ -27,7 +26,6 @@ const taskModal = {
       if (daysGroup) daysGroup.style.display = isCommon ? "flex" : "none";
     });
 
-    // Chips de selección de días
     document.querySelectorAll("#day-selector-chips .day-chip").forEach(chip => {
       chip.addEventListener("click", () => {
         chip.classList.toggle("active");
@@ -38,7 +36,6 @@ const taskModal = {
       });
     });
 
-    // Botones rápidos de selección de días
     document.querySelectorAll(".quick-days-btns button").forEach(btn => {
       btn.addEventListener("click", () => {
         const type = btn.dataset.days;
@@ -71,7 +68,6 @@ const taskModal = {
     if (errorBox) errorBox.style.display = "none";
     this.activeOccurrence = occ;
 
-    // Resetear chips de días a activos por defecto
     document.querySelectorAll("#day-selector-chips .day-chip").forEach(c => c.classList.add("active"));
 
     if (mode === "create") {
@@ -136,8 +132,21 @@ const taskModal = {
     const taskId = document.getElementById("task-form-id").value;
     const isEdit = Boolean(taskId);
 
-    submitBtn.disabled = true;
+    const originalBtnText = submitBtn ? submitBtn.textContent : "Guardar tarea";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add("is-loading");
+      submitBtn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span> Guardando...`;
+    }
     errorBox.style.display = "none";
+
+    const restoreBtn = () => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("is-loading");
+        submitBtn.textContent = originalBtnText;
+      }
+    };
 
     const payload = {
       title: form.title.value.trim(),
@@ -157,7 +166,7 @@ const taskModal = {
       if (activeChips.length === 0) {
         errorBox.textContent = "Debes seleccionar al menos un día para la tarea común";
         errorBox.style.display = "block";
-        submitBtn.disabled = false;
+        restoreBtn();
         return;
       }
       if (activeChips.length === 7) {
@@ -171,11 +180,10 @@ const taskModal = {
       payload.initial_status = form.initial_status.value;
     }
 
-    // Validación horaria en cliente
     if (payload.start_time && payload.end_time && payload.end_time <= payload.start_time) {
       errorBox.textContent = "La hora de fin debe ser posterior a la de inicio";
       errorBox.style.display = "block";
-      submitBtn.disabled = false;
+      restoreBtn();
       return;
     }
 
@@ -203,7 +211,7 @@ const taskModal = {
       errorBox.textContent = err.message || "Error al procesar la tarea";
       errorBox.style.display = "block";
     } finally {
-      submitBtn.disabled = false;
+      restoreBtn();
     }
   }
 };

@@ -24,20 +24,25 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png?v=4">
 
   <!-- Estilos propios -->
-  <link rel="stylesheet" href="/static/css/styles.css?v=7">
+  <link rel="stylesheet" href="/static/css/styles.css?v=8">
 
 
   {% block extra_head %}{% endblock %}
 </head>
 
 <body>
+  <!-- Barra global de carga superior -->
+  <div id="top-loading-bar" class="top-loading-bar" aria-hidden="true">
+    <div class="top-loading-bar-progress"></div>
+  </div>
+
   <!-- Contenedor global de Toasts/Notificaciones -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   {% block content %}{% endblock %}
 
   <!-- Scripts base -->
-  <script src="/static/js/api.js?v=7"></script>
+  <script src="/static/js/api.js?v=8"></script>
   {% block scripts %}{% endblock %}
 </body>
 
