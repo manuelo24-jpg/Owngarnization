@@ -7,13 +7,76 @@ const calendarManager = {
   calendarWeek: null,
 
   init() {
+    this.ensureSkeletons();
     this.initMonthCalendar();
     this.initWeekCalendar();
   },
 
-  setLoading(isLoading) {
-    document.getElementById("calendar-month")?.classList.toggle("is-loading", Boolean(isLoading));
-    document.getElementById("calendar-week")?.classList.toggle("is-loading", Boolean(isLoading));
+  getMonthSkeletonHtml() {
+    const weekdays = Array(7).fill('<div class="skeleton-block cal-skel-weekday-pill"></div>').join("");
+    let cells = "";
+    for (let i = 0; i < 35; i++) {
+      const hasEvent = (i % 3 === 0 || i % 5 === 1 || i % 7 === 2);
+      cells += `
+        <div class="cal-skel-day-cell">
+          <div class="skeleton-block cal-skel-day-num"></div>
+          ${hasEvent ? '<div class="skeleton-block cal-skel-day-event"></div>' : ""}
+        </div>
+      `;
+    }
+    return `
+      <div class="cal-skel-weekdays">${weekdays}</div>
+      <div class="cal-skel-month-grid">${cells}</div>
+    `;
+  },
+
+  getWeekSkeletonHtml() {
+    let rows = "";
+    for (let i = 0; i < 7; i++) {
+      const hasEvent = i % 2 === 0 || i % 3 === 0;
+      rows += `
+        <div class="cal-skel-week-row">
+          <div class="cal-skel-week-row-header">
+            <div class="skeleton-block cal-skel-week-dayname"></div>
+            <div class="skeleton-block cal-skel-week-date"></div>
+          </div>
+          ${hasEvent ? '<div class="skeleton-block cal-skel-week-event"></div>' : ""}
+        </div>
+      `;
+    }
+    return `
+      <div class="cal-skel-week-list">${rows}</div>
+    `;
+  },
+
+  ensureSkeletons() {
+    const monthEl = document.getElementById("calendar-month");
+    if (monthEl && !monthEl.querySelector(".calendar-skeleton-overlay")) {
+      const overlay = document.createElement("div");
+      overlay.className = "calendar-skeleton-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.innerHTML = this.getMonthSkeletonHtml();
+      monthEl.appendChild(overlay);
+    }
+
+    const weekEl = document.getElementById("calendar-week");
+    if (weekEl && !weekEl.querySelector(".calendar-skeleton-overlay")) {
+      const overlay = document.createElement("div");
+      overlay.className = "calendar-skeleton-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.innerHTML = this.getWeekSkeletonHtml();
+      weekEl.appendChild(overlay);
+    }
+  },
+
+  setLoading(isLoading, which = null) {
+    this.ensureSkeletons();
+    if (!which || which === "month") {
+      document.getElementById("calendar-month")?.classList.toggle("is-loading", Boolean(isLoading));
+    }
+    if (!which || which === "week") {
+      document.getElementById("calendar-week")?.classList.toggle("is-loading", Boolean(isLoading));
+    }
   },
 
   getImportanceColors(importance) {
@@ -223,17 +286,19 @@ const calendarManager = {
   },
 
   updateMonthEvents(occurrences) {
-    this.setLoading(false);
     if (!this.calendarMonth) return;
     this.calendarMonth.removeAllEvents();
     this.calendarMonth.addEventSource(this.formatEvents(occurrences));
+    this.setLoading(false, "month");
+    setTimeout(() => this.calendarMonth?.updateSize(), 50);
   },
 
   updateWeekEvents(occurrences) {
-    this.setLoading(false);
     if (!this.calendarWeek) return;
     this.calendarWeek.removeAllEvents();
     this.calendarWeek.addEventSource(this.formatEvents(occurrences));
+    this.setLoading(false, "week");
+    setTimeout(() => this.calendarWeek?.updateSize(), 50);
   },
 
   gotoDate(date) {

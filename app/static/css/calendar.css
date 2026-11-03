@@ -2,12 +2,14 @@
    Contenedor de Calendario (Semana y Mes)
    ========================================================= */
 .calendar-container {
+  position: relative;
   background-color: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: 20px;
   box-shadow: var(--shadow-xs);
   min-height: 600px;
+  overflow: hidden;
 }
 
 /* Personalización de FullCalendar para alinearse con la paleta */
@@ -38,31 +40,144 @@
   color: var(--ink-soft);
 }
 
-
-
-/* Estado de carga y skeleton para el Calendario (Semana y Mes) */
-.calendar-container {
-  position: relative;
-  transition: opacity 0.2s ease;
-}
-
-.calendar-container.is-loading::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-md);
-  background: linear-gradient(
-    90deg,
-    rgba(250, 248, 245, 0.55) 25%,
-    rgba(239, 233, 224, 0.78) 50%,
-    rgba(250, 248, 245, 0.55) 75%
-  );
-  background-size: 200% 100%;
-  animation: owngShimmer 1.35s ease-in-out infinite;
-  z-index: 15;
-  pointer-events: none;
-}
-
 .fc .fc-event {
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease;
+}
+
+/* =========================================================
+   Ocultación total del calendario durante la carga + Skeletons
+   ========================================================= */
+
+/* Mientras carga (.is-loading), el calendario real (.fc) no se ve en absoluto */
+.calendar-container.is-loading > .fc {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Cuando termina de cargar, el calendario entra con una transición suave */
+.calendar-container:not(.is-loading) > .fc {
+  visibility: visible;
+  opacity: 1;
+  animation: calendarReveal 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes calendarReveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Contenedor del Skeleton de Semana y Mes: Ocupa el 100% y tapa el calendario */
+.calendar-skeleton-overlay {
+  display: none;
+}
+
+.calendar-container.is-loading > .calendar-skeleton-overlay {
+  display: flex !important;
+  flex-direction: column;
+  gap: 14px;
+  position: absolute;
+  inset: 0;
+  padding: 20px;
+  background-color: var(--bg);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.mobile-version-layout .calendar-container.is-loading > .calendar-skeleton-overlay {
+  padding: 12px 10px;
+}
+
+/* Skeleton de Vista Mes (Cuadrícula 7 columnas) */
+.cal-skel-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cal-skel-weekday-pill {
+  height: 16px;
+  border-radius: var(--radius-xs);
+}
+
+.cal-skel-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 6px;
+  flex: 1;
+}
+
+.cal-skel-day-cell {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  padding: 6px;
+  background-color: #FAF8F5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.cal-skel-day-num {
+  width: 18px;
+  height: 12px;
+  border-radius: 3px;
+  align-self: flex-end;
+}
+
+.cal-skel-day-event {
+  width: 100%;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* Skeleton de Vista Semana (Filas / Agenda semanal) */
+.cal-skel-week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.cal-skel-week-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background-color: #FAF8F5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cal-skel-week-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cal-skel-week-dayname {
+  width: 110px;
+  height: 13px;
+  border-radius: var(--radius-xs);
+}
+
+.cal-skel-week-date {
+  width: 70px;
+  height: 11px;
+  border-radius: var(--radius-xs);
+}
+
+.cal-skel-week-event {
+  width: 78%;
+  height: 22px;
+  border-radius: var(--radius-xs);
 }

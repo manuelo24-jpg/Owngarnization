@@ -208,6 +208,11 @@ class AppState {
 
   onDateChanged() {
     this.updatePeriodLabel();
+    if (this.currentView === "week" || this.currentView === "month") {
+      window.calendarManager?.setLoading(true, this.currentView);
+    } else if (this.currentView === "day") {
+      window.board?.showSkeletons();
+    }
     if (window.calendarManager) {
       window.calendarManager.gotoDate(this.currentDate);
     }
@@ -247,6 +252,13 @@ class AppState {
 
     this.syncMobileDayTabsVisibility();
 
+    // Activar inmediatamente el skeleton y ocultar el calendario antes de mostrar la sección
+    if (newView === "week" || newView === "month") {
+      window.calendarManager?.setLoading(true, newView);
+    } else if (newView === "day") {
+      window.board?.showSkeletons();
+    }
+
     const views = {
       day: document.getElementById("view-day"),
       week: document.getElementById("view-week"),
@@ -268,12 +280,6 @@ class AppState {
     }
 
     this.updatePeriodLabel();
-
-    if (newView === "month" && window.calendarManager?.calendarMonth) {
-      setTimeout(() => window.calendarManager.calendarMonth.updateSize(), 50);
-    } else if (newView === "week" && window.calendarManager?.calendarWeek) {
-      setTimeout(() => window.calendarManager.calendarWeek.updateSize(), 50);
-    }
 
     this.reloadCurrentView({ showSkeleton: true });
   }
@@ -372,7 +378,7 @@ class AppState {
       if (this.currentView === "day" && window.board) {
         window.board.showSkeletons();
       } else if (window.calendarManager) {
-        window.calendarManager.setLoading(true);
+        window.calendarManager.setLoading(true, this.currentView);
       }
     }
 

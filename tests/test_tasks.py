@@ -161,27 +161,27 @@ def test_search_and_filters():
         "description": "Incluir balance de ventas",
         "kind": "daily",
         "importance": "high",
-        "date": "2026-11-01"
+        "date": "2028-11-01"
     })
     client.post("/api/tasks", json={
         "title": "Comprar café",
         "description": "Tueste natural",
         "kind": "daily",
         "importance": "low",
-        "date": "2026-11-01"
+        "date": "2028-11-01"
     })
 
     # Búsqueda por texto "informe"
-    q_resp = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01&q=informe").json()
+    q_resp = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01&q=informe").json()
     assert len(q_resp) == 1
     assert q_resp[0]["task"]["title"] == "Preparar informe trimestral"
 
     # Búsqueda por texto en descripción "ventas"
-    q_desc = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01&q=ventas").json()
+    q_desc = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01&q=ventas").json()
     assert len(q_desc) == 1
 
     # Filtro por importancia "low"
-    imp_resp = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01&importance=low").json()
+    imp_resp = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01&importance=low").json()
     assert len(imp_resp) == 1
     assert imp_resp[0]["task"]["title"] == "Comprar café"
 
@@ -189,21 +189,21 @@ def test_search_and_filters():
 def test_reorder_occurrences():
     client = create_authenticated_client("reorderuser@example.com", "reorderuser")
 
-    t1 = client.post("/api/tasks", json={"title": "Tarea 1", "kind": "daily", "date": "2026-11-01"}).json()
-    t2 = client.post("/api/tasks", json={"title": "Tarea 2", "kind": "daily", "date": "2026-11-01"}).json()
+    t1 = client.post("/api/tasks", json={"title": "Tarea 1", "kind": "daily", "date": "2028-11-01"}).json()
+    t2 = client.post("/api/tasks", json={"title": "Tarea 2", "kind": "daily", "date": "2028-11-01"}).json()
 
-    occs = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01").json()
+    occs = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01").json()
     id1 = occs[0]["id"]
     id2 = occs[1]["id"]
 
     # Reordenar invirtiendo las posiciones
     reorder_resp = client.post("/api/occurrences/reorder", json={
-        "date": "2026-11-01",
+        "date": "2028-11-01",
         "ordered_ids": [id2, id1]
     })
     assert reorder_resp.status_code == 200
 
-    new_occs = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01").json()
+    new_occs = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01").json()
     assert new_occs[0]["id"] == id2
     assert new_occs[1]["id"] == id1
 
@@ -214,25 +214,25 @@ def test_move_occurrence_date():
     client.post("/api/tasks", json={
         "title": "Mover reunión",
         "kind": "daily",
-        "date": "2026-11-01"
+        "date": "2028-11-01"
     })
 
-    occs = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01").json()
+    occs = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01").json()
     occ_id = occs[0]["id"]
 
-    # Mover al 2026-11-03
-    patch_resp = client.patch(f"/api/occurrences/{occ_id}", json={"date": "2026-11-03"})
+    # Mover al 2028-11-03
+    patch_resp = client.patch(f"/api/occurrences/{occ_id}", json={"date": "2028-11-03"})
     assert patch_resp.status_code == 200
-    assert patch_resp.json()["date"] == "2026-11-03"
+    assert patch_resp.json()["date"] == "2028-11-03"
 
     # Verificar que ya no está en el día 1
-    day1_occs = client.get("/api/occurrences?start=2026-11-01&end=2026-11-01").json()
+    day1_occs = client.get("/api/occurrences?start=2028-11-01&end=2028-11-01").json()
     assert len(day1_occs) == 0
 
     # Y que ahora está en el día 3
-    day3_occs = client.get("/api/occurrences?start=2026-11-03&end=2026-11-03").json()
+    day3_occs = client.get("/api/occurrences?start=2028-11-03&end=2028-11-03").json()
     assert len(day3_occs) == 1
-    assert day3_occs[0]["date"] == "2026-11-03"
+    assert day3_occs[0]["date"] == "2028-11-03"
 
 
 def test_daily_task_rollover_when_uncompleted():

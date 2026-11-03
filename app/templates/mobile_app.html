@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/static/img/icons/apple-touch-icon-180.png?v=4">
 
 <!-- Estilos exclusivos de la Versión Móvil -->
-<link rel="stylesheet" href="/static/css/mobile.css?v=8">
+<link rel="stylesheet" href="/static/css/mobile.css?v=9">
 
 <!-- FullCalendar CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
@@ -74,11 +74,85 @@
       {% include "components/board_day.html" %}
 
       <section id="view-week" class="view-section" style="display: none;" aria-label="Vista semanal">
-        <div id="calendar-week" class="calendar-container"></div>
+        <div id="calendar-week" class="calendar-container is-loading">
+          <div class="calendar-skeleton-overlay" aria-hidden="true">
+            <div class="cal-skel-week-list">
+              <div class="cal-skel-week-row">
+                <div class="cal-skel-week-row-header">
+                  <div class="skeleton-block cal-skel-week-dayname"></div>
+                  <div class="skeleton-block cal-skel-week-date"></div>
+                </div>
+                <div class="skeleton-block cal-skel-week-event"></div>
+              </div>
+              <div class="cal-skel-week-row">
+                <div class="cal-skel-week-row-header">
+                  <div class="skeleton-block cal-skel-week-dayname" style="width: 95px;"></div>
+                  <div class="skeleton-block cal-skel-week-date"></div>
+                </div>
+                <div class="skeleton-block cal-skel-week-event" style="width: 60%;"></div>
+              </div>
+              <div class="cal-skel-week-row">
+                <div class="cal-skel-week-row-header">
+                  <div class="skeleton-block cal-skel-week-dayname" style="width: 120px;"></div>
+                  <div class="skeleton-block cal-skel-week-date"></div>
+                </div>
+                <div class="skeleton-block cal-skel-week-event" style="width: 85%;"></div>
+              </div>
+              <div class="cal-skel-week-row">
+                <div class="cal-skel-week-row-header">
+                  <div class="skeleton-block cal-skel-week-dayname" style="width: 85px;"></div>
+                  <div class="skeleton-block cal-skel-week-date"></div>
+                </div>
+              </div>
+              <div class="cal-skel-week-row">
+                <div class="cal-skel-week-row-header">
+                  <div class="skeleton-block cal-skel-week-dayname" style="width: 105px;"></div>
+                  <div class="skeleton-block cal-skel-week-date"></div>
+                </div>
+                <div class="skeleton-block cal-skel-week-event" style="width: 70%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="view-month" class="view-section" style="display: none;" aria-label="Vista mensual">
-        <div id="calendar-month" class="calendar-container"></div>
+        <div id="calendar-month" class="calendar-container is-loading">
+          <div class="calendar-skeleton-overlay" aria-hidden="true">
+            <div class="cal-skel-weekdays">
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+              <div class="skeleton-block cal-skel-weekday-pill"></div>
+            </div>
+            <div class="cal-skel-month-grid">
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div><div class="skeleton-block cal-skel-day-event"></div></div>
+              <div class="cal-skel-day-cell"><div class="skeleton-block cal-skel-day-num"></div></div>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -93,15 +167,15 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/pwa.js?v=8"></script>
-<script src="/static/js/push.js?v=8"></script>
-<script src="/static/js/task_modal.js?v=8"></script>
-<script src="/static/js/drawer.js?v=8"></script>
-<script src="/static/js/guide.js?v=8"></script>
-<script src="/static/js/modal.js?v=8"></script>
-<script src="/static/js/board.js?v=8"></script>
-<script src="/static/js/calendar.js?v=8"></script>
-<script src="/static/js/app.js?v=8"></script>
+<script src="/static/js/pwa.js?v=9"></script>
+<script src="/static/js/push.js?v=9"></script>
+<script src="/static/js/task_modal.js?v=9"></script>
+<script src="/static/js/drawer.js?v=9"></script>
+<script src="/static/js/guide.js?v=9"></script>
+<script src="/static/js/modal.js?v=9"></script>
+<script src="/static/js/board.js?v=9"></script>
+<script src="/static/js/calendar.js?v=9"></script>
+<script src="/static/js/app.js?v=9"></script>
 
 <script>
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
