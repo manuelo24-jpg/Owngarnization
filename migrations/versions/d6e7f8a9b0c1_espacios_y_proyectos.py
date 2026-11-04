@@ -33,8 +33,8 @@ def upgrade() -> None:
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('color', sa.String(length=20), nullable=True),
         sa.Column('icon', sa.String(length=20), nullable=True),
-        sa.Column('is_archived', sa.Boolean(), server_default=sa.text('0'), nullable=False),
-        sa.Column('is_active', sa.Boolean(), server_default=sa.text('1'), nullable=False),
+        sa.Column('is_archived', sa.Boolean(), server_default=sa.false(), nullable=False),
+        sa.Column('is_active', sa.Boolean(), server_default=sa.true(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
@@ -79,7 +79,7 @@ def upgrade() -> None:
         sa.Column('project_id', sa.Integer(), sa.ForeignKey('projects.id', ondelete='CASCADE'), nullable=False),
         sa.Column('name', sa.String(length=50), nullable=False),
         sa.Column('position', sa.Integer(), server_default='0', nullable=False),
-        sa.Column('is_done', sa.Boolean(), server_default=sa.text('0'), nullable=False),
+        sa.Column('is_done', sa.Boolean(), server_default=sa.false(), nullable=False),
     )
     op.create_index('ix_project_columns_id', 'project_columns', ['id'])
     op.create_index('ix_project_columns_project_id', 'project_columns', ['project_id'])
