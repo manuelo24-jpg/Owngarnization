@@ -3,11 +3,11 @@
 {% block title %}Proyectos — Owngarnization{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="/static/css/projects.css?v=5">
+<link rel="stylesheet" href="/static/css/projects.css?v=8">
 {% endblock %}
 
 {% block content %}
-<div class="project-layout">
+<div class="project-layout {% if is_mobile %}mobile-version-layout mobile-projects-layout{% endif %}">
   {% include "components/projects/project_header.html" %}
 
   <main class="projects-container">
@@ -26,61 +26,61 @@
     <div id="projects-grid" class="projects-grid">
       {% if projects and projects|length > 0 %}
       {% for p in projects %}
-        <a href="{% if is_mobile %}/m/projects/{{ p.id }}{% else %}/projects/{{ p.id }}{% endif %}" class="project-card"
-          data-project-id="{{ p.id }}">
-          <div class="project-card-header">
-            <span class="project-card-icon" style="background-color: {{ p.color or '#C9B49A' }}20;">
-              {{ p.icon or '📁' }}
-            </span>
-            <span class="permission-badge {{ p.my_permission }}">
-              {{ p.my_permission }}
-            </span>
-          </div>
-
-          <h2 class="project-card-title">{{ p.name }}</h2>
-          <p class="project-card-desc">{{ p.description or 'Sin descripción detallada' }}</p>
-
-          <div class="project-progress">
-            <div class="project-progress-info">
-              <span>{{ p.done_tasks }} de {{ p.total_tasks }} tareas hechas</span>
-              <span>{{ p.progress_percent }}%</span>
-            </div>
-            <div class="project-progress-bar">
-              <div class="project-progress-fill" style="width: {{ p.progress_percent }}%;"></div>
-            </div>
-          </div>
-
-          <div class="project-card-footer">
-            <div class="members-avatar-stack">
-              {% if p.members %}
-              {% for m in p.members %}
-              <span class="avatar-circle" title="{{ m.username }}">{{ m.username[:2] }}</span>
-              {% endfor %}
-              {% endif %}
-              {% if p.members_count > 5 %}
-              <span class="avatar-circle" style="background: var(--line);">+{{ p.members_count - 5 }}</span>
-              {% endif %}
-            </div>
-            <span>Abrir proyecto →</span>
-          </div>
-        </a>
-        {% endfor %}
-        {% else %}
-        <!-- Estado Vacío -->
-        <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
-          <h2 style="font-size: 1.25rem; font-weight: 600; color: var(--ink); margin-bottom: 0.5rem;">
-            Aún no tienes proyectos
-          </h2>
-          <p style="font-size: 0.92rem; color: var(--ink-soft); max-width: 420px; margin: 0 auto 1.5rem;">
-            Crea tu primer proyecto para organizar tareas por columnas Kanban, planificar horarios y colaborar con tu
-            equipo.
-          </p>
-          <button id="btn-empty-create-project" class="btn btn-primary">
-            ＋ Crear mi primer proyecto
-          </button>
+      <a href="{% if is_mobile %}/m/projects/{{ p.id }}{% else %}/projects/{{ p.id }}{% endif %}" class="project-card"
+        data-project-id="{{ p.id }}">
+        <div class="project-card-header">
+          <span class="project-card-icon" style="background-color: {{ p.color or '#C9B49A' }}20;">
+            {{ p.icon or '📁' }}
+          </span>
+          <span class="permission-badge {{ p.my_permission }}">
+            {{ p.my_permission }}
+          </span>
         </div>
-        {% endif %}
+
+        <h2 class="project-card-title">{{ p.name }}</h2>
+        <p class="project-card-desc">{{ p.description or 'Sin descripción detallada' }}</p>
+
+        <div class="project-progress">
+          <div class="project-progress-info">
+            <span>{{ p.done_tasks }} de {{ p.total_tasks }} tareas hechas</span>
+            <span>{{ p.progress_percent }}%</span>
+          </div>
+          <div class="project-progress-bar">
+            <div class="project-progress-fill" style="width: {{ p.progress_percent }}%;"></div>
+          </div>
+        </div>
+
+        <div class="project-card-footer">
+          <div class="members-avatar-stack">
+            {% if p.members %}
+            {% for m in p.members %}
+            <span class="avatar-circle" title="{{ m.username }}">{{ m.username[:2] }}</span>
+            {% endfor %}
+            {% endif %}
+            {% if p.members_count > 5 %}
+            <span class="avatar-circle" style="background: var(--line);">+{{ p.members_count - 5 }}</span>
+            {% endif %}
+          </div>
+          <span>Abrir proyecto →</span>
+        </div>
+      </a>
+      {% endfor %}
+      {% else %}
+      <!-- Estado Vacío -->
+      <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: var(--ink); margin-bottom: 0.5rem;">
+          Aún no tienes proyectos
+        </h2>
+        <p style="font-size: 0.92rem; color: var(--ink-soft); max-width: 420px; margin: 0 auto 1.5rem;">
+          Crea tu primer proyecto para organizar tareas por columnas Kanban, planificar horarios y colaborar con tu
+          equipo.
+        </p>
+        <button id="btn-empty-create-project" class="btn btn-primary">
+          ＋ Crear mi primer proyecto
+        </button>
+      </div>
+      {% endif %}
     </div>
   </main>
 </div>

@@ -5,11 +5,12 @@
 {% block extra_head %}
 <!-- SortableJS CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<link rel="stylesheet" href="/static/css/projects.css?v=5">
+<link rel="stylesheet" href="/static/css/projects.css?v=8">
 {% endblock %}
 
 {% block content %}
-<div class="project-layout" data-project-id="{{ project.id }}" data-my-permission="{{ project.my_permission }}">
+<div class="project-layout {% if is_mobile %}mobile-version-layout mobile-project-detail-layout{% endif %}"
+  data-project-id="{{ project.id }}" data-my-permission="{{ project.my_permission }}">
   {% include "components/projects/project_header.html" %}
 
   <!-- Subbarra del Proyecto con Pestañas -->
@@ -27,7 +28,8 @@
     </div>
 
     <div style="font-size: 0.82rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.6rem;">
-      <span class="permission-badge {{ project.my_permission }}">Tu rol: {{ project.my_role or project.my_permission }}</span>
+      <span class="permission-badge {{ project.my_permission }}">Tu rol: {{ project.my_role or project.my_permission
+        }}</span>
     </div>
   </div>
 
@@ -66,4 +68,3 @@
   });
 </script>
 {% endblock %}
-

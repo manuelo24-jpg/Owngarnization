@@ -26,7 +26,7 @@
         👥 Personas y Roles
       </button>
       <button type="button" class="guide-tab-btn projects-guide-tab-btn" data-tab="ptab-shortcuts" role="tab" aria-selected="false">
-        ⌨️ Atajos
+        📱 Gestos y Atajos
       </button>
     </div>
 
@@ -43,18 +43,24 @@
         <div class="guide-grid-steps">
           <div class="guide-step-card">
             <div class="step-num">1</div>
-            <h4>Proyectos de 1 en 1</h4>
-            <p>Trabajas enfocado en un único proyecto a la vez. Todo lo que ves (tablero, horario y personas) pertenece a él.</p>
+            <div class="guide-step-body">
+              <h4>Proyectos de 1 en 1</h4>
+              <p>Trabajas enfocado en un único proyecto a la vez. Todo lo que ves (tablero, horario y personas) pertenece a él.</p>
+            </div>
           </div>
           <div class="guide-step-card">
             <div class="step-num">2</div>
-            <h4>Cambio rápido</h4>
-            <p>Usa el desplegable con el nombre del proyecto en la cabecera para saltar a otro sin volver al listado.</p>
+            <div class="guide-step-body">
+              <h4>Cambio rápido</h4>
+              <p>Usa el desplegable con el nombre del proyecto en la cabecera para saltar a otro sin volver al listado.</p>
+            </div>
           </div>
           <div class="guide-step-card">
             <div class="step-num">3</div>
-            <h4>Volver al inicio</h4>
-            <p>Toca el icono del calendario en la esquina superior izquierda en cualquier momento para volver a la pantalla de selección de espacios.</p>
+            <div class="guide-step-body">
+              <h4>Volver al inicio</h4>
+              <p>Toca el icono del calendario en la esquina superior izquierda en cualquier momento para volver a la pantalla de selección de espacios.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -112,72 +118,116 @@
           En Owngarnization separamos lo que una persona <strong>puede hacer</strong> (Permiso) de su <strong>función organizativa</strong> (Rol de equipo).
         </p>
 
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem;">
-          <thead>
-            <tr style="border-bottom: 1px solid var(--line); text-align: left;">
-              <th style="padding: 6px;">Permiso</th>
-              <th style="padding: 6px;">Tareas</th>
-              <th style="padding: 6px;">Personas/Roles</th>
-              <th style="padding: 6px;">Proyecto</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom: 1px solid var(--line);">
-              <td style="padding: 6px;"><strong>Owner</strong></td>
-              <td style="padding: 6px;">Crear/Mover</td>
-              <td style="padding: 6px;">Total</td>
-              <td style="padding: 6px;">Editar/Borrar</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--line);">
-              <td style="padding: 6px;"><strong>Admin</strong></td>
-              <td style="padding: 6px;">Crear/Mover</td>
-              <td style="padding: 6px;">Gestionar</td>
-              <td style="padding: 6px;">Editar</td>
-            </tr>
-            <tr style="border-bottom: 1px solid var(--line);">
-              <td style="padding: 6px;"><strong>Member</strong></td>
-              <td style="padding: 6px;">Crear/Mover</td>
-              <td style="padding: 6px;">—</td>
-              <td style="padding: 6px;">—</td>
-            </tr>
-            <tr>
-              <td style="padding: 6px;"><strong>Viewer</strong></td>
-              <td style="padding: 6px;">Solo lectura</td>
-              <td style="padding: 6px;">—</td>
-              <td style="padding: 6px;">—</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="guide-table-scroll" style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 0.75rem;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 320px;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--line); text-align: left;">
+                <th style="padding: 6px;">Permiso</th>
+                <th style="padding: 6px;">Tareas</th>
+                <th style="padding: 6px;">Personas/Roles</th>
+                <th style="padding: 6px;">Proyecto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--line);">
+                <td style="padding: 6px;"><strong>Owner</strong></td>
+                <td style="padding: 6px;">Crear/Mover</td>
+                <td style="padding: 6px;">Total</td>
+                <td style="padding: 6px;">Editar/Borrar</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--line);">
+                <td style="padding: 6px;"><strong>Admin</strong></td>
+                <td style="padding: 6px;">Crear/Mover</td>
+                <td style="padding: 6px;">Gestionar</td>
+                <td style="padding: 6px;">Editar</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--line);">
+                <td style="padding: 6px;"><strong>Member</strong></td>
+                <td style="padding: 6px;">Crear/Mover</td>
+                <td style="padding: 6px;">—</td>
+                <td style="padding: 6px;">—</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px;"><strong>Viewer</strong></td>
+                <td style="padding: 6px;">Solo lectura</td>
+                <td style="padding: 6px;">—</td>
+                <td style="padding: 6px;">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <small style="color: var(--ink-muted);">* Regla de integridad: el proyecto debe tener siempre al menos un Propietario (Owner).</small>
       </div>
 
-      <!-- Pestaña 5: Atajos -->
+      <!-- Pestaña 5: Gestos Móviles y Atajos de Teclado -->
       <div id="ptab-shortcuts" class="projects-guide-panel" style="display: none;">
-        <h4 style="margin-bottom: 0.75rem; color: var(--ink);">Navegación rápida por teclado</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; font-size: 0.88rem;">
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">1</kbd>
-            <span style="margin-left: 0.5rem;">Ir a pestaña Tablero</span>
+        <h4 style="margin-bottom: 0.5rem; color: var(--ink);">📱 Gestos táctiles en móvil</h4>
+        <p style="font-size: 0.86rem; color: var(--ink-soft); margin-bottom: 0.85rem;">
+          Diseñado para una experiencia fluida al alcance de tu pulgar:
+        </p>
+        <div class="mobile-guide-list" style="margin-bottom: 1.25rem;">
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">👆</div>
+            <div class="mobile-guide-text">
+              <strong>Deslizar entre columnas</strong>
+              <p>Desplaza el dedo horizontalmente en el tablero para saltar suavemente de columna en columna.</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">2</kbd>
-            <span style="margin-left: 0.5rem;">Ir a pestaña Horario</span>
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">＋</div>
+            <div class="mobile-guide-text">
+              <strong>Botón flotante (FAB)</strong>
+              <p>Toca el botón redondo negro «＋» en la esquina inferior derecha para crear tareas en 1 toque.</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">3</kbd>
-            <span style="margin-left: 0.5rem;">Ir a pestaña Personas</span>
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">📄</div>
+            <div class="mobile-guide-text">
+              <strong>Ficha inferior (Bottom Sheet)</strong>
+              <p>Toca cualquier tarjeta para abrir su panel de edición desde abajo. Puedes cerrarlo deslizando hacia abajo.</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">N</kbd>
-            <span style="margin-left: 0.5rem;">Crear nueva tarea</span>
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">🔀</div>
+            <div class="mobile-guide-text">
+              <strong>Cambio rápido de proyecto</strong>
+              <p>Toca el nombre del proyecto en la barra superior para saltar a cualquier otro proyecto de tu equipo.</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">?</kbd>
-            <span style="margin-left: 0.5rem;">Abrir este manual</span>
+          <div class="mobile-guide-item">
+            <div class="mobile-guide-icon">🏠</div>
+            <div class="mobile-guide-text">
+              <strong>Volver al selector de espacios</strong>
+              <p>Toca el logo del calendario en la esquina superior izquierda para regresar al selector inicial.</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
-            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Esc</kbd>
-            <span style="margin-left: 0.5rem;">Cerrar panel o modal</span>
+        </div>
+
+        <h4 style="margin-bottom: 0.5rem; color: var(--ink); border-top: 1px solid var(--line); padding-top: 1rem;">⌨️ Atajos de teclado (versión Web / Escritorio)</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.65rem; font-size: 0.86rem;">
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">1</kbd>
+            <span>Ir a Tablero</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">2</kbd>
+            <span>Ir a Horario</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">3</kbd>
+            <span>Ir a Personas</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">N</kbd>
+            <span>Nueva tarea</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">?</kbd>
+            <span>Abrir este manual</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--line); display: flex; align-items: center; gap: 0.6rem;">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 7px; border-radius: 4px; font-weight: 700;">Esc</kbd>
+            <span>Cerrar modal</span>
           </div>
         </div>
       </div>

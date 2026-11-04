@@ -865,8 +865,95 @@
 }
 
 /* =========================================================
-   Adaptación Móvil Nativa de Proyectos (<= 768px)
+   Contenedores Móviles de Proyectos (540px centrado como /m)
    ========================================================= */
+.project-layout.mobile-projects-layout,
+.project-layout.mobile-project-detail-layout,
+.mobile-projects-layout,
+.mobile-project-detail-layout {
+  max-width: 540px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--surface);
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  box-shadow: 0 0 32px rgba(17, 17, 17, 0.06);
+  position: relative;
+}
+
+@media (max-width: 540px) {
+
+  .project-layout.mobile-projects-layout,
+  .project-layout.mobile-project-detail-layout,
+  .mobile-projects-layout,
+  .mobile-project-detail-layout {
+    border-left: none;
+    border-right: none;
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   Adaptación Móvil Nativa de Proyectos (<= 768px y rutas /m/)
+   ========================================================= */
+.mobile-project-detail-layout,
+.mobile-projects-layout {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-project-detail-layout .project-header,
+.mobile-projects-layout .project-header {
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px 12px;
+  gap: 8px;
+  flex-wrap: nowrap !important;
+}
+
+.mobile-project-detail-layout .header-btn-new-task,
+.mobile-projects-layout .header-btn-new-task,
+.mobile-project-detail-layout .header-user-name,
+.mobile-projects-layout .header-user-name {
+  display: none !important;
+}
+
+.mobile-project-detail-layout .project-dropdown-btn,
+.mobile-projects-layout .project-dropdown-btn {
+  padding: 6px 10px;
+  font-size: 13px;
+  max-width: 155px;
+  gap: 4px;
+}
+
+.mobile-project-detail-layout .project-current-name,
+.mobile-projects-layout .project-current-name {
+  max-width: 85px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.mobile-project-detail-layout .btn-logout-compact,
+.mobile-projects-layout .btn-logout-compact {
+  padding: 4px 8px;
+  font-size: 11.5px;
+}
+
+.mobile-project-detail-layout .project-subbar,
+.mobile-projects-layout .project-subbar {
+  display: none !important;
+}
+
+.mobile-project-detail-layout .project-mobile-bottom-nav,
+.mobile-projects-layout .project-mobile-bottom-nav {
+  display: flex !important;
+}
+
+.mobile-project-detail-layout .project-mobile-fab,
+.mobile-projects-layout .project-mobile-fab {
+  display: flex !important;
+}
+
 @media (max-width: 768px) {
   .project-layout {
     padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
@@ -876,6 +963,7 @@
   .project-header {
     padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px 12px;
     gap: 8px;
+    flex-wrap: nowrap !important;
   }
 
   .project-header .header-btn-new-task,
@@ -915,6 +1003,8 @@
     bottom: 0;
     left: 0;
     right: 0;
+    max-width: 540px;
+    margin: 0 auto;
     height: calc(56px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background-color: var(--bg);
@@ -967,7 +1057,7 @@
     align-items: center;
     justify-content: center;
     position: fixed;
-    right: 18px;
+    right: max(18px, calc(50% - 252px));
     bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     width: 54px;
     height: 54px;
@@ -988,9 +1078,11 @@
     background-color: #2A2A2A;
   }
 
-  /* Tablero Kanban Móvil con Deslizamiento Táctil */
-  .kanban-workspace {
-    padding: 12px 12px 24px 12px;
+  /* Espacios de trabajo con padding inferior seguro para la barra de navegación móvil y el FAB */
+  .kanban-workspace,
+  .schedule-workspace,
+  .people-workspace {
+    padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0px)) 12px !important;
   }
 
   .kanban-board {
@@ -1005,14 +1097,17 @@
   .kanban-column {
     flex: 0 0 86vw;
     width: 86vw;
-    max-width: 330px;
+    max-width: 340px;
     scroll-snap-align: center;
     padding: 12px;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 210px);
+    max-height: calc(100dvh - 210px);
   }
 
-  /* Filtros en Móvil */
+  /* Filtros en Móvil: Barra de búsqueda superior y chips desplazables */
   .kanban-filter-bar {
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     margin-bottom: 12px;
   }
@@ -1024,57 +1119,132 @@
 
   .filter-select-group {
     width: 100%;
+    display: flex;
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 4px;
+    gap: 8px;
+    padding-bottom: 2px;
+    scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-select-group::-webkit-scrollbar {
+    display: none;
   }
 
   .board-filter-select {
     font-size: 12.5px;
-    padding: 6px 26px 6px 10px;
+    padding: 7px 26px 7px 10px;
     white-space: nowrap;
+    min-height: 38px;
+    border-radius: var(--radius-full);
   }
 
   .btn-new-column {
     margin-left: 0;
     width: 100%;
     justify-content: center;
+    min-height: 42px;
+    font-size: 13.5px;
   }
 
   /* Listado de Proyectos (/m/projects) */
   .projects-container {
-    padding: 16px 12px 32px 12px;
+    padding: 14px 14px calc(40px + env(safe-area-inset-bottom, 0px)) 14px;
   }
 
   .projects-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 14px;
     margin-bottom: 1.25rem;
+  }
+
+  .projects-header .btn {
+    min-height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+    justify-content: center;
+    border-radius: 12px;
   }
 
   .projects-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 12px;
   }
 
   .project-card {
-    padding: 1.2rem;
+    padding: 1.25rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .project-card:active {
+    transform: scale(0.985);
   }
 
   /* Horario y Personas en Móvil */
-  .schedule-workspace,
-  .people-workspace {
-    padding: 12px;
+  .schedule-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .schedule-controls>div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .schedule-controls .view-selector-group {
+    display: flex;
+    width: 100%;
+    gap: 4px;
+  }
+
+  .schedule-controls .btn-view-toggle {
+    flex: 1;
+    text-align: center;
+    padding: 8px 6px;
+    font-size: 12px;
   }
 
   .timeline-grid {
     padding: 10px 8px;
+    border-radius: var(--radius-md);
   }
 
-  .people-grid {
+  .timeline-hour-label {
+    width: 48px;
+    font-size: 11px;
+  }
+
+  .people-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .people-section-header .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .member-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  .roles-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 
