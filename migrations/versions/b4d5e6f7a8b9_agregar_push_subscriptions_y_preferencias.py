@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.add_column('users', sa.Column('timezone', sa.String(length=64), server_default='Europe/Madrid', nullable=False))
-    op.add_column('users', sa.Column('reminders_enabled', sa.Boolean(), server_default='1', nullable=False))
+    op.add_column('users', sa.Column('reminders_enabled', sa.Boolean(), server_default=sa.true(), nullable=False))
     op.add_column('users', sa.Column('reminder_offset_min', sa.Integer(), server_default='10', nullable=False))
 
     op.add_column('task_occurrences', sa.Column('reminder_sent_at', sa.DateTime(timezone=True), nullable=True))

@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.add_column('task_occurrences', sa.Column('manual_order', sa.Boolean(), server_default='0', nullable=False))
+    op.add_column('task_occurrences', sa.Column('manual_order', sa.Boolean(), server_default=sa.false(), nullable=False))
 
 
 def downgrade() -> None:
