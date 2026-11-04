@@ -1,0 +1,190 @@
+<!-- ==============================================
+     MODAL DE MANUAL DE USUARIO — PROYECTOS
+=================================================== -->
+<div id="projects-guide-modal" class="modal-overlay" style="display: none;" aria-hidden="true">
+  <div class="modal-card guide-modal-card" role="dialog" aria-labelledby="projects-guide-modal-title">
+    <div class="modal-header">
+      <div class="guide-modal-title-wrapper">
+        <span class="guide-badge" style="background-color: #EDE7DD; color: var(--ink);">Guía Proyectos</span>
+        <h3 id="projects-guide-modal-title" class="modal-title">Manual de Proyectos y Equipos</h3>
+      </div>
+      <button id="projects-guide-close-btn" class="modal-close" aria-label="Cerrar manual">✕</button>
+    </div>
+
+    <!-- Pestañas de navegación rápida del manual (Estilo Segmented Control idéntico al manual personal) -->
+    <div class="guide-tabs" role="tablist" aria-label="Secciones del manual de proyectos">
+      <button type="button" class="guide-tab-btn projects-guide-tab-btn active" data-tab="ptab-intro" role="tab" aria-selected="true">
+        📁 Espacio y Flujo
+      </button>
+      <button type="button" class="guide-tab-btn projects-guide-tab-btn" data-tab="ptab-kanban" role="tab" aria-selected="false">
+        📋 Tablero Kanban
+      </button>
+      <button type="button" class="guide-tab-btn projects-guide-tab-btn" data-tab="ptab-schedule" role="tab" aria-selected="false">
+        ⏱️ Horario y Carga
+      </button>
+      <button type="button" class="guide-tab-btn projects-guide-tab-btn" data-tab="ptab-people" role="tab" aria-selected="false">
+        👥 Personas y Roles
+      </button>
+      <button type="button" class="guide-tab-btn projects-guide-tab-btn" data-tab="ptab-shortcuts" role="tab" aria-selected="false">
+        ⌨️ Atajos
+      </button>
+    </div>
+
+    <div class="guide-content">
+      <!-- Pestaña 1: Espacio y Flujo -->
+      <div id="ptab-intro" class="projects-guide-panel active">
+        <div class="guide-intro-banner">
+          <h3>¡Bienvenido al Espacio de Proyectos! 📁🚀</h3>
+          <p>
+            Diseñado para colaborar en equipo o gestionar iniciativas complejas de 1 en 1, con la misma calma visual y estética post-it de Owngarnization.
+          </p>
+        </div>
+
+        <div class="guide-grid-steps">
+          <div class="guide-step-card">
+            <div class="step-num">1</div>
+            <h4>Proyectos de 1 en 1</h4>
+            <p>Trabajas enfocado en un único proyecto a la vez. Todo lo que ves (tablero, horario y personas) pertenece a él.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="step-num">2</div>
+            <h4>Cambio rápido</h4>
+            <p>Usa el desplegable con el nombre del proyecto en la cabecera para saltar a otro sin volver al listado.</p>
+          </div>
+          <div class="guide-step-card">
+            <div class="step-num">3</div>
+            <h4>Volver al inicio</h4>
+            <p>Toca el icono del calendario en la esquina superior izquierda en cualquier momento para volver a la pantalla de selección de espacios.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 2: Tablero Kanban -->
+      <div id="ptab-kanban" class="projects-guide-panel" style="display: none;">
+        <h4 style="margin-bottom: 0.75rem; color: var(--ink);">Flujo de trabajo visual en columnas</h4>
+        <p style="font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 1.25rem;">
+          Por defecto tu proyecto cuenta con cuatro columnas: <strong>Pendiente, En curso, En revisión y Hecho</strong>. Puedes añadir más columnas según tu metodología.
+        </p>
+
+        <div style="background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem;">
+          <h5 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 0.5rem;">Arrastrar y soltar (Drag & Drop)</h5>
+          <p style="font-size: 0.86rem; color: var(--ink-soft); margin-bottom: 0.75rem;">
+            Arrastra las tarjetas post-it entre columnas con el ratón o manteniendo pulsado en móvil. Al mover una tarea a una columna marcada como completada, se registrará automáticamente su fecha de finalización.
+          </p>
+          <h5 style="font-size: 0.92rem; font-weight: 600; margin-bottom: 0.5rem;">Colores por prioridad</h5>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem;">
+            <span style="background: var(--pi-low); padding: 3px 8px; border-radius: 4px; font-weight: 600;">Baja</span>
+            <span style="background: var(--pi-medium); padding: 3px 8px; border-radius: 4px; font-weight: 600;">Media</span>
+            <span style="background: var(--pi-high); padding: 3px 8px; border-radius: 4px; font-weight: 600;">Alta</span>
+            <span style="background: var(--pi-urgent); color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: 600;">Urgente</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 3: Horario y Carga -->
+      <div id="ptab-schedule" class="projects-guide-panel" style="display: none;">
+        <h4 style="margin-bottom: 0.75rem; color: var(--ink);">Planificación por horas y detección de solapes</h4>
+        <p style="font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 1.25rem;">
+          Asigna fecha y horas (inicio/fin) a cualquier tarea para visualizarla en la línea de tiempo (07:00 a 22:00) o en la vista semanal.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="border-left: 3px solid var(--danger); background: #fff5f5; padding: 1rem; border-radius: var(--radius-sm);">
+            <strong style="color: var(--danger); font-size: 0.9rem;">⚠️ Detección de solapes:</strong>
+            <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.25rem;">
+              Si una persona tiene dos tareas asignadas en conflicto horario el mismo día, el sistema la destacará con un borde de advertencia en el horario y en el drawer sin bloquear tu flujo.
+            </p>
+          </div>
+
+          <div style="border: 1px solid var(--line); background: var(--surface); padding: 1rem; border-radius: var(--radius-sm);">
+            <strong style="font-size: 0.9rem; color: var(--ink);">📊 Control de carga semanal:</strong>
+            <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.25rem;">
+              Compara las horas planificadas de cada miembro contra su capacidad semanal configurada (p. ej. 40h/sem) con una barra de progreso que alerta sobrecargas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 4: Personas y Roles -->
+      <div id="ptab-people" class="projects-guide-panel" style="display: none;">
+        <h4 style="margin-bottom: 0.75rem; color: var(--ink);">Permisos de seguridad vs Roles de equipo</h4>
+        <p style="font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 1.25rem;">
+          En Owngarnization separamos lo que una persona <strong>puede hacer</strong> (Permiso) de su <strong>función organizativa</strong> (Rol de equipo).
+        </p>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); text-align: left;">
+              <th style="padding: 6px;">Permiso</th>
+              <th style="padding: 6px;">Tareas</th>
+              <th style="padding: 6px;">Personas/Roles</th>
+              <th style="padding: 6px;">Proyecto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 6px;"><strong>Owner</strong></td>
+              <td style="padding: 6px;">Crear/Mover</td>
+              <td style="padding: 6px;">Total</td>
+              <td style="padding: 6px;">Editar/Borrar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 6px;"><strong>Admin</strong></td>
+              <td style="padding: 6px;">Crear/Mover</td>
+              <td style="padding: 6px;">Gestionar</td>
+              <td style="padding: 6px;">Editar</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 6px;"><strong>Member</strong></td>
+              <td style="padding: 6px;">Crear/Mover</td>
+              <td style="padding: 6px;">—</td>
+              <td style="padding: 6px;">—</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px;"><strong>Viewer</strong></td>
+              <td style="padding: 6px;">Solo lectura</td>
+              <td style="padding: 6px;">—</td>
+              <td style="padding: 6px;">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <small style="color: var(--ink-muted);">* Regla de integridad: el proyecto debe tener siempre al menos un Propietario (Owner).</small>
+      </div>
+
+      <!-- Pestaña 5: Atajos -->
+      <div id="ptab-shortcuts" class="projects-guide-panel" style="display: none;">
+        <h4 style="margin-bottom: 0.75rem; color: var(--ink);">Navegación rápida por teclado</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; font-size: 0.88rem;">
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">1</kbd>
+            <span style="margin-left: 0.5rem;">Ir a pestaña Tablero</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">2</kbd>
+            <span style="margin-left: 0.5rem;">Ir a pestaña Horario</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">3</kbd>
+            <span style="margin-left: 0.5rem;">Ir a pestaña Personas</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">N</kbd>
+            <span style="margin-left: 0.5rem;">Crear nueva tarea</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">?</kbd>
+            <span style="margin-left: 0.5rem;">Abrir este manual</span>
+          </div>
+          <div style="background: var(--surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--line);">
+            <kbd style="background: #fff; border: 1px solid var(--line-strong); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Esc</kbd>
+            <span style="margin-left: 0.5rem;">Cerrar panel o modal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--line);">
+      <button type="button" id="projects-guide-ok-btn" class="btn btn-primary">¡Entendido!</button>
+    </div>
+  </div>
+</div>

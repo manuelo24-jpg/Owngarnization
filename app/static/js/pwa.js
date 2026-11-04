@@ -112,7 +112,7 @@ const pwaManager = {
       if (this.deferredPrompt) {
         await this.triggerInstallPrompt();
       } else {
-        window.location.href = "/m";
+        window.location.href = "/m/spaces";
       }
     });
   },
@@ -136,7 +136,7 @@ const pwaManager = {
     if (downloadBtn) {
       downloadBtn.textContent = "✅ Abrir App Móvil";
       downloadBtn.onclick = () => {
-        window.location.href = "/m";
+        window.location.href = "/m/spaces";
       };
     }
     if (statusEl) {

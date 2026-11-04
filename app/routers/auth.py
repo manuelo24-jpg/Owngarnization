@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.requests import Request
 from sqlalchemy.orm import Session
 
@@ -47,20 +48,35 @@ def login(user_in: UserLogin, request: Request, db: Session = Depends(get_db)):
     set_session_user(request, user.id)
     return {
         "message": "Inicio de sesión exitoso",
+        "redirect_url": "/spaces",
         "user": {
             "id": user.id,
             "email": user.email,
             "username": user.username,
+            "last_space": user.last_space,
             "created_at": user.created_at
         }
     }
 
 
-@router.post("/logout")
+@router.api_route("/logout", methods=["GET", "POST"])
 def logout(request: Request):
-    """Cierra la sesión activa del usuario."""
+    """Cierra la sesión activa del usuario y borra la cookie en todos los navegadores."""
     clear_session(request)
-    return {"message": "Sesión cerrada correctamente"}
+
+    if request.method == "GET":
+        response = RedirectResponse(url="/login", status_code=302)
+    else:
+        response = JSONResponse(content={"message": "Sesión cerrada correctamente"})
+
+    # Eliminar explícitamente la cookie en la respuesta HTTP
+    response.delete_cookie(
+        key="owngarnization_session",
+        path="/",
+        httponly=True,
+        samesite="lax"
+    )
+    return response
 
 
 @router.get("/me", response_model=UserResponse)

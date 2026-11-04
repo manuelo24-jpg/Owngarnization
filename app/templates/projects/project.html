@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} — Owngarnization{% endblock %}
+
+{% block extra_head %}
+<!-- SortableJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<link rel="stylesheet" href="/static/css/projects.css?v=5">
+{% endblock %}
+
+{% block content %}
+<div class="project-layout" data-project-id="{{ project.id }}" data-my-permission="{{ project.my_permission }}">
+  {% include "components/projects/project_header.html" %}
+
+  <!-- Subbarra del Proyecto con Pestañas -->
+  <div class="project-subbar">
+    <div class="project-nav-tabs" role="tablist">
+      <button id="tab-btn-board" class="project-tab-btn active" role="tab" aria-selected="true" data-tab="board">
+        📋 Tablero
+      </button>
+      <button id="tab-btn-schedule" class="project-tab-btn" role="tab" aria-selected="false" data-tab="schedule">
+        ⏱️ Horario
+      </button>
+      <button id="tab-btn-people" class="project-tab-btn" role="tab" aria-selected="false" data-tab="people">
+        👥 Personas
+      </button>
+    </div>
+
+    <div style="font-size: 0.82rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.6rem;">
+      <span class="permission-badge {{ project.my_permission }}">Tu rol: {{ project.my_role or project.my_permission }}</span>
+    </div>
+  </div>
+
+  <!-- Vistas Principales -->
+  <main class="project-main-area">
+    {% include "components/projects/board_view.html" %}
+    {% include "components/projects/schedule_view.html" %}
+    {% include "components/projects/people_view.html" %}
+  </main>
+  <!-- Componentes Modales, Drawer y Navegación Móvil -->
+  {% include "components/projects/task_drawer.html" %}
+  {% include "components/projects/project_modals.html" %}
+  {% include "components/projects/projects_guide_modal.html" %}
+  {% include "components/projects/project_mobile_nav.html" %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/api.js?v=11"></script>
+<script src="/static/js/projects/projects_guide.js?v=2"></script>
+<script src="/static/js/projects/project_drawer.js?v=2"></script>
+<script src="/static/js/projects/project_board.js?v=2"></script>
+<script src="/static/js/projects/project_schedule.js?v=2"></script>
+<script src="/static/js/projects/project_people.js?v=2"></script>
+<script src="/static/js/projects/project_app.js?v=2"></script>
+
+<script>
+  // Script de Logout
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    try {
+      await api.post("/auth/logout");
+      window.location.href = "/login";
+    } catch {
+      window.location.href = "/login";
+    }
+  });
+</script>
+{% endblock %}
+

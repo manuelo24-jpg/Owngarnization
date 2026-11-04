@@ -1,0 +1,380 @@
+/* =========================================================
+   Owngarnization — Pantalla Previa / Hub de Espacios (/spaces)
+   Diseño vistoso, editorial, cálido y minimalista
+   ========================================================= */
+
+.spaces-page-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* Barra superior minimalista */
+.spaces-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--line);
+  background-color: var(--bg);
+}
+
+.spaces-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.spaces-topbar-brand img {
+  height: 38px;
+  width: 38px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+.spaces-brand-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+
+.spaces-topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.spaces-logout-link {
+  color: var(--danger);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(179, 57, 57, 0.25);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.spaces-logout-link:hover {
+  background-color: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+/* Contenido Principal Centrado */
+.spaces-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.spaces-hero {
+  text-align: center;
+  margin-bottom: 2.75rem;
+  max-width: 620px;
+}
+
+.spaces-hero-badge {
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  background-color: #EDE7DD;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.85rem;
+}
+
+.spaces-hero-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+  margin-bottom: 0.6rem;
+}
+
+.spaces-hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* Grid de las dos tarjetas principales */
+.spaces-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Tarjeta individual de espacio */
+.space-hub-card {
+  position: relative;
+  background-color: var(--surface-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.space-hub-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background-color: var(--line-strong);
+  transition: background-color var(--transition-fast);
+}
+
+.space-hub-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-strong);
+}
+
+.space-hub-card:hover::before {
+  background-color: var(--accent-strong);
+}
+
+.space-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.space-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.85rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.space-tag-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.space-hub-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+  margin-bottom: 0.5rem;
+}
+
+.space-hub-desc {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+/* Caja de métricas en vivo */
+.space-metrics-box {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.space-metric-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent-strong);
+  flex-shrink: 0;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+.space-metric-text {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Lista de ventajas / características */
+.space-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.space-features-list li {
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.space-features-list li span.check {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+/* Botón CTA dentro de la tarjeta */
+.space-hub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  background-color: var(--ink);
+  color: #FFFFFF;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.space-hub-card:hover .space-hub-btn {
+  background-color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+/* Pie de pantalla: Recordar y ajustes */
+.spaces-bottom-options {
+  margin-top: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spaces-remember-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+}
+
+.spaces-remember-label input[type="checkbox"] {
+  accent-color: var(--ink);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Adaptación Responsive Mobile */
+@media (max-width: 768px) {
+    .spaces-topbar {
+      padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px 16px;
+    }
+
+    .spaces-topbar-user span {
+      display: none;
+    }
+
+    .spaces-main {
+      padding: 1.5rem 1rem 3rem 1rem;
+    }
+
+    .spaces-hero {
+      margin-bottom: 1.75rem;
+    }
+
+    .spaces-hero-title {
+      font-size: 1.65rem;
+      line-height: 1.25;
+    }
+
+
+      .spaces-hero-subtitle {
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
+
+
+        .spaces-cards-grid {
+          grid-template-columns: 1fr;
+          gap: 1.25rem;
+          width: 100%;
+        }
+
+        .space-hub-card {
+          padding: 1.4rem 1.25rem;
+          border-radius: var(--radius-lg);
+        }
+
+        .space-hub-title {
+          font-size: 1.25rem;
+        }
+
+        .space-hub-desc {
+          font-size: 0.85rem;
+        }
+
+        .space-hub-btn {
+          min-height: 46px;
+          padding: 10px 16px;
+          font-size: 13.5px;
+          border-radius: var(--radius-md);
+        }
+      }

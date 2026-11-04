@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Espacios de Trabajo — Owngarnization{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/spaces.css?v=2">
+{% endblock %}
+
+{% block content %}
+<div class="spaces-page-wrapper">
+  <!-- Barra superior limpia -->
+  <header class="spaces-topbar">
+      <a href="{% if is_mobile %}/m/spaces{% else %}/spaces{% endif %}" class="spaces-topbar-brand"
+        title="Owngarnization">
+        <img src="/static/img/logo.png?v=4" alt="Owngarnization">
+        <span class="spaces-brand-text">Owngarnization</span>
+      </a>
+
+      <div class="spaces-topbar-user">
+        <span>Conectado como <strong>{{ user.username }}</strong></span>
+        <a href="/auth/logout" id="spaces-logout-btn" class="spaces-logout-link" title="Cerrar sesión">Salir</a>
+      </div>
+  </header>
+
+  <!-- Contenido Central Vistoso -->
+  <main class="spaces-main">
+    <div class="spaces-hero">
+      <span class="spaces-hero-badge">Espacios de trabajo</span>
+      <h1 class="spaces-hero-title">¿Dónde deseas enfocarte hoy?</h1>
+      <p class="spaces-hero-subtitle">
+        Owngarnization separa con claridad tu agenda individual de tus proyectos en equipo. Elige un espacio para
+        comenzar.
+      </p>
+    </div>
+
+    <div class="spaces-cards-grid">
+      <!-- TARJETA 1: ORGANIZACIÓN PERSONAL -->
+        <a href="{% if is_mobile %}/m{% else %}/{% endif %}" id="card-personal" class="space-hub-card"
+          aria-label="Entrar a Organización Personal">
+          <div class="space-card-top">
+            <div class="space-icon-box">🗓️</div>
+            <span class="space-tag-pill">Individual · Rutinas</span>
+          </div>
+
+          <h2 class="space-hub-title">Organización personal</h2>
+          <p class="space-hub-desc">
+            Tus notas post-it individuales, rutinas de hábitos recurrentes y calendario mensual y semanal.
+          </p>
+
+          <div class="space-metrics-box">
+            <span class="space-metric-dot"></span>
+            <span id="personal-summary-text" class="space-metric-text">Cargando tus tareas de hoy...</span>
+          </div>
+
+          <ul class="space-features-list">
+            <li><span class="check">✓</span> Tablero diario de post-its con cambio rápido de estado</li>
+            <li><span class="check">✓</span> Tareas comunes diarias y traspaso de pendientes</li>
+            <li><span class="check">✓</span> Calendario interactivo en vistas Mes y Semana</li>
+          </ul>
+
+          <div class="space-hub-btn">
+            <span>Entrar a mi agenda personal</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- TARJETA 2: PROYECTOS -->
+          <a href="{% if is_mobile %}/m/projects{% else %}/projects{% endif %}" id="card-projects"
+            class="space-hub-card" aria-label="Entrar a Proyectos">
+            <div class="space-card-top">
+              <div class="space-icon-box">📁</div>
+              <span class="space-tag-pill">Equipo · Kanban</span>
+            </div>
+
+            <h2 class="space-hub-title">Proyectos y Equipos</h2>
+            <p class="space-hub-desc">
+              Organización colaborativa de 1 en 1: tableros Kanban, planificación por horas y gestión de personas.
+            </p>
+
+            <div class="space-metrics-box">
+              <span class="space-metric-dot"></span>
+              <span id="projects-summary-text" class="space-metric-text">Cargando tus proyectos...</span>
+            </div>
+
+            <ul class="space-features-list">
+              <li><span class="check">✓</span> Tableros Kanban con columnas y drag & drop</li>
+              <li><span class="check">✓</span> Línea horaria (07:00 a 22:00) con solapes de agenda</li>
+              <li><span class="check">✓</span> Roles de equipo, asignación y control de carga semanal</li>
+            </ul>
+
+            <div class="space-hub-btn">
+              <span>Abrir mis proyectos</span>
+              <span>→</span>
+            </div>
+          </a>
+    </div>
+
+    <!-- Opciones de Navegación -->
+    <div class="spaces-bottom-options">
+      <label class="spaces-remember-label">
+        <input type="checkbox" id="remember-space-choice" {% if user and user.last_space and user.last_space !='spaces'
+          %}checked{% endif %}>
+        <span>Recordar mi elección y entrar directamente en este navegador</span>
+      </label>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/api.js?v=9"></script>
+<script src="/static/js/spaces.js?v=2"></script>
+{% endblock %}

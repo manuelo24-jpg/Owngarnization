@@ -1,0 +1,122 @@
+<!-- Panel Deslizante de Detalle / Edición de Tarea de Proyecto -->
+<aside id="project-task-drawer" class="detail-drawer" aria-label="Detalle de tarea" style="display: none;">
+  <div class="drawer-header">
+    <div class="drawer-header-left">
+      <span id="drawer-priority-badge" class="importance-badge">Media</span>
+      <span id="drawer-role-badge" class="role-tag" style="display: none;"></span>
+    </div>
+    <button id="project-drawer-close" class="btn-icon-close" aria-label="Cerrar panel">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <!-- Banner de Advertencia de Solapes Horarios -->
+    <div id="drawer-overlap-alert" class="alert-box" style="display: none; background-color: #fde8e8; border: 1px solid #b33939; color: #b33939; padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem;">
+      <strong>⚠️ Conflicto horario detectado:</strong>
+      <div id="drawer-overlap-msg"></div>
+    </div>
+
+    <form id="project-task-form">
+      <input type="hidden" id="pdrawer-task-id">
+
+      <div class="form-group">
+        <label for="pdrawer-title">Título de la tarea *</label>
+        <input type="text" id="pdrawer-title" required maxlength="255">
+      </div>
+
+      <div class="form-group">
+        <label for="pdrawer-desc">Descripción detallada</label>
+        <textarea id="pdrawer-desc" rows="3" placeholder="Contexto, enlaces, notas..."></textarea>
+      </div>
+
+      <div class="form-row" style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex: 1;">
+          <label for="pdrawer-column">Columna / Estado</label>
+          <select id="pdrawer-column" required>
+            {% if project and project.columns %}
+              {% for c in project.columns %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+
+        <div class="form-group" style="flex: 1;">
+          <label for="pdrawer-priority">Prioridad</label>
+          <select id="pdrawer-priority">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+            <option value="urgent">Urgente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="pdrawer-role">Rol de equipo asociado</label>
+        <select id="pdrawer-role">
+          <option value="">Sin rol</option>
+          {% if project and project.roles %}
+            {% for r in project.roles %}
+              <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <!-- Asignación de Miembros -->
+      <div class="form-group">
+        <label>Personas asignadas</label>
+        <div id="pdrawer-assignees-container" style="max-height: 120px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.5rem; background: var(--surface);">
+          {% if project and project.all_members %}
+            {% for m in project.all_members %}
+              <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 0.85rem; cursor: pointer;">
+                <input type="checkbox" name="assignee" value="{{ m.user_id }}" class="assignee-checkbox">
+                <span>{{ m.username }}</span>
+                <small style="color: var(--ink-muted);">({{ m.role_name or m.permission }})</small>
+              </label>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Planificación Horaria -->
+      <div style="border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 1rem;">
+        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--ink);">Planificación horaria</h4>
+        
+        <div class="form-group">
+          <label for="pdrawer-date">Fecha de ejecución (opcional)</label>
+          <input type="date" id="pdrawer-date">
+        </div>
+
+        <div class="form-row" style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;">
+            <label for="pdrawer-start">Hora inicio</label>
+            <input type="time" id="pdrawer-start">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="pdrawer-end">Hora fin</label>
+            <input type="time" id="pdrawer-end">
+          </div>
+        </div>
+
+        <div class="form-row" style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex: 1;">
+            <label for="pdrawer-due">Fecha límite</label>
+            <input type="date" id="pdrawer-due">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="pdrawer-minutes">Minutos estimados</label>
+            <input type="number" id="pdrawer-minutes" min="0" placeholder="Ej: 90">
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-actions" style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+        <button type="submit" class="btn btn-primary" id="btn-save-drawer-task" style="flex: 1;">Guardar cambios</button>
+        <button type="button" class="btn btn-outline" id="btn-delete-drawer-task" style="color: var(--danger); border-color: var(--danger);">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</aside>
+<div id="drawer-overlay" class="drawer-backdrop" style="display: none;"></div>
+

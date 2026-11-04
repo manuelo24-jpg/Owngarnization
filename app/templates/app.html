@@ -133,14 +133,15 @@
 <script src="/static/js/app.js?v=9"></script>
 
 <script>
-  // Script de Logout
-  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+  // Script de Logout robusto
+  document.getElementById("logout-btn")?.addEventListener("click", async (e) => {
+    e.preventDefault();
     try {
       if (window.pwaManager) window.pwaManager.clearApiCache();
-      await api.post("/auth/logout");
-      window.location.href = "/login";
-    } catch (e) {
-      console.error(e);
+      await fetch("/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.warn("Logout error:", err);
+    } finally {
       window.location.href = "/login";
     }
   });

@@ -27,19 +27,22 @@
 
       <div class="form-group">
         <label for="password">Contraseña (mínimo 6 caracteres)</label>
-        <input type="password" id="password" name="password" minlength="6" required autocomplete="new-password" placeholder="••••••••">
+        <input type="password" id="password" name="password" minlength="6" required autocomplete="new-password"
+          placeholder="••••••••">
       </div>
 
       <div class="form-group">
         <label for="password_confirm">Confirmar contraseña</label>
-        <input type="password" id="password_confirm" name="password_confirm" minlength="6" required autocomplete="new-password" placeholder="••••••••">
+        <input type="password" id="password_confirm" name="password_confirm" minlength="6" required
+          autocomplete="new-password" placeholder="••••••••">
         <div id="password-match-hint" class="password-match-hint empty" aria-live="polite"></div>
       </div>
 
       <div class="form-checkbox-group">
         <label class="checkbox-label" for="privacy_policy">
           <input type="checkbox" id="privacy_policy" name="privacy_policy" required>
-          <span>He leído y acepto la <a href="/privacy" target="_blank" rel="noopener noreferrer">política de protección y privacidad de datos</a></span>
+          <span>He leído y acepto la <a href="/privacy" target="_blank" rel="noopener noreferrer">política de protección
+              y privacidad de datos</a></span>
         </label>
       </div>
 
@@ -133,7 +136,8 @@
       if (!res.ok) {
         throw new Error(data.detail || "Error al crear la cuenta");
       }
-      window.location.href = "/";
+      const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      window.location.href = isMobile ? "/m/spaces" : "/spaces";
     } catch (err) {
       alertBox.textContent = err.message;
       alertBox.style.display = "block";

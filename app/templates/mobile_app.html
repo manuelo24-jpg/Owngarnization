@@ -27,7 +27,7 @@
   <!-- Cabecera Compacta Móvil -->
   <header class="app-header">
     <div class="header-brand">
-      <a href="/m" class="brand-link" title="Owngarnization Móvil" aria-label="Owngarnization Móvil">
+      <a href="/m/spaces" class="brand-link" title="Ir al inicio (Espacios)" aria-label="Owngarnization Móvil">
         <img src="/static/img/logo.png?v=4" alt="Owngarnization" class="app-logo">
       </a>
     </div>
@@ -49,7 +49,7 @@
         <span class="guide-qmark">?</span>
       </button>
       <div class="user-profile">
-        <button id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</button>
+        <a href="/auth/logout" id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</a>
       </div>
     </div>
   </header>
@@ -178,12 +178,14 @@
 <script src="/static/js/app.js?v=9"></script>
 
 <script>
-  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+  document.getElementById("logout-btn")?.addEventListener("click", async (e) => {
+    e.preventDefault();
     try {
       if (window.pwaManager) window.pwaManager.clearApiCache();
-      await api.post("/auth/logout");
-      window.location.href = "/login";
-    } catch (e) {
+      await fetch("/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.warn(err);
+    } finally {
       window.location.href = "/login";
     }
   });

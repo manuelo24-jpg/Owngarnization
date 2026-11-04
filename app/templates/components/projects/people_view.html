@@ -1,0 +1,139 @@
+<!-- Pestaña 3: Personas, Roles y Permisos -->
+<section id="project-view-people" class="people-workspace" style="display: none;" aria-label="Personas y roles del proyecto">
+  <!-- Sección: Miembros del equipo -->
+  <div class="people-section">
+    <div class="people-section-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 600; color: var(--ink);">Equipo del proyecto</h2>
+        <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.2rem;">
+          Personas que colaboran en este proyecto y sus permisos de acceso.
+        </p>
+      </div>
+      {% if project and project.my_permission in ['owner', 'admin'] %}
+      <button id="btn-open-invite" class="btn btn-primary btn-sm">
+        ＋ Invitar persona
+      </button>
+      {% endif %}
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table class="member-table">
+        <thead>
+          <tr>
+            <th>Persona</th>
+            <th>Rol de equipo</th>
+            <th>Permiso</th>
+            <th>Capacidad</th>
+            <th style="text-align: right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="project-members-tbody">
+          {% if project and project.all_members %}
+            {% for m in project.all_members %}
+              <tr data-member-user-id="{{ m.user_id }}">
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <span class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                      {{ m.username[:2] }}
+                    </span>
+                    <div>
+                      <div style="font-weight: 600; color: var(--ink);">{{ m.username }}</div>
+                      <div style="font-size: 0.78rem; color: var(--ink-muted);">{{ m.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {% if m.role_name %}
+                    <span class="role-tag" style="background-color: {{ m.role_color or '#EFE9E0' }};">
+                      {{ m.role_name }}
+                    </span>
+                  {% else %}
+                    <span style="color: var(--ink-muted); font-size: 0.82rem;">Sin rol</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="permission-badge {{ m.permission }}">
+                    {{ m.permission }}
+                  </span>
+                </td>
+                <td>
+                  {{ m.weekly_hours or '—' }} h/sem
+                </td>
+                <td style="text-align: right;">
+                  {% if project.my_permission in ['owner', 'admin'] and (m.permission != 'owner' or project.my_permission == 'owner') %}
+                    {% if m.user_id != user.id %}
+                      <button class="btn-outline-xs btn-remove-member" data-user-id="{{ m.user_id }}" style="color: var(--danger); border-color: var(--danger);" title="Quitar miembro">
+                        Quitar
+                      </button>
+                    {% endif %}
+                  {% endif %}
+                  {% if m.user_id == user.id and project.members_count > 1 and (m.permission != 'owner' or project.all_members|selectattr('permission', 'equalto', 'owner')|list|length > 1) %}
+                    <button class="btn-outline-xs btn-leave-project" data-user-id="{{ m.user_id }}" style="color: var(--danger);" title="Abandonar proyecto">
+                      Salir
+                    </button>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sección: Roles de equipo personalizables -->
+  <div class="people-section">
+    <div class="people-section-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 600; color: var(--ink);">Roles de equipo</h2>
+        <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.2rem;">
+          Funciones y especialidades del equipo en este proyecto (Diseño, Desarrollo, Cliente...).
+        </p>
+      </div>
+      {% if project and project.my_permission in ['owner', 'admin'] %}
+      <button id="btn-open-create-role" class="btn btn-outline btn-sm">
+        ＋ Crear rol
+      </button>
+      {% endif %}
+    </div>
+
+    <div id="project-roles-list" style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+      {% if project and project.roles %}
+        {% for r in project.roles %}
+          <div class="role-pill" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-full); padding: 0.35rem 0.85rem; font-size: 0.85rem;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: {{ r.color }};"></span>
+            <span style="font-weight: 600;">{{ r.name }}</span>
+            {% if project.my_permission in ['owner', 'admin'] and r.name != 'General' %}
+            <button class="btn-icon-xs btn-delete-role" data-role-id="{{ r.id }}" title="Eliminar rol" style="margin-left: 0.25rem;">✕</button>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sección: Ajustes de Proyecto (owner/admin) -->
+  {% if project and project.my_permission in ['owner', 'admin'] %}
+  <div class="people-section" style="border-color: #e2d9cd;">
+    <div class="people-section-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 600; color: var(--ink);">Ajustes del proyecto</h2>
+        <p style="font-size: 0.85rem; color: var(--ink-soft); margin-top: 0.2rem;">
+          Gestión del nombre, icono o archivo del proyecto.
+        </p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <button id="btn-edit-project-settings" class="btn btn-outline-sm">
+        ✏️ Editar información
+      </button>
+      {% if project.my_permission == 'owner' %}
+      <button id="btn-delete-project-action" class="btn btn-outline-sm" style="color: var(--danger); border-color: var(--danger);">
+        🗑️ Eliminar proyecto
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+

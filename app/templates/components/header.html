@@ -1,7 +1,7 @@
 <!-- Cabecera Principal -->
 <header class="app-header">
   <div class="header-brand">
-    <a href="/" class="brand-link" title="Owngarnization" aria-label="Owngarnization">
+    <a href="/spaces" class="brand-link" title="Ir al inicio (Espacios)" aria-label="Ir al inicio">
       <img src="/static/img/logo.png?v=4" alt="Owngarnization" class="app-logo">
     </a>
   </div>
@@ -40,7 +40,7 @@
 
     <div class="user-profile">
       <span class="user-name" title="{{ user.email }}">{{ user.username }}</span>
-      <button id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</button>
+      <a href="/auth/logout" id="logout-btn" class="btn btn-outline-sm" title="Cerrar sesión">Salir</a>
     </div>
   </div>
 </header>

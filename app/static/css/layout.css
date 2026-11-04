@@ -347,3 +347,14 @@ kbd {
 .mobile-filters-footer {
   display: none;
 }
+
+
+.header-brand {
+  display: flex;
+  align-items: center;
+}
+
+.header-brand .brand-link {
+  display: flex;
+  align-items: center;
+}

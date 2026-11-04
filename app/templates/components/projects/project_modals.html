@@ -1,0 +1,177 @@
+<!-- Modal Crear/Editar Proyecto -->
+<div id="modal-project" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-project-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-project-title" class="modal-title">Nuevo proyecto</h3>
+      <button class="modal-close" id="modal-project-close" aria-label="Cerrar modal">✕</button>
+    </div>
+    <form id="form-project" class="modal-form">
+      <input type="hidden" id="project-id" name="id">
+      
+      <div class="form-group">
+        <label for="project-name">Nombre del proyecto <span class="required">*</span></label>
+        <input type="text" id="project-name" name="name" required placeholder="Ej: Rediseño Web, Campaña Q4..." maxlength="100" autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="project-desc">Descripción <span class="optional">(opcional)</span></label>
+        <textarea id="project-desc" name="description" rows="3" placeholder="Objetivo, alcance o notas clave del proyecto..."></textarea>
+      </div>
+
+      <!-- Icono del Proyecto -->
+      <div class="form-group">
+        <label for="project-icon">Icono del proyecto</label>
+        <div class="icon-picker-row">
+          <input type="text" id="project-icon" name="icon" class="project-icon-badge" value="📁" maxlength="2" title="Icono seleccionado. Pulsa un emoji abajo o escribe uno nuevo.">
+          <div class="emoji-pills">
+            <button type="button" class="emoji-pill active" data-emoji="📁" title="Carpeta">📁</button>
+            <button type="button" class="emoji-pill" data-emoji="🚀" title="Cohete">🚀</button>
+            <button type="button" class="emoji-pill" data-emoji="💡" title="Idea">💡</button>
+            <button type="button" class="emoji-pill" data-emoji="🎨" title="Diseño">🎨</button>
+            <button type="button" class="emoji-pill" data-emoji="⚡" title="Rápido">⚡</button>
+            <button type="button" class="emoji-pill" data-emoji="🎯" title="Objetivo">🎯</button>
+            <button type="button" class="emoji-pill" data-emoji="📊" title="Analítica">📊</button>
+            <button type="button" class="emoji-pill" data-emoji="🛠️" title="Herramientas">🛠️</button>
+            <button type="button" class="emoji-pill" data-emoji="💼" title="Negocio">💼</button>
+            <button type="button" class="emoji-pill" data-emoji="🌟" title="Destacado">🌟</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Color del Proyecto -->
+      <div class="form-group">
+        <label for="project-color">Color distintivo</label>
+        <div class="color-picker-row">
+          <div class="project-color-badge" id="project-color-badge" style="background-color: #C9B49A;" title="Haz clic para elegir cualquier color">
+            <input type="color" id="project-color" name="color" value="#C9B49A" class="native-color-input">
+          </div>
+          <div class="color-pills">
+            <button type="button" class="color-pill active" data-color="#C9B49A" style="background-color: #C9B49A;" title="Beige post-it"></button>
+            <button type="button" class="color-pill" data-color="#E3CFB4" style="background-color: #E3CFB4;" title="Arena suave"></button>
+            <button type="button" class="color-pill" data-color="#C9A57C" style="background-color: #C9A57C;" title="Caramelo"></button>
+            <button type="button" class="color-pill" data-color="#4A6B82" style="background-color: #4A6B82;" title="Azul pizarra"></button>
+            <button type="button" class="color-pill" data-color="#5E8B75" style="background-color: #5E8B75;" title="Verde salvia"></button>
+            <button type="button" class="color-pill" data-color="#8C6D97" style="background-color: #8C6D97;" title="Ciruela"></button>
+            <button type="button" class="color-pill" data-color="#2B2D42" style="background-color: #2B2D42;" title="Grafito"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-project">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-project">Guardar proyecto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Invitar Miembro -->
+<div id="modal-invite-member" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-invite-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-invite-title" class="modal-title">Invitar persona al proyecto</h3>
+      <button class="modal-close" id="modal-invite-close" aria-label="Cerrar modal">✕</button>
+    </div>
+    <form id="form-invite-member" class="modal-form">
+      <div class="form-group">
+        <label for="invite-email">Correo electrónico del usuario <span class="required">*</span></label>
+        <input type="email" id="invite-email" name="email" required placeholder="correo@ejemplo.com">
+        <small class="form-help-text">El usuario debe estar registrado en Owngarnization.</small>
+      </div>
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="invite-permission">Permiso en el proyecto</label>
+          <select id="invite-permission" name="permission">
+            <option value="member" selected>Miembro (puede crear y mover tareas)</option>
+            <option value="admin">Administrador (gestiona personas, roles y tareas)</option>
+            <option value="viewer">Lector (solo ver tablero y horario)</option>
+          </select>
+        </div>
+        <div class="form-group flex-1">
+          <label for="invite-role">Rol de equipo (función)</label>
+          <select id="invite-role" name="role_id">
+            <option value="">Sin rol específico</option>
+            {% if project and project.roles %}
+              {% for r in project.roles %}
+                <option value="{{ r.id }}">{{ r.name }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="invite-hours">Capacidad semanal estimada <span class="optional">(horas)</span></label>
+        <input type="number" id="invite-hours" name="weekly_hours" min="0" max="168" placeholder="Ej: 40">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-invite">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-send-invite">Invitar persona</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar Rol de Equipo -->
+<div id="modal-role" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-role-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-role-title" class="modal-title">Rol de equipo</h3>
+      <button class="modal-close" id="modal-role-close" aria-label="Cerrar modal">✕</button>
+    </div>
+    <form id="form-role" class="modal-form">
+      <input type="hidden" id="role-id" name="id">
+      <div class="form-group">
+        <label for="role-name">Nombre de la función / rol <span class="required">*</span></label>
+        <input type="text" id="role-name" name="name" required placeholder="Ej: Diseño, Desarrollo Frontend, QA, Copywriting..." maxlength="50">
+      </div>
+      <div class="form-group">
+        <label for="role-color">Color de la etiqueta</label>
+        <div class="color-picker-row">
+          <div class="project-color-badge" id="role-color-badge" style="background-color: #C9B49A;" title="Haz clic para elegir cualquier color">
+            <input type="color" id="role-color" name="color" value="#C9B49A" class="native-color-input">
+          </div>
+          <div class="color-pills">
+            <button type="button" class="color-pill active" data-target="role-color" data-color="#C9B49A" style="background-color: #C9B49A;" title="Beige post-it"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#E3CFB4" style="background-color: #E3CFB4;" title="Arena suave"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#C9A57C" style="background-color: #C9A57C;" title="Caramelo"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#4A6B82" style="background-color: #4A6B82;" title="Azul pizarra"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#5E8B75" style="background-color: #5E8B75;" title="Verde salvia"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#8C6D97" style="background-color: #8C6D97;" title="Ciruela"></button>
+            <button type="button" class="color-pill" data-target="role-color" data-color="#2B2D42" style="background-color: #2B2D42;" title="Grafito"></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-role">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-role">Guardar rol</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar Columna -->
+<div id="modal-column" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-col-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modal-col-title" class="modal-title">Nueva columna de estado</h3>
+      <button class="modal-close" id="modal-col-close" aria-label="Cerrar modal">✕</button>
+    </div>
+    <form id="form-column" class="modal-form">
+      <input type="hidden" id="col-id" name="id">
+      <div class="form-group">
+        <label for="col-name">Nombre de la columna <span class="required">*</span></label>
+        <input type="text" id="col-name" name="name" required placeholder="Ej: En revisión, Bloqueado, Pruebas..." maxlength="50">
+      </div>
+      <div class="form-group">
+        <label class="remember-choice-label" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; user-select: none;">
+          <input type="checkbox" id="col-is-done" name="is_done" style="width: 17px; height: 17px; accent-color: var(--ink); cursor: pointer;">
+          <span style="font-size: 13.5px; color: var(--ink-soft);">Marca las tareas como completadas al llegar a esta columna</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-column">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-column">Guardar columna</button>
+      </div>
+    </form>
+  </div>
+</div>

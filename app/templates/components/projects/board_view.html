@@ -1,0 +1,135 @@
+<!-- Pestaña 1: Tablero Kanban de Tareas -->
+<section id="project-view-board" class="kanban-workspace" aria-label="Tablero Kanban de tareas">
+  <!-- Barra de Filtros del Tablero -->
+  <div class="kanban-filter-bar">
+    <div class="search-input-wrapper board-search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="board-search" class="board-search-input" placeholder="Buscar o filtrar tareas..." autocomplete="off">
+    </div>
+
+    <div class="filter-select-group">
+      <div class="custom-select-wrapper">
+        <select id="board-filter-priority" class="board-filter-select" aria-label="Filtrar por prioridad">
+          <option value="">Todas las prioridades</option>
+          <option value="urgent">🔴 Urgente</option>
+          <option value="high">🟠 Alta</option>
+          <option value="medium">🟡 Media</option>
+          <option value="low">⚪ Baja</option>
+        </select>
+      </div>
+
+      <div class="custom-select-wrapper">
+        <select id="board-filter-member" class="board-filter-select" aria-label="Filtrar por persona">
+          <option value="">Todas las personas</option>
+          <option value="my_tasks">👤 Mis tareas asignadas</option>
+          <option value="unassigned">Sin asignar</option>
+          {% if project and project.all_members %}
+            {% for m in project.all_members %}
+              <option value="{{ m.user_id }}">{{ m.username }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="custom-select-wrapper">
+        <select id="board-filter-role" class="board-filter-select" aria-label="Filtrar por rol">
+          <option value="">Todos los roles</option>
+          {% if project and project.roles %}
+            {% for r in project.roles %}
+              <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+    </div>
+
+    {% if project and project.my_permission in ['owner', 'admin'] %}
+    <button id="btn-add-column" class="btn-new-column" title="Añadir nueva columna de estado">
+      <span class="btn-icon">＋</span> Nueva columna
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- Contenedor de Columnas SortableJS -->
+  <div id="kanban-board" class="kanban-board">
+    {% if project and project.columns %}
+      {% for col in project.columns %}
+        <div class="kanban-column" data-column-id="{{ col.id }}">
+          <div class="kanban-column-header">
+            <div class="kanban-column-title-group">
+              <span class="kanban-column-title">{{ col.name }}</span>
+              <span class="kanban-column-count">{{ col.tasks|length }}</span>
+              {% if col.is_done %}
+                <span class="col-done-badge" title="Las tareas en esta columna cuentan como finalizadas">✓ Completadas</span>
+              {% endif %}
+            </div>
+            {% if project.my_permission in ['owner', 'admin'] and project.columns|length > 1 %}
+            <button class="btn-col-action btn-delete-col" data-column-id="{{ col.id }}" title="Eliminar columna">
+              <span aria-hidden="true">✕</span>
+            </button>
+            {% endif %}
+          </div>
+
+          <div class="kanban-column-tasks sortable-column" data-column-id="{{ col.id }}" id="col-tasks-{{ col.id }}">
+            {% for t in col.tasks %}
+              <div class="kanban-task-card priority-{{ t.priority }}" 
+                   data-task-id="{{ t.id }}" 
+                   data-priority="{{ t.priority }}"
+                   data-role-id="{{ t.role_id or '' }}"
+                   data-assignee-ids="{{ t.assignee_ids|join(',') }}">
+                
+                <div class="kanban-task-badges">
+                  {% if t.role_name %}
+                    <span class="role-tag" style="background-color: {{ t.role_color or '#C9B49A' }}28; border-color: {{ t.role_color or '#C9B49A' }}; color: var(--ink);">
+                      {{ t.role_name }}
+                    </span>
+                  {% endif %}
+
+                  {% if t.start_time %}
+                    <span class="time-badge">
+                      ⏰ {{ t.start_time.strftime('%H:%M') }}{% if t.end_time %}–{{ t.end_time.strftime('%H:%M') }}{% endif %}
+                    </span>
+                  {% endif %}
+
+                  {% if t.due_date %}
+                    <span class="time-badge date-badge">
+                      📅 {{ t.due_date.strftime('%d/%m') }}
+                    </span>
+                  {% endif %}
+                </div>
+
+                <div class="kanban-task-title">{{ t.title }}</div>
+
+                <div class="kanban-task-footer">
+                  <div class="members-avatar-stack">
+                    {% for a in t.assignees %}
+                      <span class="avatar-circle" title="{{ a.username }}">{{ a.username[:2] }}</span>
+                    {% endfor %}
+                    {% if not t.assignees %}
+                      <span class="unassigned-badge">Sin asignar</span>
+                    {% endif %}
+                  </div>
+                  {% if col.is_done %}
+                    <span class="task-done-indicator">✓ Hecho</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+
+            {% if col.tasks|length == 0 %}
+              <div class="kanban-column-empty">
+                <span class="empty-drop-text">Arrastra o añade una tarea aquí</span>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if project.my_permission != 'viewer' %}
+          <button class="kanban-add-task-btn" data-column-id="{{ col.id }}">
+            <span class="add-icon">＋</span> Añadir tarea
+          </button>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>

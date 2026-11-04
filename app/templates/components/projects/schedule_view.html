@@ -1,0 +1,47 @@
+<!-- Pestaña 2: Horario y Planificación por Horas -->
+<section id="project-view-schedule" class="schedule-workspace" style="display: none;" aria-label="Planificación por horas">
+  <!-- Controles de Navegación de Horario -->
+  <div class="schedule-controls">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <button id="sched-btn-prev" class="btn btn-outline-sm">◀</button>
+      <button id="sched-btn-today" class="btn btn-outline-sm">Hoy</button>
+      <button id="sched-btn-next" class="btn btn-outline-sm">▶</button>
+      <input type="date" id="sched-date-picker" class="form-input-sm" style="padding: 0.35rem 0.6rem;">
+      <span id="sched-date-label" style="font-weight: 600; font-size: 0.95rem; margin-left: 0.5rem;"></span>
+    </div>
+
+    <!-- Modos de Horario -->
+    <div class="view-selector-group">
+      <button id="sched-mode-day" class="btn-view-toggle active" data-mode="day">Día</button>
+      <button id="sched-mode-week" class="btn-view-toggle" data-mode="week">Semana</button>
+      <button id="sched-mode-person" class="btn-view-toggle" data-mode="person">Por persona</button>
+    </div>
+  </div>
+
+  <!-- Resumen de Carga Horaria Semanal -->
+  <div class="workload-summary-card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+      <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--ink);">
+        📊 Carga horaria semanal del equipo
+      </h3>
+      <span id="workload-week-range" style="font-size: 0.8rem; color: var(--ink-muted);"></span>
+    </div>
+    <div id="workload-members-list">
+      <p style="font-size: 0.85rem; color: var(--ink-soft);">Cargando carga horaria...</p>
+    </div>
+  </div>
+
+  <!-- Franja superior: Tareas del día Sin Hora -->
+  <div id="sched-untimed-bar" style="background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; display: none;">
+    <span style="font-size: 0.8rem; font-weight: 600; color: var(--ink-muted); text-transform: uppercase;">Tareas sin hora hoy:</span>
+    <div id="sched-untimed-tasks" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem;"></div>
+  </div>
+
+  <!-- Cuadrícula / Línea de Tiempo por Horas (07:00 a 22:00) -->
+  <div id="timeline-container" class="timeline-grid">
+    <div id="timeline-hours-body">
+      <!-- Generado dinámicamente por project_schedule.js -->
+    </div>
+  </div>
+</section>
+

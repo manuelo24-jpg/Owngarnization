@@ -1,0 +1,25 @@
+<!-- =========================================================
+     Barra de Navegación Inferior Móvil y FAB (Proyectos)
+     ========================================================= -->
+<nav class="project-mobile-bottom-nav" aria-label="Navegación móvil del proyecto">
+  <button id="mobile-tab-board" class="project-mobile-nav-btn active" data-tab="board" role="tab" aria-selected="true" aria-label="Tablero Kanban">
+    <span class="mobile-nav-icon">📋</span>
+    <span class="mobile-nav-label">Tablero</span>
+  </button>
+  <button id="mobile-tab-schedule" class="project-mobile-nav-btn" data-tab="schedule" role="tab" aria-selected="false" aria-label="Horario y carga">
+    <span class="mobile-nav-icon">⏱️</span>
+    <span class="mobile-nav-label">Horario</span>
+  </button>
+  <button id="mobile-tab-people" class="project-mobile-nav-btn" data-tab="people" role="tab" aria-selected="false" aria-label="Personas y roles">
+    <span class="mobile-nav-icon">👥</span>
+    <span class="mobile-nav-label">Personas</span>
+  </button>
+</nav>
+
+{% if project and project.my_permission != 'viewer' %}
+<!-- Botón Flotante de Creación Rápida (FAB) con el pulgar -->
+<button id="btn-project-mobile-fab" class="project-mobile-fab" title="Nueva tarea (FAB)" aria-label="Crear nueva tarea">
+  <span class="fab-plus" aria-hidden="true">＋</span>
+</button>
+{% endif %}
+

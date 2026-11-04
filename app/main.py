@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
-from app.routers import auth, pages, tasks, pwa, push
+from app.routers import auth, pages, tasks, pwa, push, spaces, projects
 from app.services.reminder_service import run_due_reminders_session
 
 
@@ -65,6 +65,8 @@ app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(pwa.router)
 app.include_router(push.router)
+app.include_router(spaces.router)
+app.include_router(projects.router)
 app.include_router(pages.router)
 
 BASE_DIR = Path(__file__).resolve().parent
