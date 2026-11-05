@@ -1,58 +1,387 @@
 /* =========================================================
-   Responsive Design (Media Queries)
+   Owngarnization — Responsive Design (Media Queries)
+   Diseño adaptativo para monitores grandes, portátiles,
+   tabletas y dispositivos móviles.
    ========================================================= */
+
+/* 1. PORTÁTILES Y PANTALLAS MEDIANAS (<= 1200px) */
+@media (max-width: 1200px) {
+  .app-header {
+    padding: 12px 20px;
+    gap: 14px;
+  }
+
+  .header-search {
+    max-width: 320px;
+  }
+
+  .header-actions {
+    gap: 10px;
+  }
+
+  .view-workspace {
+    padding: 20px 22px;
+  }
+
+  .day-board {
+    gap: 20px;
+  }
+
+  .day-board .board-column {
+    flex: 1 1 340px;
+  }
+}
+
+/* 2. TABLETS EN HORIZONTAL Y PANTALLAS ESTRECHAS (<= 1024px) */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: 10px 18px;
+    gap: 12px;
+  }
+
+  .header-search {
+    max-width: 240px;
+  }
+
+  #search-input {
+    font-size: 12.5px;
+    padding: 7px 12px 7px 30px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .user-profile {
+    padding-left: 8px;
+    gap: 8px;
+  }
+
+  .user-name {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12.5px;
+  }
+
+  .sidebar-filters {
+    width: 230px;
+    padding: 18px 14px;
+    gap: 14px;
+  }
+
+  .control-bar {
+    padding: 10px 20px;
+  }
+
+  .current-period-label {
+    font-size: 15px;
+  }
+
+  .day-board {
+    gap: 16px;
+  }
+
+  .day-board .board-column {
+    flex: 1 1 310px;
+  }
+}
+
+/* 3. TABLETS EN VERTICAL Y VENTANAS MEDIANAS (<= 900px) */
 @media (max-width: 900px) {
   .main-container {
     flex-direction: column;
   }
+
   .sidebar-filters {
+    position: static;
+    top: auto;
+    max-height: none;
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--line);
-    padding: 16px 20px;
-    gap: 14px;
+    padding: 14px 18px;
+    gap: 12px 18px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
   }
+
+  .filters-header {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .filter-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .filter-label {
+    white-space: nowrap;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+
   .filter-chips {
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
+
   .keyboard-shortcuts {
-    display: none;
+    display: none; /* Se ocultan los atajos en tablets y móviles para limpiar la vista */
+  }
+
+  .day-board {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 18px !important;
+  }
+
+  .day-board .board-column {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
   }
 }
 
+/* 4. DISPOSITIVOS MÓVILES (<= 680px) */
 @media (max-width: 680px) {
   .app-header {
     flex-wrap: wrap;
-    padding: 12px 16px;
+    padding: 10px 14px;
+    gap: 8px;
   }
+
+  .header-brand {
+    flex-shrink: 0;
+  }
+
+  .app-logo {
+    height: 36px;
+    width: 36px;
+  }
+
+  .app-title {
+    font-size: 19px;
+  }
+
   .header-search {
     order: 3;
     width: 100%;
     max-width: 100%;
+    margin-top: 4px;
   }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-actions a[href="/download"] {
+    padding: 5px 8px;
+    font-size: 11.5px;
+  }
+
+  #btn-new-task {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .user-profile {
+    padding-left: 6px;
+    gap: 6px;
+  }
+
+  .user-name {
+    max-width: 75px;
+    font-size: 11.5px;
+  }
+
+  #logout-btn {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .btn-guide-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  /* Barra de control en móvil */
   .control-bar {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px 16px;
-    gap: 12px;
+    padding: 10px 14px;
+    gap: 10px;
   }
+
   .control-nav {
     justify-content: space-between;
+    width: 100%;
   }
+
+  .btn-group .btn-secondary-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .current-period-label {
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
   .view-switcher {
     width: 100%;
     display: flex;
   }
+
   .view-btn {
     flex: 1;
     text-align: center;
+    padding: 7px 6px;
+    font-size: 12px;
   }
+
+  /* Barra lateral adaptada a lista en móvil pequeño */
+  .sidebar-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .filter-chips {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 4px 9px;
+    font-size: 11.5px;
+  }
+
+  /* Área de trabajo */
   .view-workspace {
-    padding: 16px;
+    padding: 14px 12px;
   }
+
   .day-board {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 14px !important;
+  }
+
+  .day-board .board-column {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 14px 12px !important;
+    min-height: auto !important;
+  }
+
+  .column-title {
+    font-size: 14px;
+  }
+
+  .column-subtitle {
+    font-size: 11.5px;
+  }
+
+  .postit-card {
+    padding: 12px 12px 10px 12px;
+  }
+
+  .postit-title {
+    font-size: 13.5px;
+  }
+
+  .postit-desc-preview {
+    font-size: 11.5px;
+  }
+
+  .postit-footer {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Contenedores de Calendario en móvil */
+  .calendar-container {
+    padding: 12px 8px;
+    min-height: 480px;
+  }
+
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 15px !important;
+    text-align: center;
+  }
+
+  .fc .fc-button {
+    padding: 4px 8px !important;
+    font-size: 11.5px !important;
+  }
+}
+
+/* 5. MÓVILES MUY ESTRECHOS (<= 420px) */
+@media (max-width: 420px) {
+  .app-title {
+    font-size: 17px;
+  }
+
+  #search-input {
+    font-size: 12px;
+    padding: 6px 10px 6px 28px;
+  }
+
+  .current-period-label {
+    font-size: 13px;
+    max-width: 140px;
+  }
+
+  .btn-group .btn-secondary-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .postit-card {
+    padding: 10px;
+  }
+
+  .postit-title {
+    font-size: 13px;
   }
 }

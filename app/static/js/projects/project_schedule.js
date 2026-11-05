@@ -24,6 +24,7 @@ const projectSchedule = (() => {
   }
 
   async function loadWorkload() {
+    if (!projectId) return;
     const monday = getMonday(currentDate);
     const mondayStr = formatDateIso(monday);
     const sunday = new Date(monday);
@@ -40,7 +41,12 @@ const projectSchedule = (() => {
       if (!container || !data || !data.members) return;
 
       if (data.members.length === 0) {
-        container.innerHTML = `<p style="font-size: 0.85rem; color: var(--ink-soft);">No hay miembros registrados.</p>`;
+        container.innerHTML = `
+          <div class="workload-empty-state">
+            <span class="workload-empty-icon">👥</span>
+            <span>No hay miembros con horas estimadas en esta semana.</span>
+          </div>
+        `;
         return;
       }
 
@@ -50,28 +56,37 @@ const projectSchedule = (() => {
         const isOverloaded = m.planned_hours > capacity;
         return `
           <div class="workload-member-row">
-            <div style="display: flex; align-items: center; gap: 0.5rem; width: 180px;">
-              <span class="avatar-circle" style="width: 24px; height: 24px; font-size: 0.7rem;">${m.username.slice(0,2)}</span>
-              <strong>${m.username}</strong>
+            <div class="workload-member-info">
+              <span class="avatar-circle">${m.username.slice(0, 2).toUpperCase()}</span>
+              <strong class="workload-member-name">${m.username}</strong>
             </div>
-            <div style="flex-grow: 1; margin: 0 1rem;">
-              <div class="project-progress-bar" style="height: 6px;">
-                <div class="project-progress-fill" style="width: ${percent}%; background-color: ${isOverloaded ? 'var(--danger)' : 'var(--accent-strong)'};"></div>
+            <div class="workload-bar-wrapper">
+              <div class="project-progress-bar">
+                <div class="project-progress-fill ${isOverloaded ? 'is-overloaded' : ''}" style="width: ${percent}%;"></div>
               </div>
             </div>
-            <div style="font-size: 0.82rem; font-weight: 500; min-width: 110px; text-align: right;">
-              ${m.planned_hours}h / ${m.weekly_hours ? m.weekly_hours + 'h' : '—'}
-              ${isOverloaded ? '<span style="color: var(--danger); margin-left: 4px;">⚠️</span>' : ''}
+            <div class="workload-hours-badge ${isOverloaded ? 'badge-danger' : ''}">
+              ${m.planned_hours}h / ${m.weekly_hours ? m.weekly_hours + 'h' : '40h'}
+              ${isOverloaded ? '<span class="overload-warning-icon" title="Sobrecarga">⚠️</span>' : ''}
             </div>
           </div>
         `;
       }).join("");
     } catch (e) {
       console.warn("Error cargando carga horaria:", e);
+      const container = document.getElementById("workload-members-list");
+      if (container) {
+        container.innerHTML = `
+          <div class="workload-empty-state">
+            <span>No se pudo cargar la carga horaria semanal.</span>
+          </div>
+        `;
+      }
     }
   }
 
   async function loadSchedule() {
+    if (!projectId) return;
     let startStr, endStr;
     const datePicker = document.getElementById("sched-date-picker");
     const dateLabel = document.getElementById("sched-date-label");
@@ -86,7 +101,10 @@ const projectSchedule = (() => {
     } else {
       startStr = formatDateIso(currentDate);
       endStr = startStr;
-      if (dateLabel) dateLabel.textContent = currentDate.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+      if (dateLabel) {
+        const text = currentDate.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+        dateLabel.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+      }
     }
 
     if (datePicker) datePicker.value = formatDateIso(currentDate);
@@ -100,6 +118,7 @@ const projectSchedule = (() => {
 
       renderTimeline(data);
     } catch (err) {
+      console.warn("Error cargando horario:", err);
       showToast("Error al cargar horario del proyecto", "error");
     }
   }
@@ -108,13 +127,41 @@ const projectSchedule = (() => {
     const hoursBody = document.getElementById("timeline-hours-body");
     if (!hoursBody) return;
 
+    // Procesar tareas sin hora
+    const untimedBar = document.getElementById("sched-untimed-bar");
+    const untimedList = document.getElementById("sched-untimed-tasks");
+    const untimedTasks = (data?.tasks || []).filter(item => !item.task.start_time);
+
+    if (untimedTasks.length > 0 && untimedBar && untimedList) {
+      untimedBar.style.display = "block";
+      untimedList.innerHTML = untimedTasks.map(item => {
+        const t = item.task;
+        return `
+          <div class="untimed-task-chip" data-task-id="${t.id}">
+            <span class="untimed-task-dot">📌</span>
+            <span class="untimed-task-title">${t.title}</span>
+            ${t.role_name ? `<span class="role-tag" style="background-color: ${t.role_color || 'var(--line)'};">${t.role_name}</span>` : ''}
+          </div>
+        `;
+      }).join("");
+
+      untimedList.querySelectorAll(".untimed-task-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const taskId = chip.dataset.taskId;
+          if (taskId && window.projectDrawer) window.projectDrawer.open(parseInt(taskId, 10));
+        });
+      });
+    } else if (untimedBar) {
+      untimedBar.style.display = "none";
+    }
+
     // Renderizar horas 07:00 a 22:00
     let html = "";
     for (let h = 7; h <= 22; h++) {
       const timeStr = `${String(h).padStart(2, "0")}:00`;
-      
+
       // Filtrar tareas que caigan en esta hora
-      const tasksInHour = (data.tasks || []).filter(item => {
+      const tasksInHour = (data?.tasks || []).filter(item => {
         const t = item.task;
         if (!t.start_time) return false;
         const taskHour = parseInt(t.start_time.split(":")[0], 10);
@@ -124,29 +171,36 @@ const projectSchedule = (() => {
       const tasksHtml = tasksInHour.map(item => {
         const t = item.task;
         const hasOverlap = item.overlaps && item.overlaps.length > 0;
-        const startShort = t.start_time ? t.start_time.slice(0,5) : "";
-        const endShort = t.end_time ? t.end_time.slice(0,5) : "";
+        const startShort = t.start_time ? t.start_time.slice(0, 5) : "";
+        const endShort = t.end_time ? t.end_time.slice(0, 5) : "";
         return `
           <div class="timeline-task-block ${hasOverlap ? 'task-overlap-alert' : ''}" 
-               data-task-id="${t.id}"
-               style="background: #fdfbf7; border: 1px solid var(--line); border-left: 4px solid var(--accent-strong); border-radius: var(--radius-sm); padding: 0.4rem 0.6rem; margin-bottom: 4px; cursor: pointer;">
-            <div style="font-size: 0.82rem; font-weight: 600; color: var(--ink);">
-              ${startShort}${endShort ? '–' + endShort : ''} · ${t.title}
-              ${hasOverlap ? '<span style="color: var(--danger); font-size: 0.8rem; margin-left: 4px;" title="Conflicto horario">⚠️ Solape</span>' : ''}
+               data-task-id="${t.id}">
+            <div class="timeline-task-header">
+              <span class="timeline-task-time">${startShort}${endShort ? ' – ' + endShort : ''}</span>
+              <span class="timeline-task-title">${t.title}</span>
+              ${hasOverlap ? '<span class="timeline-task-overlap-badge" title="Conflicto horario">⚠️ Solape</span>' : ''}
             </div>
-            <div style="font-size: 0.72rem; color: var(--ink-soft); display: flex; gap: 0.5rem; margin-top: 2px;">
-              ${t.role_name ? `<span class="role-tag" style="padding: 1px 4px; font-size: 0.68rem;">${t.role_name}</span>` : ''}
-              <span>${t.assignees.map(a => a.username).join(", ") || 'Sin asignar'}</span>
+            <div class="timeline-task-meta">
+              ${t.role_name ? `<span class="role-tag" style="background-color: ${t.role_color || 'var(--line)'};">${t.role_name}</span>` : ''}
+              <span class="timeline-task-assignees">${(t.assignees || []).map(a => a.username).join(", ") || 'Sin asignar'}</span>
             </div>
           </div>
         `;
       }).join("");
 
+      const emptySlotHtml = tasksInHour.length === 0 ? `
+        <div class="timeline-empty-slot" data-hour="${h}">
+          <span class="timeline-empty-slot-hint">＋ Añadir a las ${timeStr}</span>
+        </div>
+      ` : '';
+
       html += `
-        <div class="timeline-hour-row">
+        <div class="timeline-hour-row" data-hour="${h}">
           <div class="timeline-hour-label">${timeStr}</div>
           <div class="timeline-hour-content" data-hour="${h}">
             ${tasksHtml}
+            ${emptySlotHtml}
           </div>
         </div>
       `;
@@ -154,17 +208,37 @@ const projectSchedule = (() => {
 
     hoursBody.innerHTML = html;
 
-    // Delegar clic para abrir drawer
+    // Delegar clic para abrir drawer de tarea existente
     hoursBody.querySelectorAll(".timeline-task-block").forEach(block => {
-      block.addEventListener("click", () => {
+      block.addEventListener("click", (e) => {
+        e.stopPropagation();
         const taskId = block.dataset.taskId;
-        if (taskId) projectDrawer.open(parseInt(taskId, 10));
+        if (taskId && window.projectDrawer) window.projectDrawer.open(parseInt(taskId, 10));
+      });
+    });
+
+    // Delegar clic para crear tarea en esa hora
+    hoursBody.querySelectorAll(".timeline-empty-slot").forEach(slot => {
+      slot.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const hour = slot.dataset.hour;
+        const timeStr = `${String(hour).padStart(2, "0")}:00`;
+        if (window.projectDrawer) {
+          window.projectDrawer.open(null, null, {
+            date: formatDateIso(currentDate),
+            start_time: timeStr
+          });
+        }
       });
     });
   }
 
   function init() {
     if (!projectId) return;
+
+    // Cargar datos inmediatamente
+    loadSchedule();
+    loadWorkload();
 
     document.getElementById("sched-btn-today")?.addEventListener("click", () => {
       currentDate = new Date();
@@ -197,8 +271,12 @@ const projectSchedule = (() => {
     // Modos
     document.querySelectorAll(".view-selector-group .btn-view-toggle").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".view-selector-group .btn-view-toggle").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".view-selector-group .btn-view-toggle").forEach(b => {
+          b.classList.remove("active");
+          b.setAttribute("aria-selected", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
         currentMode = btn.dataset.mode;
         loadSchedule();
       });
@@ -208,7 +286,9 @@ const projectSchedule = (() => {
   return { init, loadSchedule, loadWorkload };
 })();
 
+// Exportar globalmente
+window.projectSchedule = projectSchedule;
+
 document.addEventListener("DOMContentLoaded", () => {
   projectSchedule.init();
 });
-

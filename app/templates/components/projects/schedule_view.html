@@ -2,39 +2,48 @@
 <section id="project-view-schedule" class="schedule-workspace" style="display: none;" aria-label="Planificación por horas">
   <!-- Controles de Navegación de Horario -->
   <div class="schedule-controls">
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-      <button id="sched-btn-prev" class="btn btn-outline-sm">◀</button>
-      <button id="sched-btn-today" class="btn btn-outline-sm">Hoy</button>
-      <button id="sched-btn-next" class="btn btn-outline-sm">▶</button>
-      <input type="date" id="sched-date-picker" class="form-input-sm" style="padding: 0.35rem 0.6rem;">
-      <span id="sched-date-label" style="font-weight: 600; font-size: 0.95rem; margin-left: 0.5rem;"></span>
+    <div class="schedule-nav-group">
+      <div class="btn-group">
+        <button id="sched-btn-prev" class="btn btn-secondary-sm" aria-label="Período anterior">‹</button>
+        <button id="sched-btn-today" class="btn btn-secondary-sm">Hoy</button>
+        <button id="sched-btn-next" class="btn btn-secondary-sm" aria-label="Período siguiente">›</button>
+      </div>
+      <input type="date" id="sched-date-picker" class="sched-date-input" aria-label="Seleccionar fecha">
+      <h2 id="sched-date-label" class="sched-date-label">—</h2>
     </div>
 
     <!-- Modos de Horario -->
-    <div class="view-selector-group">
-      <button id="sched-mode-day" class="btn-view-toggle active" data-mode="day">Día</button>
-      <button id="sched-mode-week" class="btn-view-toggle" data-mode="week">Semana</button>
-      <button id="sched-mode-person" class="btn-view-toggle" data-mode="person">Por persona</button>
+    <div class="view-selector-group" role="tablist" aria-label="Vista del horario">
+      <button id="sched-mode-day" class="btn-view-toggle active" data-mode="day" role="tab" aria-selected="true">Día</button>
+      <button id="sched-mode-week" class="btn-view-toggle" data-mode="week" role="tab" aria-selected="false">Semana</button>
+      <button id="sched-mode-person" class="btn-view-toggle" data-mode="person" role="tab" aria-selected="false">Por persona</button>
     </div>
   </div>
 
   <!-- Resumen de Carga Horaria Semanal -->
   <div class="workload-summary-card">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-      <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--ink);">
-        📊 Carga horaria semanal del equipo
-      </h3>
-      <span id="workload-week-range" style="font-size: 0.8rem; color: var(--ink-muted);"></span>
+    <div class="workload-card-header">
+      <div class="workload-card-title">
+        <span class="workload-card-icon">📊</span>
+        <h3>Carga horaria semanal del equipo</h3>
+      </div>
+      <span id="workload-week-range" class="workload-week-range"></span>
     </div>
-    <div id="workload-members-list">
-      <p style="font-size: 0.85rem; color: var(--ink-soft);">Cargando carga horaria...</p>
+    <div id="workload-members-list" class="workload-members-list">
+      <div class="workload-loading-state">
+        <div class="workload-loading-spinner"></div>
+        <span>Cargando carga horaria...</span>
+      </div>
     </div>
   </div>
 
   <!-- Franja superior: Tareas del día Sin Hora -->
-  <div id="sched-untimed-bar" style="background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; display: none;">
-    <span style="font-size: 0.8rem; font-weight: 600; color: var(--ink-muted); text-transform: uppercase;">Tareas sin hora hoy:</span>
-    <div id="sched-untimed-tasks" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem;"></div>
+  <div id="sched-untimed-bar" class="sched-untimed-bar" style="display: none;">
+    <div class="sched-untimed-header">
+      <span class="sched-untimed-icon">⏳</span>
+      <span class="sched-untimed-title">Tareas del día sin hora asignada</span>
+    </div>
+    <div id="sched-untimed-tasks" class="sched-untimed-tasks"></div>
   </div>
 
   <!-- Cuadrícula / Línea de Tiempo por Horas (07:00 a 22:00) -->
@@ -44,4 +53,3 @@
     </div>
   </div>
 </section>
-

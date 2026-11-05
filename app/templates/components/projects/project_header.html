@@ -1,41 +1,48 @@
 <!-- Cabecera del Módulo de Proyectos -->
 <header class="app-header project-header">
-  <div class="header-brand">
-    <a href="{% if is_mobile %}/m/spaces{% else %}/spaces{% endif %}" class="brand-link" title="Ir al inicio (Espacios)" aria-label="Ir al inicio">
-      <img src="/static/img/logo.png?v=4" alt="Owngarnization" class="app-logo">
-    </a>
-  </div>
-
-  {% if project %}
-  <!-- Selector Desplegable de Proyecto 1 a 1 -->
-  <div class="project-dropdown">
-    <button id="btn-project-dropdown" class="project-dropdown-btn" aria-haspopup="true" aria-expanded="false">
-      <span class="project-header-icon">{{ project.icon or '📁' }}</span>
-      <span class="project-current-name">{{ project.name }}</span>
-      <span class="dropdown-caret">▾</span>
-    </button>
-    <div id="project-dropdown-menu" class="project-dropdown-menu">
-      <div style="padding: 0.4rem 1rem; font-size: 0.75rem; color: var(--ink-muted); text-transform: uppercase;">
-        Tus proyectos
-      </div>
-      {% if user_projects %}
-        {% for p in user_projects %}
-          <a href="{% if is_mobile %}/m/projects/{{ p.id }}{% else %}/projects/{{ p.id }}{% endif %}" class="project-dropdown-item {% if p.id == project.id %}active{% endif %}">
-            <span>{{ p.icon or '📁' }}</span>
-            <span>{{ p.name }}</span>
-          </a>
-        {% endfor %}
-      {% endif %}
-      <div class="project-dropdown-divider"></div>
-      <a href="{% if is_mobile %}/m/projects{% else %}/projects{% endif %}" class="project-dropdown-item">
-        <span>📋</span> Ver todos los proyectos
-      </a>
-      <a href="#" id="btn-new-project-dropdown" class="project-dropdown-item">
-        <span>＋</span> Nuevo proyecto
+  <div class="header-left-group">
+    <div class="header-brand">
+      <a href="{% if is_mobile %}/m/spaces{% else %}/spaces{% endif %}" class="brand-link" title="Ir al inicio (Espacios)" aria-label="Ir al inicio">
+        <img src="/static/img/logo.png?v=4" alt="Owngarnization" class="app-logo">
       </a>
     </div>
+
+    {% if project %}
+    <span class="header-breadcrumb-slash" aria-hidden="true">/</span>
+
+    <!-- Selector Desplegable de Proyecto 1 a 1 -->
+    <div class="project-dropdown">
+      <button id="btn-project-dropdown" class="project-dropdown-btn" aria-haspopup="true" aria-expanded="false" title="Cambiar o seleccionar proyecto">
+        <span class="project-header-icon">{{ project.icon or '📁' }}</span>
+        <span class="project-current-name">{{ project.name }}</span>
+        <span class="dropdown-caret">▾</span>
+      </button>
+      <div id="project-dropdown-menu" class="project-dropdown-menu">
+        <div class="project-dropdown-heading">
+          Tus proyectos
+        </div>
+        {% if user_projects %}
+          {% for p in user_projects %}
+            <a href="{% if is_mobile %}/m/projects/{{ p.id }}{% else %}/projects/{{ p.id }}{% endif %}" class="project-dropdown-item {% if p.id == project.id %}active{% endif %}">
+              <span class="dropdown-item-icon">{{ p.icon or '📁' }}</span>
+              <span class="dropdown-item-name">{{ p.name }}</span>
+              {% if p.id == project.id %}
+                <span class="dropdown-active-check">✓</span>
+              {% endif %}
+            </a>
+          {% endfor %}
+        {% endif %}
+        <div class="project-dropdown-divider"></div>
+        <a href="{% if is_mobile %}/m/projects{% else %}/projects{% endif %}" class="project-dropdown-item">
+          <span class="dropdown-item-icon">📋</span> Ver todos los proyectos
+        </a>
+        <a href="#" id="btn-new-project-dropdown" class="project-dropdown-item">
+          <span class="dropdown-item-icon">＋</span> Nuevo proyecto
+        </a>
+      </div>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
   <!-- Acciones de Cabecera -->
   <div class="header-actions">

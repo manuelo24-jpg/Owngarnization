@@ -40,9 +40,13 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Controlar visibilidad del FAB flotante
+    // Controlar visibilidad del FAB flotante (únicamente en móvil)
     if (mobileFab) {
-      mobileFab.style.display = tabName === "people" ? "none" : "flex";
+      if (window.innerWidth <= 768) {
+        mobileFab.style.display = tabName === "people" ? "none" : "flex";
+      } else {
+        mobileFab.style.display = "none";
+      }
     }
 
     if (viewBoard) viewBoard.style.display = tabName === "board" ? "flex" : "none";
