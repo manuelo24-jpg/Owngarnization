@@ -435,5 +435,12 @@ Una vez finalizado el despliegue (suele tardar 2-3 minutos la primera vez):
 - [x] **Fase 9 — Despliegue**: Configuración de `render.yaml`, `Procfile`, PostgreSQL serverless en Neon y guía paso a paso.
 - [x] **Fase 10 — Manual de Usuario Integrado (In-App)**: Icono de ayuda con símbolo de pregunta (`?`) en la cabecera que despliega una ventana emergente interactiva y estructurada con guías visuales y sencillas sobre todas las funcionalidades de Owngarnization.
 - [x] **Fase 11 — Refactorización para Escalabilidad y Modularidad (Senior Architecture)**: Desacoplamiento en capa de servicios (Service Layer), componentes Jinja2 modulares, arquitectura CSS escalable y separación de módulos frontend.
+- [x] **Fase 12 — Espacios y Proyectos (Backend)**: Modelos relacionales para proyectos, roles, miembros, permisos y tareas; control de acceso granular y pruebas de aislamiento.
+- [x] **Fase 13 — Espacios y Proyectos (Frontend)**: Selector de espacio `/spaces`, vistas Kanban, planificación por horas en línea de tiempo (07:00 a 22:00) y gestión de personas y roles.
+- [x] **Fase 14 — Manual de Usuario de Proyectos**: Modal contextual accesible con `?` en proyectos con explicaciones paso a paso de roles, columnas y solapes.
+- [x] **Fase 15 — Experiencia Móvil (Mobile-first)**: Layouts dedicados (`/m`), navegación con barra inferior y bottom sheets, áreas táctiles ≥ 44px y drag & drop táctil con SortableJS.
+- [x] **Fase 16 — PWA Instalable**: Web App Manifest (`/manifest.webmanifest`), Service Worker en raíz (`/sw.js`), iconos adaptativos e instalación en iOS y Android.
+- [x] **Fase 17 — Notificaciones Web Push (Backend)**: Estándar VAPID con `pywebpush`, preferencias por usuario, detección de zona horaria y dispatcher seguro vía `X-Cron-Secret`.
+- [x] **Fase 18 — Notificaciones Web Push (Frontend y Operación)**: Panel de configuración de avisos y notificaciones en tiempo real al vencer tareas con hora.
 
 

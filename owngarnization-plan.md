@@ -725,31 +725,31 @@ Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `
 
 ## 12. Criterios de aceptación finales
 
-- [ ] Registro, login y logout funcionan; los datos son privados por usuario.
-- [ ] Las tareas **comunes** aparecen cada día con estado independiente.
-- [ ] Las tareas **del día** solo aparecen en su fecha.
-- [ ] Horario opcional con validación; la tarea funciona sin horas.
-- [ ] Vistas **mes, semana y día** operativas con navegación y búsqueda.
-- [ ] En vista día, tareas como **post-its** reordenables manualmente (persistente).
-- [ ] Color por importancia y 3 estados (sin empezar / en proceso / finalizada).
-- [ ] Detalle en **panel emergente** que se cierra sin salir de la pantalla.
-- [ ] Estilo blanco/negro/marrón claro, responsive y accesible.
-- [ ] Tests pasan y la app está desplegada en un servicio gratuito.
-- [ ] `README.md` con instalación local, variables de entorno y despliegue.
+- [x] Registro, login y logout funcionan; los datos son privados por usuario.
+- [x] Las tareas **comunes** aparecen cada día con estado independiente.
+- [x] Las tareas **del día** solo aparecen en su fecha.
+- [x] Horario opcional con validación; la tarea funciona sin horas.
+- [x] Vistas **mes, semana y día** operativas con navegación y búsqueda.
+- [x] En vista día, tareas como **post-its** reordenables manualmente (persistente).
+- [x] Color por importancia y 3 estados (sin empezar / en proceso / finalizada).
+- [x] Detalle en **panel emergente** que se cierra sin salir de la pantalla.
+- [x] Estilo blanco/negro/marrón claro, responsive y accesible.
+- [x] Tests pasan y la app está desplegada en un servicio gratuito.
+- [x] `README.md` con instalación local, variables de entorno y despliegue.
 - [x] Manual de usuario interactivo y guiado accesible desde el icono de ayuda (`?`) en la cabecera.
 - [x] Arquitectura modular escalable: archivos concisos con responsabilidad única (SRP), capa de servicios en backend y componentes Jinja2 desacoplados.
-- [ ] **Espacios**: tras el login se elige entre **Organización personal** (la app actual, sin cambios) y **Proyectos**, con opción de recordar la elección y conmutador en la cabecera para cambiar en cualquier momento.
-- [ ] **Proyectos**: se trabaja en un proyecto cada vez (`/projects/{id}`), con desplegable para cambiar de proyecto, y pestañas Tablero · Horario · Personas.
-- [ ] Cada proyecto gestiona **personas** (invitar, quitar), **permisos** (owner/admin/member/viewer) y **roles de equipo** personalizables.
-- [ ] Las tareas de proyecto tienen estado, prioridad, asignados, rol y **día y hora** opcionales; el horario por horas muestra día/semana/por persona, solapes y carga horaria.
-- [ ] El diseño de Proyectos sigue la lógica de la app (paleta, post-its, drawer, toasts, atajos) en web y móvil.
-- [ ] Los proyectos y sus tareas son privados por usuario (y compartidos solo con los miembros invitados), con tests de aislamiento y permisos.
-- [ ] El módulo de proyectos respeta la arquitectura modular (router delgado + servicios + componentes + CSS/JS propios, ningún archivo > ~250 líneas).
-- [ ] Manual de usuario independiente para Proyectos, accesible desde un icono `?` en la propia pantalla de proyectos.
-- [ ] **Móvil**: todas las pantallas se ven y se usan bien desde 360 px (sin scroll horizontal, navegación inferior, bottom sheets, áreas táctiles ≥ 44 px, drag & drop táctil).
-- [ ] **PWA**: la app se instala gratis desde la web publicada en iOS (Safari) y Android (Chrome), abre a pantalla completa y tiene icono propio.
-- [ ] **Notificaciones**: las tareas con hora avisan con la antelación elegida, una sola vez, en la zona horaria del usuario, también con la app cerrada; al pulsar se abre la tarea.
-- [ ] Las limitaciones de iOS (push solo con la PWA instalada, iOS ≥ 16.4) se explican en la UI, el manual y el README.
+- [x] **Espacios**: tras el login se elige entre **Organización personal** (la app actual, sin cambios) y **Proyectos**, con opción de recordar la elección y conmutador en la cabecera para cambiar en cualquier momento.
+- [x] **Proyectos**: se trabaja en un proyecto cada vez (`/projects/{id}`), con desplegable para cambiar de proyecto, y pestañas Tablero · Horario · Personas.
+- [x] Cada proyecto gestiona **personas** (invitar, quitar), **permisos** (owner/admin/member/viewer) y **roles de equipo** personalizables.
+- [x] Las tareas de proyecto tienen estado, prioridad, asignados, rol y **día y hora** opcionales; el horario por horas muestra día/semana/por persona, solapes y carga horaria.
+- [x] El diseño de Proyectos sigue la lógica de la app (paleta, post-its, drawer, toasts, atajos) en web y móvil.
+- [x] Los proyectos y sus tareas son privados por usuario (y compartidos solo con los miembros invitados), con tests de aislamiento y permisos.
+- [x] El módulo de proyectos respeta la arquitectura modular (router delgado + servicios + componentes + CSS/JS propios, ningún archivo > ~250 líneas).
+- [x] Manual de usuario independiente para Proyectos, accesible desde un icono `?` en la propia pantalla de proyectos.
+- [x] **Móvil**: todas las pantallas se ven y se usan bien desde 360 px (sin scroll horizontal, navegación inferior, bottom sheets, áreas táctiles ≥ 44 px, drag & drop táctil).
+- [x] **PWA**: la app se instala gratis desde la web publicada en iOS (Safari) y Android (Chrome), abre a pantalla completa y tiene icono propio.
+- [x] **Notificaciones**: las tareas con hora avisan con la antelación elegida, una sola vez, en la zona horaria del usuario, también con la app cerrada; al pulsar se abre la tarea.
+- [x] Las limitaciones de iOS (push solo con la PWA instalada, iOS ≥ 16.4) se explican en la UI, el manual y el README.
 
 ## 13. Reglas de trabajo para el agente
 
