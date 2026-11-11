@@ -445,6 +445,6 @@ Una vez finalizado el despliegue (suele tardar 2-3 minutos la primera vez):
 - [x] **Fase 16 — PWA Instalable**: Web App Manifest (`/manifest.webmanifest`), Service Worker en raíz (`/sw.js`), iconos adaptativos e instalación en iOS y Android.
 - [x] **Fase 17 — Notificaciones Web Push (Backend)**: Estándar VAPID con `pywebpush`, preferencias por usuario, detección de zona horaria y dispatcher seguro vía `X-Cron-Secret`.
 - [x] **Fase 18 — Notificaciones Web Push (Frontend y Operación)**: Panel de configuración de avisos y notificaciones en tiempo real al vencer tareas con hora.
-- [ ] **Fase 19 — Historial y Resúmenes de Productividad (Diario y Semanal)**: Métricas automáticas de cumplimiento, gráficas de rendimiento semanal, rachas de días activos e historial de tareas completadas.
+- [x] **Fase 19 — Historial y Resúmenes de Productividad (Diario y Semanal)**: Métricas automáticas de cumplimiento, gráficas de rendimiento semanal, rachas de días activos e historial de tareas completadas.
 
 
