@@ -192,6 +192,9 @@ Todas las rutas privadas validan la sesión activa del usuario.
 | `DELETE` | `/api/tasks/{id}` | Eliminación física o desactivación lógica de la tarea |
 | `PATCH` | `/api/occurrences/{id}` | Actualización de estado (`not_started`, `in_progress`, `done`), fecha u horas del día |
 | `POST` | `/api/occurrences/reorder` | Persiste el nuevo orden manual tras drag & drop (`{date, ordered_ids: []}`) |
+| `GET` | `/api/reports/daily` | Resumen diario de productividad (`date=YYYY-MM-DD`, ratios, tiempos y feedback) |
+| `GET` | `/api/reports/weekly` | Rendimiento semanal (`week=YYYY-MM-DD`, desglose diario y racha activa) |
+| `GET` | `/api/history` | Historial paginado de tareas completadas (`start`, `end`, `q`, `limit`, `offset`) |
 
 ---
 
@@ -442,5 +445,6 @@ Una vez finalizado el despliegue (suele tardar 2-3 minutos la primera vez):
 - [x] **Fase 16 — PWA Instalable**: Web App Manifest (`/manifest.webmanifest`), Service Worker en raíz (`/sw.js`), iconos adaptativos e instalación en iOS y Android.
 - [x] **Fase 17 — Notificaciones Web Push (Backend)**: Estándar VAPID con `pywebpush`, preferencias por usuario, detección de zona horaria y dispatcher seguro vía `X-Cron-Secret`.
 - [x] **Fase 18 — Notificaciones Web Push (Frontend y Operación)**: Panel de configuración de avisos y notificaciones en tiempo real al vencer tareas con hora.
+- [ ] **Fase 19 — Historial y Resúmenes de Productividad (Diario y Semanal)**: Métricas automáticas de cumplimiento, gráficas de rendimiento semanal, rachas de días activos e historial de tareas completadas.
 
 

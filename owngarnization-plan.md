@@ -251,6 +251,9 @@ owngarnization/
 | GET / PATCH | `/api/me/preferences` | `timezone`, `reminders_enabled`, `reminder_offset_min` |
 | POST | `/api/push/test` | Enviar una notificación de prueba a mis dispositivos |
 | POST | `/internal/reminders/dispatch` | Llamado por el cron cada minuto. **Sin sesión**: exige cabecera `X-Cron-Secret` (comparación en tiempo constante) |
+| GET | `/api/reports/daily?date=YYYY-MM-DD` | Resumen diario de productividad (ratio completadas/totales, tiempo y desglose por importancia) |
+| GET | `/api/reports/weekly?week=YYYY-MM-DD` | Resumen semanal de productividad (rendimiento por día, tasa de éxito y racha activa) |
+| GET | `/api/history?start=&end=&q=&project_id=&limit=&offset=` | Historial de tareas y ocurrencias completadas con búsqueda y paginación |
 
 Validar todo con Pydantic y devolver errores claros (422/404/403).
 
@@ -495,6 +498,32 @@ Páginas HTML: `GET /spaces`, `GET /projects`, `GET /projects/{id}` (y versiones
 **Rendimiento** (objetivo Lighthouse móvil ≥ 90 en Performance, Accessibility, Best Practices)
 - `defer` en scripts, cargar FullCalendar solo al entrar en Semana/Mes, iconos y capturas del manual en WebP con `loading="lazy"`.
 
+### 9.11 Resúmenes de productividad (diario y semanal) e historial de tareas
+
+**Objetivo general**
+Brindar al usuario una visión clara, gratificante y sin esfuerzo de su rendimiento y constancia, mediante cierres diarios, análisis semanales y un archivo histórico searchable, todo integrado en la estética minimalista de Owngarnization.
+
+**1. Resumen Diario ("Cierre del Día")**
+- **Métricas clave**:
+  - Ratio de completadas vs. planificadas (`completadas / total`) y porcentaje de éxito.
+  - Tiempo total invertido estimado (calculado a partir de tareas con `start_time` y `end_time`).
+  - Desglose por importancia (urgente, alta, media, baja) para verificar si se resolvieron las prioridades críticas.
+  - Comparativa visual entre hábitos de tareas comunes y tareas puntuales del día.
+- **Feedback motivacional**: Mensajes adaptativos y dinámicos según el porcentaje completado (*"¡Día perfecto! 100% completado"*, *"Gran avance: foco en lo urgente"*, etc.).
+- **Acciones al cierre**: Posibilidad de traspasar o reprogramar las tareas pendientes no realizadas directamente para mañana con un solo clic.
+
+**2. Resumen Semanal de Rendimiento**
+- **Desglose de lunes a domingo**: Tarjetas o mini barras de progreso por cada día de la semana.
+- **Tasa de cumplimiento semanal**: Porcentaje global acumulado de tareas finalizadas en los 7 días.
+- **Racha de constancia (Streaks)**: Contador de días consecutivos completando al menos 1 tarea o alcanzando el umbral de cumplimiento diario.
+- **Distribución de esfuerzo**: Resumen de distribución entre proyectos colaborativos y tareas individuales.
+
+**3. Historial de Tareas Completadas**
+- **Búsqueda y filtros**: Búsqueda instantánea en texto libre (`q`), filtro por rango de fechas (`start`, `end`) y por proyecto.
+- **Consulta desacoplada y eficiente**: Paginación en servidor (`limit`, `offset`) para no sobrecargar el almacenamiento ni penalizar el rendimiento del calendario reactivo.
+- **Detalle de finalización**: Muestra fecha y hora en que se marcó como terminada cada tarea.
+- **Exportación**: Botón para copiar el resumen del historial en formato Markdown / texto plano para informes o notas personales.
+
 ## 10. Plan de implementación por fases
 
 ### Fase 0 — Preparación
@@ -686,6 +715,40 @@ Decisiones que el responsable del producto debe **aprobar o cambiar**:
 
 Gate: una tarea a +12 min con antelación de 10 min genera **una sola** notificación en ±1 min en iOS y Android, y al pulsarla se abre su detalle.
 
+### Fase 19 — Historial y Resúmenes de Productividad (Diario y Semanal)
+
+**Objetivo**: Integrar en la aplicación resúmenes automáticos diarios ("Cierre del día") y semanales, cálculo de rachas de constancia y un historial searchable de tareas completadas, sin alterar la sencillez visual de las vistas principales.
+
+**PR 19.1 — Servicio de analíticas y cálculo de métricas (Backend)**
+- Crear `app/services/analytics_service.py`:
+  - `get_daily_summary(db, user_id, date)`: cálculo de ratio (completadas/totales), porcentaje de éxito, horas dedicadas estimadas, desglose por importancia y mensaje motivacional dinámico.
+  - `get_weekly_summary(db, user_id, start_date)`: desglose día a día (lunes a domingo), tasa de cumplimiento semanal y comparativa tareas comunes vs. puntuales.
+  - `calculate_streak(db, user_id, as_of_date)`: cálculo eficiente de la racha ininterrumpida de días activos con tareas completadas.
+  - `get_completed_history(db, user_id, start_date, end_date, q, project_id, limit, offset)`: consulta paginada y optimizada de tareas finalizadas con filtros de texto y fecha.
+- Pruebas unitarias en `tests/test_analytics.py`:
+  - Cálculo de ratios con 0 tareas, tareas pendientes y 100% completadas.
+  - Validación de rachas (días sin completar tareas rompen la racha).
+  - Aislamiento estricto de datos entre usuarios y paginación en el historial.
+
+**PR 19.2 — Endpoints y esquemas de API**
+- Crear `app/schemas/analytics.py` con modelos Pydantic (`DailySummaryResponse`, `WeeklySummaryResponse`, `TaskHistoryItem`, `HistoryResponse`).
+- Crear router `app/routers/analytics.py`:
+  - `GET /api/reports/daily?date=YYYY-MM-DD`
+  - `GET /api/reports/weekly?week=YYYY-MM-DD`
+  - `GET /api/history?start=&end=&q=&project_id=&limit=&offset=`
+- Registrar el router en `app/main.py`.
+
+**PR 19.3 — Interfaz de usuario (Modal / Panel de Resúmenes & Historial)**
+- Añadir botón de acceso rápido con icono `📊 Resúmenes & Historial` en la barra superior (escritorio) y en la barra de navegación / menú lateral (móvil).
+- Modal / panel estructurado en 3 pestañas:
+  1. **Cierre de hoy**: indicador visual del porcentaje de éxito, post-its resueltos, tiempo invertido y botón de acción para posponer tareas no realizadas al día siguiente.
+  2. **Rendimiento semanal**: gráfico de barras CSS ligero sin librerías externas pesadas y contador visual de racha de días consecutivos activos.
+  3. **Historial de tareas completadas**: barra de búsqueda en tiempo real, selector de fechas, listado paginado y botón para exportar o copiar el resumen en Markdown.
+- Adaptabilidad táctil y responsive completa (mínimo 44×44 px, inputs ≥ 16px, soporte bottom sheet en pantallas móviles).
+
+**Criterio de hecho de la fase**:
+- Puedo abrir el modal de resúmenes, consultar las estadísticas de hoy y de la semana en curso, verificar mi racha activa de días, y buscar tareas en el historial de tareas completadas de manera instantánea y paginada.
+
 **Plantilla de descripción de PR** (copiar en cada PR del bloque)
 ```markdown
 ## Objetivo
@@ -750,6 +813,8 @@ Incluir en el repo un `render.yaml` o `Procfile`, y documentar los pasos en el `
 - [x] **PWA**: la app se instala gratis desde la web publicada en iOS (Safari) y Android (Chrome), abre a pantalla completa y tiene icono propio.
 - [x] **Notificaciones**: las tareas con hora avisan con la antelación elegida, una sola vez, en la zona horaria del usuario, también con la app cerrada; al pulsar se abre la tarea.
 - [x] Las limitaciones de iOS (push solo con la PWA instalada, iOS ≥ 16.4) se explican en la UI, el manual y el README.
+- [ ] Resúmenes de productividad: cálculo automático de métricas diarias y semanales (ratio de completadas, tiempo invertido, desglose por importancia y rachas de días activos).
+- [ ] Historial de tareas completadas: registro histórico accesible, paginado y filtrable por fecha y texto sin sobrecargar el calendario activo.
 
 ## 13. Reglas de trabajo para el agente
 
