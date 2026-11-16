@@ -107,6 +107,7 @@ const modal = {
     this.closeDetailDrawer();
     this.closeGuideModal();
     if (window.pushManagerClient) window.pushManagerClient.closeModal();
+    if (window.analyticsManager) window.analyticsManager.close();
     if (window.appState) window.appState.closeMobileFilters();
   },
 
